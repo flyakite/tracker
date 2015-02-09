@@ -1,0 +1,21 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Notification Settings</title>
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  <div style='text-size:16px;margin:20px;color:#444;text-weight:600;'>
+    {% if success %}
+    Success
+    {% else %}
+    Error {{code}}
+    {% endif %}
+  </div>
+</body>
+</html>

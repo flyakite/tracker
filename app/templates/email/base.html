@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!-- base on http://zurb.com/playground/projects/responsive-email-templates/basic.html -->
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>zenblip</title>
+    <style>
+        [touch-action="none"] {
+            -ms-touch-action: none;
+            touch-action: none;
+        }
+        [touch-action="pan-x"] {
+            -ms-touch-action: pan-x;
+            touch-action: pan-x;
+        }
+        [touch-action="pan-y"] {
+            -ms-touch-action: pan-y;
+            touch-action: pan-y;
+        }
+        [touch-action="scroll"],
+        [touch-action="pan-x pan-y"],
+        [touch-action="pan-y pan-x"] {
+            -ms-touch-action: pan-x pan-y;
+            touch-action: pan-x pan-y;
+        }
+        * {
+          margin: 0;
+        }
+        img {
+            max-width: 100%;
+        }
+        .collapse {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+            width: 100%!important;
+            height: 100%;
+        }
+        .header.container table td.logo {
+            padding: 5px;
+        }
+
+        .header.container table td.label {
+            padding: 5px;
+            padding-left: 0px;
+        }
+
+        table.body-wrap {
+            width: 100%;
+        }
+
+        table.footer-wrap {
+            width: 100%;
+            clear: both!important;
+        }
+
+        .footer-wrap .container td.content p {
+            border-top: 1px solid rgb(215,215,215);
+            padding-top: 15px;
+        }
+
+        .footer-wrap .container td.content p {
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .container {
+            display: block!important;
+            max-width: 600px!important;
+            margin: 0 auto!important;
+            clear: both!important;
+        }
+
+        .content {
+            padding: 5px;
+            max-width: 600px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .content table {
+            width: 100%;
+        }
+        h4 {
+          font-size: 110%;
+          margin-top:20px;
+          margin-bottom:10px;
+        }
+    </style>
+</head>
+
+<body bgcolor="#FFFFFF">
+    <!-- HEAD Logo -->
+    <table style="width:100%" bgcolor="#5Fb7ff"> <!-- 95,183,255 -->
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="header container">
+                    <div class="content">
+                        <table bgcolor="#5Fb7ff">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <img src="http://zenblip.appspot.com/img/zenblip_logo_small.png">
+                                    </td>
+                                    <td align="right">
+                                        <h6 class="collapse">Beta</h6>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Main body -->
+    <table class="body-wrap">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="container" bgcolor="#FFFFFF">
+                    <div class="content">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <h1 style='margin-top:0px;font-weight:500;font-size:32px;line-height:42px;margin-bottom:24px;font-family:Merriweather,Georgia,serif!important'>zenblip</h1>
+                                        <p style="margin-top:0px;margin-bottom:27px;letter-spacing:-0.01em;font-size:17px;line-height:27px;font-family:Merriweather,Georgia,serif!important">Phasellus dictum sapien a neque luctus cursus. Pellentesque sem dolor, fringilla et pharetra vitae.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+<!--     <table class="footer-wrap">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="container">
+
+                    <div class="content">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td align="center">
+                                        <p>
+                                            <a href="#">Terms</a> |
+                                            <a href="#">Privacy</a> |
+                                            <a href="#">
+                                                <unsubscribe>Unsubscribe</unsubscribe>
+                                            </a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table> -->
+</body>
+
+</html>

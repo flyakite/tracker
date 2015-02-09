@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0">    <!-- So that mobile webkit will display zoomed in -->
+    <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
+
+    <title>2 columns to rows template | Antwort</title>
+
+    <style type="text/css">
+    </style>
+
+</head>
+<body style="margin:0; padding:10px 0;" bgcolor="#ebebeb" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+    <h3> {{title}} </h3>
+    <table border="0" cellspacing="5" cellpadding="5">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Email</th>
+                <th>Connected</th>
+                <th>Organizations</th>
+                <th>Legit</th>
+                <th>Created(UTC)</th>
+                <th>Last Seen(UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{loop.index}}</td>
+                <td>{{u.email}}</td>
+                <td>
+                    {% if u.is_connected %}
+                        {{u.is_connected}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.orgs %}
+                        {{u.orgs|join(', ')}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.legit %}
+                        True
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.created %}
+                        {{u.created.strftime('%Y/%m/%d %H:%M')}}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if u.last_seen %}
+                        {{u.last_seen.strftime('%Y/%m/%d %H:%M')}}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table>
+    	<thead>
+    	    <tr>
+    	    	<th>All Emails</th>
+    	    </tr>
+    	</thead>
+    	<tbody>
+    	    <tr>
+    	    	<td>
+    	    	    {{emails|join(', ')}}
+    	    	</td>
+    	    </tr>
+    	</tbody>
+    </table>
+</body>
+</html>
+

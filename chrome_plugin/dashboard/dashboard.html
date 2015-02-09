@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style type="text/css" media="screen">
+    </style>
+    <link rel="stylesheet" href="css-build/dashboard.css">
+    <link rel="stylesheet" href="../font-awesome/css/font-awesome.css">
+    <style type="text/css" media="screen">
+      body{
+        background-color: black;
+      }
+      .some-top{
+        width: 100%;
+        height: 30px;
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="some-top">
+    </div>
+    <div id="zb-area"></div>
+    <!-- script src="build/JSXTransformer.js"></script -->
+    <script src="js-build/react-with-addons.js"></script>
+    <script src="../jquery-1.10.2.min.js"></script>
+    <script src="js-build/dashboard.js"></script>
+    <script>
+    var senderEmail = 'sushi@zenblip.com';
+    var baseURL = 'https://zenblip.appspot.com';
+    var signalResourcePath = '/resource/signals';
+    var linkResourcePath = '/resource/links';
+    var dashboardHeight = '300px';
+    var showLogo = true;
+    var raDashboard = React.render(
+      React.createElement(SignalApp, {
+        baseURL: baseURL, 
+        signalResourcePath: signalResourcePath, 
+        linkResourcePath: linkResourcePath,
+        dashboardHeight: dashboardHeight,
+        showLogo: showLogo
+      }),
+      document.getElementById('zb-area')
+    );
+
+    setTimeout(function() {
+      raDashboard.onAuthenticated({senderEmail:senderEmail});
+      raDashboard.showDashboard();
+    }, 200);
+    
+    </script>
+  </body>
+</html>

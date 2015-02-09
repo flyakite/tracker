@@ -1,0 +1,12 @@
+Hi there!
+
+Thanks for joining zenblip for recruiters.
+
+Please use the following link to activate {{email}}
+https://zenblip.appspot.com/activate_from_email?code={{code}}
+
+Cheers,
+
+The zenblip team
+
+|zenblip for recruiters|

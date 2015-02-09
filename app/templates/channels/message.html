@@ -1,0 +1,9 @@
+{% extends "layouts/default.html" %}
+{% block layout_content %}
+    <div>Token: {{token}}</div>
+    <div>Client ID: {{client_id}}</div>
+    <form action="message" method="post">
+       Enter a Message: <input type="text" name="message" ><br>
+        <input type="submit" value="Submit">
+    </form>
+{% endblock %}

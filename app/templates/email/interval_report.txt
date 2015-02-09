@@ -1,0 +1,75 @@
+{{start.strftime('%Y/%m/%d')}} to {{end.strftime('%Y/%m/%d')}}
+
+  Email Open Rate
+
+  {{ "%0.0f" % (open_rate*100) }}%
+
+
+      Number of Emails Tracked
+
+
+      {{number_of_emails_tracked}}
+
+  {% if high_access_frequency_signals %}
+   Most Read Emails:
+
+
+          {% for s in high_access_frequency_signals %}
+
+              {{s.subject}}
+
+                {% for email in s.receivers.get("to",[]).keys() %}
+                    {{email}}
+                {% endfor %}
+
+              {{s.access_count}} time{% if s.access_count > 1 %}s{% endif %}
+
+          {% endfor %}
+
+
+  {% endif %}
+
+  Weekly Emails Accessed &amp; Best Time Periods
+
+
+          {% for i in range(0,7) %}
+
+                {{time_frame_text['weekdays'][i]}}.
+
+                    {% if time_frame[i]['sum'] %}
+
+                    {% endif %}
+
+
+                    {% if time_frame[i]['sum'] %}
+                    {{time_frame_text['frames'][time_frame[i]['max_i']]}}
+                    to
+                    {{time_frame_text['frames'][time_frame[i]['max_i']+1]}}
+                    {% else %}
+                    {% endif %}
+
+
+          {% endfor %}
+
+
+  Used Devices Ranking
+
+
+        {% for device in top_devices_list %}
+
+
+                {{device}}
+
+
+                {% if device in device_count %}
+                {{100.0*device_count[device]/accesses_count}}%
+                {% endif %}
+
+
+        {% endfor %}
+
+
+
+No crack open a beer and enjoy the weekend!
+Cheers,
+The zenblip team

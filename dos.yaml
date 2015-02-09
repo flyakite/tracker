@@ -1,0 +1,3 @@
+blacklist:
+- subnet: 5.250.143.80
+  description: php weakness detect bot

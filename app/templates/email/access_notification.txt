@@ -1,0 +1,27 @@
+<h3> {{signal.subject}} </h3>
+{% if an.kind == 'high_frequent' %}
+    This email's recent activities:
+    {% for a in an.recent_accesses %}
+
+        Accessed by: {{a.accessor_name or a.accessor or "Someone"}}
+        Action: {% if a.kind == 'open' %} Opened email {% elif a.kind == 'link'%} Clicked on {{a.url}}{% else %}{% endif %}
+        Date: {% if signal.tz_offset not in [0, None] %}{{(a.created + timedelta(hours=signal.tz_offset)).strftime('%Y/%m/%d')}}{% else %}{{a.created.strftime('%Y/%m/%d')}} UTC{% endif %}
+        Time: {% if signal.tz_offset not in [0, None] %}{{(a.created + timedelta(hours=signal.tz_offset)).strftime('%H:%M:%S')}}{% else %}{{a.created.strftime('%H:%M:%S')}} UTC{% endif %}
+        Location: {% if a.country %}{% if a.city %} {{a.city}}{% endif %}, {{a.country}}
+                    {% elif a.proxy == 'GoogleImageProxy'%}Unknown due to Gmail client{% elif a.proxy == 'MicrosoftHosting'%}Unknown due to Microsoft proxy{% endif %}
+        Device: {% if a.device %}{{ a.device }}{% else %}Unknown Desktop device{% endif %}
+
+
+    {% endfor %}
+{% elif an.kind == 'first_access' %}
+
+    Accessed by: {{a.accessor_name or a.accessor or "Someone"}}
+    Action: {% if a.kind == 'open' %} Opened email {% elif a.kind == 'link'%} Clicked on {{a.url}}{% else %}{% endif %}
+    Date: {% if signal.tz_offset not in [0, None] %}{{(a.created + timedelta(hours=signal.tz_offset)).strftime('%Y/%m/%d')}}{% else %}{{a.created.strftime('%Y/%m/%d')}} UTC{% endif %}
+    Time: {% if signal.tz_offset not in [0, None] %}{{(a.created + timedelta(hours=signal.tz_offset)).strftime('%H:%M:%S')}}{% else %}{{a.created.strftime('%H:%M:%S')}} UTC{% endif %}
+    Location: {% if a.country %}{% if a.city %} {{a.city}}{% endif %}, {{a.country}}
+                    {% elif a.proxy == 'GoogleImageProxy'%}Unknown due to Gmail client{% elif a.proxy == 'MicrosoftHosting'%}Unknown due to Microsoft proxy{% endif %}
+    Device: {% if a.device %}{{ a.device }}{% else %}Unknown Desktop device{% endif %}
+
+
+{% endif %}

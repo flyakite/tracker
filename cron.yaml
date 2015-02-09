@@ -1,0 +1,46 @@
+cron:
+- description: Weekly report
+  url: /cron/interval_report?org=weekly&start=7-6-0&end=0-6-0&weekly=true
+  schedule: every mon 06:00
+  timezone: Asia/Tokyo
+
+- description: Daily report
+  url: /cron/interval_report?org=daily&start=1-6-0&end=0-6-0&daily=true
+  schedule: every mon,tue,wed,thu,fri 06:00
+  timezone: Asia/Tokyo
+
+- description: Activity report
+  url: /cron/activity_report?org=activity&start=1-0-0&end=0-0-1
+  schedule: every tue,wed,thu,fri,sat 00:00
+  timezone: Asia/Tokyo
+
+- description: Scheduled welcom emails
+  url: /cron/send_user_scheduled_emails
+  schedule: every day 09:00
+  timezone: Asia/Tokyo
+
+- description: debug activity report
+  url: /cron/activity_report?org=admin&start=1-0-0&end=0-0-0
+  schedule: every mon,tue,wed,thu,fri 23:59
+  # schedule: every mon 08:59
+  timezone: Asia/Tokyo
+
+- description: Apex weekly report to manager
+  url: /cron/interval_report?rgid=apex&start=7-8-0&end=0-8-1&weekly=1
+  schedule: every mon 08:00
+  timezone: Asia/Tokyo
+
+- description: Apex daily report to manager
+  url: /cron/interval_report?rgid=apex&start=1-0-0&end=0-0-1&daily=1
+  schedule: every tue,wed,thu,fri,sat 00:00
+  timezone: Asia/Tokyo
+
+- description: Apex daily activity report
+  url: /cron/activity_report?org=apex&start=1-0-0&end=0-0-1
+  schedule: every tue,wed,thu,fri,sat 00:00
+  timezone: Asia/Tokyo
+
+- description: Experis weekly report to manager
+  url: /cron/interval_report?rgid=experis&start=5-0-0&end=0-0-1&weekly=1
+  schedule: every sat 00:00
+  timezone: Asia/Tokyo

@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!-- base on http://zurb.com/playground/projects/responsive-email-templates/basic.html -->
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>zenblip</title>
+    <style>
+        [touch-action="none"] {
+            -ms-touch-action: none;
+            touch-action: none;
+        }
+        [touch-action="pan-x"] {
+            -ms-touch-action: pan-x;
+            touch-action: pan-x;
+        }
+        [touch-action="pan-y"] {
+            -ms-touch-action: pan-y;
+            touch-action: pan-y;
+        }
+        [touch-action="scroll"],
+        [touch-action="pan-x pan-y"],
+        [touch-action="pan-y pan-x"] {
+            -ms-touch-action: pan-x pan-y;
+            touch-action: pan-x pan-y;
+        }
+        /** {
+          margin: 0;
+        }
+        img {
+            max-width: 100%;
+        }*/
+        /*.collapse {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: none;
+            width: 100%!important;
+            height: 100%;
+        }*/
+        /*.header.container table td.logo {
+            padding: 5px;
+        }
+
+        .header.container table td.label {
+            padding: 5px;
+            padding-left: 0px;
+        }*/
+
+        /*table.body-wrap {
+            width: 100%;
+        }
+
+        table.footer-wrap {
+            width: 100%;
+            clear: both!important;
+        }
+
+        .footer-wrap .container td.content p {
+            border-top: 1px solid rgb(215,215,215);
+            padding-top: 15px;
+        }
+
+        .footer-wrap .container td.content p {
+            font-size: 10px;
+            font-weight: bold;
+        }*/
+        /*.container {
+            display: block!important;
+            max-width: 600px!important;
+            margin: 0 auto!important;
+            clear: both!important;
+        }*/
+
+        /*.content {
+            padding: 5px;
+            max-width: 600px;
+            margin: 0 auto;
+            display: block;
+        }*/
+
+        /*.content table {
+            width: 100%;
+        }*/
+    </style>
+</head>
+
+<body bgcolor="#FFFFFF">
+    <!-- HEAD Logo -->
+    <!-- 95,183,255 -->
+    <table style="width:100%;-webkit-font-smoothing:antialiased;" bgcolor="#5Fb7ff">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="header container" style='display: block!important;max-width: 600px!important;margin: 0 auto!important;clear: both!important;'>
+                    <div class="content" style="padding: 5px;max-width: 600px;margin: 0 auto;display: block;">
+                        <table bgcolor="#5Fb7ff" style='width:100%'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <h1 style='color:#fff;font-size:32px;font-weight:400;margin:0;font-family:HelveticaNeue-UltraLight,Helvetica;'>
+                                            {% if daily %}
+                                                Daily
+                                            {% elif weekly %}
+                                                Weekly
+                                            {% endif %} Report
+                                            {% if debug %}
+                                                debug
+                                            {% endif %}
+                                        </h1>
+                                        <!-- <img src="http://zenblip.appspot.com/img/zenblip_logo_small.png"> -->
+                                    </td>
+                                    <td align="right" style='color:#f2f2f2'>
+                                        <h6 class="collapse" style='margin:0;padding:0;font-size:17px;font-family:Helvetica;font-weight:300;'>zenblip for recruiters</h6>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Main body -->
+    <table class="body-wrap" style='width:100%;-webkit-font-smoothing:antialiased;font-size:14px;'>
+        <tbody>
+            <tr>
+                <td class="container" bgcolor="#FFFFFF" style="display:block!important;max-width: 600px!important;margin:0 auto!important;clear:both!important;">
+                    <div class="content" style="padding:5px;max-width: 600px;margin:0 auto;display:block;">
+                        <table style='width:100%;'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <table border="0" style="width:100%">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div>
+                                                            <!-- interval -->
+                                                            {% if daily %}
+
+                                                                {% if debug %}
+                                                                    {{end.strftime('%Y/%m/%d %H:%M:%S')}}
+                                                                {% else %}
+                                                                    {{end.strftime('%Y/%m/%d')}}
+                                                                {% endif %}
+
+                                                            {% else %}
+
+                                                                {% if debug %}
+                                                                    {{start.strftime('%Y/%m/%d %H:%M:%S')}} to {{end.strftime('%Y/%m/%d %H:%M:%S')}}
+                                                                {% else %}
+                                                                    {{start.strftime('%Y/%m/%d')}} to {{end.strftime('%Y/%m/%d')}}
+                                                                {% endif %}
+
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td style="width:150px">
+                                                        <!-- open rate -->
+                                                        <div style='display:inline;float:right;margin-right:28px'>
+                                                            <div style='display:inline-block;width:100px;height:100px;border-radius:50px;behavior:url(ie-css3.htc);font-size:24px;font-weight:300;font-family:HelveticaNeue-Light,Helvetica;color:#fff;line-height:100px;text-align:center;background:#ffa500'>
+                                                            {{ "%0.0f" % (open_rate*100) }}%
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- moved to top -->
+                                        <!-- <h1 style='margin-top:0px;font-weight:500;font-size:28px;line-height:42px;margin-bottom:24px;font-family:sans-serif'>Weekly Report</h1> -->
+                                        <div style="margin-top:0px;margin-bottom:27px;letter-spacing:-0.01em;">
+
+                                            <div>
+                                                <div>
+
+                                                  {% if rgid and sender %}
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">Sender</div>
+                                                  <div>
+                                                      {{sender}}
+                                                  </div>
+                                                  {% endif %}
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">Email Open Rate</div>
+                                                  <div style="">
+                                                  {{ "%0.0f" % (open_rate*100) }}% <br />
+                                                  </div>
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">
+                                                      Number of Emails Tracked
+                                                  </div>
+                                                  <div>
+                                                      {{number_of_emails_tracked}}
+                                                  </div>
+                                                  {% if high_access_frequency_signals %}
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%"> Most Read Emails: </div>
+                                                  <table style='width:100%;text-align:left'>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style='width:33%'>Subject</th>
+                                                            <th style='width:33%'>Main Receivers</th>
+                                                            <th style='width:33%'>Total Access</th>
+                                                        </tr>
+                                                    </thead>
+                                                      <tbody>
+                                                          {% for s in high_access_frequency_signals %}
+                                                            <tr>
+                                                              <td>{{s.subject}}</td>
+                                                              <td>
+                                                                {% if s.receivers.get("to") %}
+                                                                    {% for email in s.receivers.get("to").keys() %}
+                                                                        {{email}} <br>
+                                                                    {% endfor %}
+                                                                {% endif %}
+                                                              </td>
+                                                              <td>{{s.access_count}} time{% if s.access_count > 1 %}s{% endif %}</td>
+                                                            </tr>
+                                                          {% endfor %}
+                                                      </tbody>
+                                                  </table>
+                                                  {% endif %}
+                                                  <br />
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">
+                                                      {% if daily %}
+                                                          Daily
+                                                      {% elif weekly %}
+                                                          Weekly
+                                                      {% endif %}
+                                                      Emails Accessed &amp; Best Time Periods
+                                                  </div>
+                                                  <table>
+                                                      <tbody>
+                                                          {% for i in range(0,7) %}
+                                                          <tr>
+                                                                <td>{{time_frame_text['weekdays'][i]}}.</td>
+                                                                <td>
+                                                                    {% if time_frame[i]['sum'] %}
+                                                                    <div style="height:13px;background:#3399ff;width:{{time_frame[i]['portion']*100}}px"></div>
+                                                                    {% endif %}
+                                                                </td>
+                                                                {% if time_frame[i]['sum'] %}
+                                                                    <td>
+                                                                    {{"%0.0f" % (time_frame[i]['portion']*100)}}%
+                                                                    </td>
+                                                                {% endif %}
+                                                                <td>
+                                                                    {% if time_frame[i]['sum'] %}
+                                                                        {{time_frame_text['frames'][time_frame[i]['max_i']]}}
+                                                                        to
+                                                                        {{time_frame_text['frames'][time_frame[i]['max_i']+1]}}
+                                                                        {% if time_frame[i][time_frame[i]['max_i']].get('max_device') %}
+                                                                            ({{time_frame[i][time_frame[i]['max_i']].get('max_device')}})
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                    {% endif %}
+                                                                </td>
+                                                          </tr>
+                                                          {% endfor %}
+                                                      </tbody>
+                                                  </table>
+                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">Used Devices Ranking </div>
+                                                  <table>
+                                                      <tbody>
+                                                        {% for device in top_devices_list %}
+                                                        <tr>
+                                                            <td>
+                                                                {{device}}
+                                                            </td>
+                                                            <td>
+                                                                {% if device in device_count %}
+                                                                {{"%0.0f" % (100.0*device_count[device]/accesses_count)}}%
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                      </tbody>
+                                                  </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+            <tr style='width:100%'>
+                <td style='width:100%'>
+                    <div style="width:100%;background-color:#5Fb7ff;height: 1px;"></div>
+                </td>
+            </tr>
+            <tr style="margin-top:30px;">
+                <td>
+                    <br><br>
+                    Cheers, <br><br>
+                    The zenblip team <br>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+<!--     <table class="footer-wrap">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="container">
+
+                    <div class="content" style="padding: 5px;max-width: 600px;margin: 0 auto;display: block;">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td align="center">
+                                        <p>
+                                            <a href="#">Terms</a> |
+                                            <a href="#">Privacy</a> |
+                                            <a href="#">
+                                                <unsubscribe>Unsubscribe</unsubscribe>
+                                            </a>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table> -->
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+{% extends "layouts/default.html" %}
+{% block layout_content %}
+    <h2>This is the message receiver client</h2>
+    <a href="/message" target="_blank">Send Message To This Browser Tab (opens in a new tab, don't close this one!)</a>
+    <div id="messages">Messages so far:
+    <ul>
+
+    </ul></div>
+{% endblock %}
+{% block layout_scripts %}
+<script type="text/javascript" src="/_ah/channel/jsapi"></script>
+<script>
+    var channelToken,
+        _renewTimer = 60*60*1000, //renew per hour(google times out per 2 hour)
+        _initTimer = 1*1000, //1 second
+        timerCount = _initTimer;
+
+    xhRequest = function(method, url, callback){
+        var xhr;
+        if(window.XMLHttpRequest){
+            xhr = new XMLHttpRequest();
+        }else{
+            //IE5, 6
+            xhr = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == xhr.DONE){
+                if(xhr.status == 200){
+                    callback(xhr.responseText);
+                }else{
+                    console.log("xhr Error 1");
+                }
+            }
+        };
+        xhr.open(method, url, true);
+        xhr.send(null);
+    };
+    getToken = function(callback, isCreate){
+        /* JSON.parse support
+         Feature    Chrome  Firefox (Gecko) Internet Explorer   Opera   Safari
+         Basic support(Yes)   3.5 (1.9.1)    8.0                 10.5    4.0
+         * */
+        var path = isCreate? "create_token":"get_token";
+        xhRequest("GET", "/channels/"+path, function(data){
+            console.log('got token');
+            var jdata = JSON.parse(data);
+            if(jdata.error){
+                console.log(jdata.error);
+            }else{
+                channelToken = jdata.token;
+                callback();
+            }
+        });
+    };
+    onOpened = function() {
+        connected = true;
+       // sendMessage('opened');
+        console.log("opened");
+        setTimeout(function(){
+            getToken(openChannel, true);
+        }, _renewTimer);
+        timerCount = _initTimer;
+    };
+    onMessage = function(msg) {
+        alert(msg.data);
+
+        $("#messages ul").append($("<li></li>").html(msg.data));
+
+    };
+    onError = function(err) {
+        console.log("Got error");
+        console.log(err);
+        if(err && err.code == 401){
+            setTimeout(function(){
+                getToken(openChannel, true);
+            }, timerCount);
+            console.log('reconnect after ' + timerCount/1000 +' seconds');
+            timerCount = Math.pow(timerCount, 2);
+        }
+    };
+    onClose = function() {
+       // alert("close");
+     //   connected = false;
+        console.log("close");
+    };
+    // open new session
+    openChannel = function(){
+        var channel = new goog.appengine.Channel(channelToken);
+        var socket = channel.open();
+        socket.onopen = onOpened;
+        socket.onmessage = onMessage;
+        socket.onerror = onError;
+        socket.onclose = onClose;
+    };
+    getToken(openChannel);
+</script>
+{% endblock %}
