@@ -359,7 +359,7 @@ function onGoogleAuthUnauthorized(callback) {
 var zenblip = (function(zb) {
   var zbBaseURL = 'https://zenblip.appspot.com';
   var ExtensionID = 'oocgfjghhllncddlnhlocnikogonjdcp';
-  var authUserPath = '/auth/user';
+  //var authUserPath = '/auth/user';
   var current_user = null;
   var messenger = null;
   //var UKeys = []; //TODO: make it local

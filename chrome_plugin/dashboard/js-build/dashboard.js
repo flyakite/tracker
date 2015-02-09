@@ -45,7 +45,7 @@ var ListDetail = React.createClass({displayName: "ListDetail",
         return (
           React.createElement("div", null, 
             React.createElement("span", {className: "zb-link-url"}, 
-              React.createElement("a", {target: "_blank", href: "{this.props.data.url}"}, this.props.data.url.substr(0,60))
+              React.createElement("a", {target: "_blank", href: this.props.data.url}, this.props.data.url.substr(0,50)+'...')
             ), 
             React.createElement("span", null, 
               detail
@@ -97,7 +97,7 @@ var ListContent = React.createClass({displayName: "ListContent",
     });
 
     return (
-      React.createElement("table", {className: "zb-list-content table table-striped"}, 
+      React.createElement("table", {className: "zb-list-content table table-striped", id: 'zb-table-' + self.props.contentType}, 
         React.createElement("thead", {className: "zb-list-head-area"}, 
           React.createElement("tr", {className: "zb-list-head"}, 
             React.createElement("th", {className: "zb-head zb-head-receiver"}, React.createElement("span", null, "Email")), 
@@ -124,7 +124,8 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       toggleDashboardText: 'expand',
       loginHelperText: 'zenblip loading...',
       queryText: '',
-      senderEmail: ''
+      senderEmail: '',
+      accessToken:''
       }
   },
   componentDidMount: function() {
@@ -133,7 +134,10 @@ var SignalApp = React.createClass({displayName: "SignalApp",
   },
   loadSignalsFromServer: function() {
     var self = this;
-    $.getJSON(this.props.baseURL + this.props.signalResourcePath, {sender: this.state.senderEmail}, function(data){
+    console.log('OKKK');
+    console.log({sender: this.state.senderEmail, access_token: this.state.accessToken});
+    $.getJSON(this.props.baseURL + this.props.signalResourcePath, 
+      {sender: this.state.senderEmail, access_token: this.state.accessToken}, function(data){
       //console.log(data);
       signals = data['data']
       self.setState({
@@ -147,7 +151,8 @@ var SignalApp = React.createClass({displayName: "SignalApp",
   },
   loadLinksFromServer: function() {
     var self = this;
-    $.getJSON(this.props.baseURL + this.props.linkResourcePath, {sender: this.state.senderEmail, accessed:true}, function(data){
+    $.getJSON(this.props.baseURL + this.props.linkResourcePath, 
+      {sender: this.state.senderEmail, accessed:true, access_token: this.state.accessToken}, function(data){
       //console.log(data);
       links = data['data']
       self.setState({
@@ -290,7 +295,7 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       if(row.subject && row.subject.indexOf(queryText) != -1){
         return row;
       }
-      //TODO: remove receivers
+      //TODO: remove receivers after new data structure row.receiver_emails roll-out
       if(row.receivers && row.receivers.to && Object.keys(row.receivers.to).length >0 &&
        Object.keys(row.receivers.to)[0].indexOf(queryText) != -1){
         return row;
@@ -302,10 +307,19 @@ var SignalApp = React.createClass({displayName: "SignalApp",
           }
         }
       }
+      if(row.device && row.device.indexOf(queryText) != -1){
+        return row;
+      }
+      if(row.country && row.country.indexOf(queryText) != -1){
+        return row;
+      }
     });
     this.setState({
       data: data
     });
+  },
+  exportCSV: function(e) {
+    return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
   onAuthenticationFailed: function() {
     this.setState({
@@ -326,24 +340,25 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       senderEmail: setting.senderEmail,
       accessToken: setting.accessToken
     });
-    $.ajaxSetup({
-        headers: { 'x-zenblip-access-token': setting.accessToken }
-    });
     this.loadSignalsFromServer();
   },
   render: function() {
     var self = this;
     var cx = React.addons.classSet;
     var signalsClass = cx({
+      'track': true,
       'zb-active': self.state.activeTab == 'signals'
     });
     var signalsOpenedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'opened'
     });
     var signalsNotOpenedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'notopened'
     });
     var linksClickedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'linksClicked'
     });
     var functionAreaClass = cx({
@@ -351,6 +366,7 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       fixed: this.state.fixFunctionArea
     });
     var toggleDashboardClass = cx({
+      'track': true,
       'zb-toggle-dashboard': true,
     });
     var toggleDashboardIconClass = cx({
@@ -358,6 +374,10 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       'zb-white': true,
       'fa-angle-double-down': !this.state.dashboardEnabled,
       'fa-angle-double-up': this.state.dashboardEnabled
+    });
+    var toolbarDownloadClass = cx({
+      'zb-tool': true,
+      'zb-display-none': !this.state.dashboardEnabled,
     });
     var queryIconClass = cx({
       'zb-query-icon': true,
@@ -371,23 +391,26 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       'zb-login-helper': true,
       'zb-display-none': this.state.dashboardAuthenticated
     });
-    var showLogoClass = cx({
+    var hideLogoClass = cx({
       'zb-logo': true,
-      'zb-show-logo': this.props.showLogo
+      'zb-hide-logo': this.props.hideLogo
     });
     return (
       React.createElement("div", {className: "zb-dashboard-container"}, 
         React.createElement("div", {className: "zb-navbar"}, 
           React.createElement("div", {className: "zb-navbar-inner zb-clearfix"}, 
             React.createElement("div", {className: toolbarClass}, 
-              React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard}, 
+              React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard, "data-track": "Click Expand Button"}, 
                 React.createElement("i", {className: toggleDashboardIconClass}), " ", this.state.toggleDashboardText
+              ), 
+              React.createElement("a", {className: toolbarDownloadClass, href: "#", onClick: this.exportCSV, download: this.state.contentType + '.csv', title: "export to csv", "data-track": "Export CSV", "data-trackop": "{'type':"+this.state.contentType+"}"}, 
+                React.createElement("i", {className: "fa zb-white fa-download"})
               ), 
               React.createElement("ul", {className: "zb-nav"}, 
                 React.createElement("li", null, 
-                  React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard}, 
+                  React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard, "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("i", {className: "fa fa-bars zb-white"}), 
-                    React.createElement("img", {className: showLogoClass, src: "img/zenblip_logo_small.png"})
+                    React.createElement("img", {className: hideLogoClass, src: "https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"})
                   )
                 ), 
                 React.createElement("li", null, 
@@ -395,7 +418,7 @@ var SignalApp = React.createClass({displayName: "SignalApp",
                     React.createElement("span", {className: queryIconClass}, React.createElement("i", {className: "fa fa-search"})), 
                     React.createElement("form", {onSubmit: this.onQuerySubmit}, 
                       React.createElement("input", {onChange: this.onQueryChange, onFocus: this.onQueryFocus, onBlur: this.onQueryBlur, value: this.state.queryText, 
-                      placeholder: "Search recent events"})
+                      placeholder: "Search recent events", class: "track", "data-track": "Toolbar Search"})
                     )
                   )
                 ), 
@@ -414,25 +437,25 @@ var SignalApp = React.createClass({displayName: "SignalApp",
           React.createElement("div", {id: "zb-function-area", className: functionAreaClass}, 
             React.createElement("ul", {className: "zb-function-list zb-nav"}, 
               React.createElement("li", null, 
-                React.createElement("a", {className: signalsClass, href: "#", onClick: this.allSignals}, 
+                React.createElement("a", {className: signalsClass, href: "#", onClick: this.allSignals, "data-track": "Click EmailsTracked"}, 
                   "Emails Tracked", 
                   React.createElement("div", {className: "zb-arrow-right"})
                 )
               ), 
               React.createElement("li", null, 
-                React.createElement("a", {className: signalsOpenedClass, href: "#", onClick: this.filterOpened}, 
+                React.createElement("a", {className: signalsOpenedClass, href: "#", onClick: this.filterOpened, "data-track": "Click EmailsOpened"}, 
                   "Opened", 
                   React.createElement("div", {className: "zb-arrow-right"})
                 )
               ), 
               React.createElement("li", null, 
-                React.createElement("a", {className: signalsNotOpenedClass, href: "#", onClick: this.filterNotOpened}, 
+                React.createElement("a", {className: signalsNotOpenedClass, href: "#", onClick: this.filterNotOpened, "data-track": "Click EmailsNotOpened"}, 
                   "Not Opened", 
                   React.createElement("div", {className: "zb-arrow-right"})
                 )
               ), 
               React.createElement("li", null, 
-                React.createElement("a", {className: linksClickedClass, href: "#", onClick: this.linksClicked}, 
+                React.createElement("a", {className: linksClickedClass, href: "#", onClick: this.linksClicked, "data-track": "Click LinksClicked"}, 
                   "Links Clicked", 
                   React.createElement("div", {className: "zb-arrow-right"})
                 )

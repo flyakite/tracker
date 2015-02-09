@@ -17,6 +17,22 @@ from app.models.device_client import DeviceClient
 from app.utils import is_user_legit, is_email_valid
 from libs.itsdangerous import JSONWebSignatureSerializer
 
+logger = logging.getLogger('default')
+PROJECT_SECRET = 'zenblip_secret'
+PROJECT_SALT = 'zenblip_salt'
+
+def encode_token(dict_object):
+    s = JSONWebSignatureSerializer(PROJECT_SECRET, salt=PROJECT_SALT)
+    dict_object.update(_created = str(datetime.utcnow()))
+    return s.dumps(dict_object)
+    
+def decode_token(code):
+    s = JSONWebSignatureSerializer(PROJECT_SECRET, salt=PROJECT_SALT)
+    try:
+        return s.loads(code)
+    except:
+        return None
+
 class Auths(BaseController):
 
     
@@ -122,7 +138,9 @@ class Auths(BaseController):
                 user_info.google_id = user_from_plus['id']
                 user_info.put()
 
-            self.context['data'] = {'success': 1, 'email': user_from_plus['email']}
+            self.context['data'] = {'success': 1, 
+                                    'email': user_from_plus['email'],
+                                    'access_token': encode_token({'email':user_from_plus['email']})}
             
             self.set_session_user(user_from_plus['email'])
             self.get_or_set_csrf_token()
@@ -134,7 +152,7 @@ class Auths(BaseController):
     @route_with('/auth/user')
     def auth_user(self):
         """
-        Check if current_user exist, return User_Info
+        Check if current_user exist, return User_Info, deprecated, use auth_google
         """
         self.meta.change_view('json')
         self._enable_cors()
@@ -144,6 +162,7 @@ class Auths(BaseController):
                                     'name': user.name,
                                     'orgs': user.orgs,
                                     'role': user.role,
+                                    'access_token': encode_token({'email':user.email}),
                                     'tz_offset': user.tz_offset
                                     }
         else:

@@ -340,8 +340,8 @@ var zenblip = (function(zb, $, Gmail, React) {
     switch(msg.e){
       case 'GotUser':
         //TODO: login dashboard
-        if(!msg.error){
-          raDashboard.onAuthenticated({senderEmail:sender.email});
+        if(!msg.error && msg.data){
+          raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:msg.data.access_token});
           if(!zb._trackerInitialized){
             zb.trackerInit();
           }
@@ -588,11 +588,23 @@ var zenblip = (function(zb, $, Gmail, React) {
     dashboard.id = 'zenblip-dashboard-container';
     $('div.nH.w-asV.aiw')[0].appendChild(dashboard);
     // zb.getElementByXpath("/html/body/div[7]/div[3]/div/div[1]").appendChild(dashboard);
+    var dashboardHeight = '300px';
     raDashboard = React.render(
-      React.createElement(SignalApp, {senderEmail: sender.email, baseURL: zbBaseURL, 
-        signalResourcePath: signalResourcePath, linkResourcePath: linkResourcePath}),
+      React.createElement(SignalApp, {
+        senderEmail: sender.email, 
+        baseURL: zbBaseURL, 
+        signalResourcePath: signalResourcePath, 
+        linkResourcePath: linkResourcePath,
+        dashboardHeight: dashboardHeight
+      }),
       document.getElementById(dashboard.id)
     );
+    //mixpanel
+    $('body').on('click', '.track', function(){
+      var $this = $(this);
+      console.log($this.data('track'));
+      mixpanel.track($this.data('track'), $this.data('trackop'));
+    });
   };
 
 

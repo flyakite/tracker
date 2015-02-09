@@ -48,7 +48,7 @@ body {
   opacity: 0; }
 
 .zb-display-none {
-  display: none; }
+  display: none !important; }
 
 /* end of common */
 /* nav bar */
@@ -70,13 +70,13 @@ body {
   border-right: 1px solid #aabbcc; }
 
 .zb-logo {
-  display: none;
+  display: inline;
   margin: -10px 0 -15px 10px;
   width: 81px;
   height: 40px; }
 
-.zb-show-logo {
-  display: inline; }
+.zb-hide-logo {
+  display: none; }
 
 .zb-toolbar {
   height: auto;
@@ -90,14 +90,20 @@ body {
     margin: 0 10px 0 0; }
     .zb-toolbar ul.zb-nav li {
       float: left; }
-
-a.zb-toggle-dashboard {
-  float: right;
-  display: block;
-  padding: 10px 15px 10px;
-  color: #fff;
-  text-decoration: none;
-  border-left: 1px solid #d2d8df; }
+  .zb-toolbar a.zb-toggle-dashboard {
+    float: right;
+    display: block;
+    padding: 10px 15px 10px;
+    color: #fff;
+    text-decoration: none;
+    border-left: 1px solid #d2d8df; }
+  .zb-toolbar .zb-tool {
+    float: right;
+    display: block;
+    padding: 10px 15px 10px;
+    color: #fff;
+    text-decoration: none;
+    border-left: 1px solid #d2d8df; }
 
 /* end of toolbar */
 /* query */
@@ -156,7 +162,7 @@ a.zb-toggle-dashboard {
         text-decoration: none; }
         .zb-function-area ul.zb-function-list > li > a:hover {
           color: #335577;
-          background-color: #faf3ff;
+          background-color: #faf6fc;
           border-left: 3px solid #0088ff; }
       .zb-function-area ul.zb-function-list > li > a.zb-active {
         border-left: 3px solid #0088ff;
@@ -164,7 +170,7 @@ a.zb-toggle-dashboard {
         font-weight: bold; }
         .zb-function-area ul.zb-function-list > li > a.zb-active:hover {
           color: #335577;
-          background-color: #faf3ff; }
+          background-color: #faf6fc; }
     .zb-function-area ul.zb-function-list .zb-arrow-right {
       width: 0;
       height: 0;

@@ -45,7 +45,7 @@ var ListDetail = React.createClass({
         return (
           <div>
             <span className="zb-link-url">
-              <a target="_blank" href="{this.props.data.url}">{this.props.data.url.substr(0,60)}</a>
+              <a target="_blank" href={this.props.data.url}>{this.props.data.url.substr(0,50)+'...'}</a>
             </span>
             <span>
               {detail}
@@ -97,7 +97,7 @@ var ListContent = React.createClass({
     });
 
     return (
-      <table className="zb-list-content table table-striped">
+      <table className="zb-list-content table table-striped" id={'zb-table-' + self.props.contentType}>
         <thead className="zb-list-head-area">
           <tr className="zb-list-head">
             <th className="zb-head zb-head-receiver"><span>Email</span></th>
@@ -124,7 +124,8 @@ var SignalApp = React.createClass({
       toggleDashboardText: 'expand',
       loginHelperText: 'zenblip loading...',
       queryText: '',
-      senderEmail: ''
+      senderEmail: '',
+      accessToken:''
       }
   },
   componentDidMount: function() {
@@ -133,7 +134,10 @@ var SignalApp = React.createClass({
   },
   loadSignalsFromServer: function() {
     var self = this;
-    $.getJSON(this.props.baseURL + this.props.signalResourcePath, {sender: this.state.senderEmail}, function(data){
+    console.log('OKKK');
+    console.log({sender: this.state.senderEmail, access_token: this.state.accessToken});
+    $.getJSON(this.props.baseURL + this.props.signalResourcePath, 
+      {sender: this.state.senderEmail, access_token: this.state.accessToken}, function(data){
       //console.log(data);
       signals = data['data']
       self.setState({
@@ -147,7 +151,8 @@ var SignalApp = React.createClass({
   },
   loadLinksFromServer: function() {
     var self = this;
-    $.getJSON(this.props.baseURL + this.props.linkResourcePath, {sender: this.state.senderEmail, accessed:true}, function(data){
+    $.getJSON(this.props.baseURL + this.props.linkResourcePath, 
+      {sender: this.state.senderEmail, accessed:true, access_token: this.state.accessToken}, function(data){
       //console.log(data);
       links = data['data']
       self.setState({
@@ -290,7 +295,7 @@ var SignalApp = React.createClass({
       if(row.subject && row.subject.indexOf(queryText) != -1){
         return row;
       }
-      //TODO: remove receivers
+      //TODO: remove receivers after new data structure row.receiver_emails roll-out
       if(row.receivers && row.receivers.to && Object.keys(row.receivers.to).length >0 &&
        Object.keys(row.receivers.to)[0].indexOf(queryText) != -1){
         return row;
@@ -302,10 +307,19 @@ var SignalApp = React.createClass({
           }
         }
       }
+      if(row.device && row.device.indexOf(queryText) != -1){
+        return row;
+      }
+      if(row.country && row.country.indexOf(queryText) != -1){
+        return row;
+      }
     });
     this.setState({
       data: data
     });
+  },
+  exportCSV: function(e) {
+    return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
   onAuthenticationFailed: function() {
     this.setState({
@@ -326,24 +340,25 @@ var SignalApp = React.createClass({
       senderEmail: setting.senderEmail,
       accessToken: setting.accessToken
     });
-    $.ajaxSetup({
-        headers: { 'x-zenblip-access-token': setting.accessToken }
-    });
     this.loadSignalsFromServer();
   },
   render: function() {
     var self = this;
     var cx = React.addons.classSet;
     var signalsClass = cx({
+      'track': true,
       'zb-active': self.state.activeTab == 'signals'
     });
     var signalsOpenedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'opened'
     });
     var signalsNotOpenedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'notopened'
     });
     var linksClickedClass = cx({
+      'track': true,
       'zb-active': this.state.activeTab == 'linksClicked'
     });
     var functionAreaClass = cx({
@@ -351,6 +366,7 @@ var SignalApp = React.createClass({
       fixed: this.state.fixFunctionArea
     });
     var toggleDashboardClass = cx({
+      'track': true,
       'zb-toggle-dashboard': true,
     });
     var toggleDashboardIconClass = cx({
@@ -358,6 +374,10 @@ var SignalApp = React.createClass({
       'zb-white': true,
       'fa-angle-double-down': !this.state.dashboardEnabled,
       'fa-angle-double-up': this.state.dashboardEnabled
+    });
+    var toolbarDownloadClass = cx({
+      'zb-tool': true,
+      'zb-display-none': !this.state.dashboardEnabled,
     });
     var queryIconClass = cx({
       'zb-query-icon': true,
@@ -371,23 +391,26 @@ var SignalApp = React.createClass({
       'zb-login-helper': true,
       'zb-display-none': this.state.dashboardAuthenticated
     });
-    var showLogoClass = cx({
+    var hideLogoClass = cx({
       'zb-logo': true,
-      'zb-show-logo': this.props.showLogo
+      'zb-hide-logo': this.props.hideLogo
     });
     return (
       <div className='zb-dashboard-container'>
         <div className="zb-navbar">
           <div className="zb-navbar-inner zb-clearfix">
             <div className={toolbarClass}>
-              <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard}>
+              <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard} data-track="Click Expand Button">
                 <i className={toggleDashboardIconClass}></i> {this.state.toggleDashboardText}
+              </a>
+              <a className={toolbarDownloadClass} href='#' onClick={this.exportCSV} download={this.state.contentType + '.csv'} title="export to csv" data-track="Export CSV" data-trackop={"{'type':"+this.state.contentType+"}"}>
+                <i className="fa zb-white fa-download"></i> 
               </a>
               <ul className="zb-nav">
                 <li>
-                  <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard}>
+                  <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard} data-track="Click Logo or Detail Icon Button">
                     <i className="fa fa-bars zb-white"></i>
-                    <img className={showLogoClass} src="img/zenblip_logo_small.png"></img>
+                    <img className={hideLogoClass} src="https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"></img>
                   </a>
                 </li>
                 <li>
@@ -395,7 +418,7 @@ var SignalApp = React.createClass({
                     <span className={queryIconClass}><i className='fa fa-search' /></span>
                     <form onSubmit={this.onQuerySubmit}>
                       <input onChange={this.onQueryChange} onFocus={this.onQueryFocus} onBlur={this.onQueryBlur} value={this.state.queryText} 
-                      placeholder='Search recent events' />
+                      placeholder='Search recent events' class="track" data-track="Toolbar Search"/>
                     </form>
                   </div>
                 </li>
@@ -414,25 +437,25 @@ var SignalApp = React.createClass({
           <div id='zb-function-area' className={functionAreaClass}>
             <ul className='zb-function-list zb-nav'>
               <li>
-                <a className={signalsClass} href="#" onClick={this.allSignals}>
+                <a className={signalsClass} href="#" onClick={this.allSignals} data-track="Click EmailsTracked">
                   Emails Tracked
                   <div className="zb-arrow-right"></div>
                 </a>
               </li>
               <li>
-                <a className={signalsOpenedClass} href="#" onClick={this.filterOpened}>
+                <a className={signalsOpenedClass} href="#" onClick={this.filterOpened} data-track="Click EmailsOpened">
                   Opened
                   <div className="zb-arrow-right"></div>
                 </a>
               </li>
               <li>
-                <a className={signalsNotOpenedClass} href="#" onClick={this.filterNotOpened}>
+                <a className={signalsNotOpenedClass} href="#" onClick={this.filterNotOpened} data-track="Click EmailsNotOpened">
                   Not Opened
                   <div className="zb-arrow-right"></div>
                 </a>
               </li>
               <li>
-                <a className={linksClickedClass} href="#" onClick={this.linksClicked}>
+                <a className={linksClickedClass} href="#" onClick={this.linksClicked} data-track="Click LinksClicked">
                   Links Clicked
                   <div className="zb-arrow-right"></div>
                 </a>

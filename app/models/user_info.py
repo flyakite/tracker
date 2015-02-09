@@ -24,7 +24,7 @@ class UserInfo(BasicModel):
     last_seen = ndb.DateTimeProperty()
 
     domain = ndb.StringProperty()  # email domain part, in lower case
-    role = ndb.IntegerProperty()  # null or 0: not legit, 1:legit
+    role = ndb.IntegerProperty()  # null or 0: not legit, 1:free plan, 2:pro plan 3:team plan
     started = ndb.DateTimeProperty()  # the datetime the user send first signal, used for scheduled news letter
     tz_offset = ndb.IntegerProperty(default=0)
 

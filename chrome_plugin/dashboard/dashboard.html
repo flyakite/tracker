@@ -23,6 +23,8 @@
     <!-- script src="build/JSXTransformer.js"></script -->
     <script src="js-build/react-with-addons.js"></script>
     <script src="../jquery-1.10.2.min.js"></script>
+    <script src="utils/excellentexport.min.js"></script>
+    <script src="utils/mixpanel.js"></script>
     <script src="js-build/dashboard.js"></script>
     <script>
     var senderEmail = 'sushi@zenblip.com';
@@ -30,14 +32,14 @@
     var signalResourcePath = '/resource/signals';
     var linkResourcePath = '/resource/links';
     var dashboardHeight = '300px';
-    var showLogo = true;
+    var hideLogo = false;
     var raDashboard = React.render(
       React.createElement(SignalApp, {
         baseURL: baseURL, 
         signalResourcePath: signalResourcePath, 
         linkResourcePath: linkResourcePath,
         dashboardHeight: dashboardHeight,
-        showLogo: showLogo
+        hideLogo: hideLogo
       }),
       document.getElementById('zb-area')
     );
@@ -46,7 +48,6 @@
       raDashboard.onAuthenticated({senderEmail:senderEmail});
       raDashboard.showDashboard();
     }, 200);
-    
     </script>
   </body>
 </html>

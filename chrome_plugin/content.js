@@ -7,6 +7,8 @@ var config = {
     'jquery': chrome.extension.getURL('jquery-1.10.2.min.js'),
     'gmail': chrome.extension.getURL('gmail.js'),
     'react': chrome.extension.getURL('react-with-addons.min.js'),
+    'export': chrome.extension.getURL('dashboard/utils/excellentexport.min.js'),
+    'mixpanel': chrome.extension.getURL('dashboard/utils/mixpanel.js'),
     'dashboard': chrome.extension.getURL('dashboard/js-build/dashboard.js'),
     'utils': chrome.extension.getURL('utils.js'),
     'channel': chrome.extension.getURL('channel.js'),
@@ -18,7 +20,7 @@ var config = {
       'retry': 3
     },
     'dashboard':{
-      'deps': ['react', 'jquery']
+      'deps': ['react', 'jquery', 'export', 'mixpanel']
     },
     'channel': {
       'deps': ['utils']
