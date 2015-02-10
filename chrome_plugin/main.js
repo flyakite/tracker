@@ -398,9 +398,13 @@ var zenblip = (function(zb, $, Gmail, React) {
         plainLinksDecoded = [];
       //deal with links with html A tag
       var match = linkRegexWithATag.exec(bodyDecoded);
+      var url;
       while (match != null) {
-        links.push(urlPack(match[1], 0));
-        match = linkRegexWithATag.exec(bodyDecoded);
+        url = match[1];
+        if(url.indexOf(zbExternalURL) == -1){
+          links.push(urlPack(url, 0));
+          match = linkRegexWithATag.exec(bodyDecoded);
+        }
       }
 
       //deal with plain url link
@@ -409,7 +413,10 @@ var zenblip = (function(zb, $, Gmail, React) {
       plainLinks = bodyDecoded2.match(linkRegexInPlainText);
       if (plainLinks != null && plainLinks.length > 0) {
         for (var i = plainLinks.length; i--;) {
-          links.push(urlPack(plainLinks[i], 1));
+          url = plainLinks[i];
+          if(url.indexOf(zbExternalURL) == -1){
+            links.push(urlPack(url, 1));
+          }
         }
       }
 
