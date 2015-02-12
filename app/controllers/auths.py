@@ -3,9 +3,10 @@ Created on 2014/8/21
 
 @author: sushih-wen
 '''
-
+import re
 import logging
 import json
+import urllib
 from datetime import datetime
 from google.appengine.api import users, urlfetch
 from google.appengine.ext import deferred
@@ -186,7 +187,6 @@ class Auths(BaseController):
         else:
             self.context['data'] = {'error': True}
             
-            
     @route_with('/auth/legit')
     def auth_legit(self):
         """
@@ -260,3 +260,31 @@ class Auths(BaseController):
             self.context['data'] = {'success': False,
                                     'error': 'invalid_client_id',
                                     'data': ''}
+                                    
+    @route_with('/auth/access_token')
+    def get_access_token(self):
+        self.meta.change_view('json')
+        callback = self.request.get('callback')
+        check_permission_email = self.request.get('check_permission_email')
+        
+        data = {}
+        if self.current_user():
+            url = "http://console.zenblip.com/accounts/access_token"
+            payload = {'user_email':self.current_user().email, 'check_permission_email':check_permission_email}
+            payload = urllib.urlencode(payload)
+            result = urlfetch.fetch(url=url)
+            if result.status_code == 200:
+                data = json.loads(result.content)
+        else:
+            data = {'error':True, 'signed_in': False}
+            
+        logging.info(data)
+        
+        if callback and re.match(r'^[\w\.-]+$', callback):
+            """
+            JSONP
+            """
+            self.response.content_type = "text/plain"
+            self.response.write('%s(%s)' % (callback, json.dumps(data)))
+        else:
+            self.context['data'] = data
