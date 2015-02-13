@@ -35,6 +35,7 @@
   ],
   "permissions":[
     "identity",
+    "storage",
     "tabs",
     "notifications",
     "webRequest",

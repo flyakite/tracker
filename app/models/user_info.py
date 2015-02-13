@@ -29,6 +29,7 @@ class UserInfo(BasicModel):
     tz_offset = ndb.IntegerProperty(default=0)
 
     google_id = ndb.StringProperty()
+    refresh_token = ndb.StringProperty()
 
     @classmethod
     def create_user(cls,

@@ -136,6 +136,7 @@ var SignalApp = React.createClass({
     var self = this;
     console.log('OKKK');
     console.log({sender: this.state.senderEmail, access_token: this.state.accessToken});
+    //TODO: add csrf token
     $.getJSON(this.props.baseURL + this.props.signalResourcePath, 
       {sender: this.state.senderEmail, access_token: this.state.accessToken}, function(data){
       //console.log(data);
@@ -151,6 +152,7 @@ var SignalApp = React.createClass({
   },
   loadLinksFromServer: function() {
     var self = this;
+    //TODO: add csrf token
     $.getJSON(this.props.baseURL + this.props.linkResourcePath, 
       {sender: this.state.senderEmail, accessed:true, access_token: this.state.accessToken}, function(data){
       //console.log(data);
@@ -321,10 +323,12 @@ var SignalApp = React.createClass({
   exportCSV: function(e) {
     return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
-  onAuthenticationFailed: function() {
+  onAuthenticationFailed: function(setting) {
+    var message = setting && setting.message || 'Click here to login zenblip';
     this.setState({
-      loginHelperText: 'Click here to login zenblip',
+      loginHelperText: message,
     });
+    //TODO: a setting to remove toolbar for free plan
   },
   onLoginClick: function(e) {
     e.preventDefault();

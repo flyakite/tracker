@@ -258,79 +258,79 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
   ["blocking"]
 );
 
-function getAndUpdateUserInfo (options, callback) {
-  console.log('getAndUpdateUserInfo');
-  getGoogleAuthToken(options, function(result){
-    if(!result.error){
-      retryConnection.hold('onGotAuthTokenSendToServer' + result.access_token, 5*1000, function(){
-        onGotAuthTokenSendToServer(result.access_token, callback);  
-      });
-    }else{
-      console.log('getGoogleAuthToken Error');
-      callback({error:true})
-    }
-  });
-}
-/** independent get google auth token function **/
-function getGoogleAuthToken(options, callback) {
-  console.log('getGoogleAuthToken');
-  console.log(options);
-  chrome.identity.getAuthToken({ interactive: options.interactive }, function(access_token) {
-    if (chrome.runtime.lastError) {
-      console.log(chrome.runtime.lastError);
-      onGoogleAuthUnauthorized(callback);
-      return;
-    }
-    console.log('Got Google Auth Token');
-    // chrome.identity.removeCachedAuthToken({token:access_token}, function() {
-    //   console.log('OK removed');
-    // });
-    console.log(access_token);
-    callback({access_token:access_token});
-  });
-}
+// function getAndUpdateUserInfo (options, callback) {
+//   console.log('getAndUpdateUserInfo');
+//   getGoogleAuthToken(options, function(result){
+//     if(!result.error){
+//       retryConnection.hold('onGotAuthTokenSendToServer' + result.access_token, 5*1000, function(){
+//         onGotAuthTokenSendToServer(result.access_token, callback);  
+//       });
+//     }else{
+//       console.log('getGoogleAuthToken Error');
+//       callback({error:true})
+//     }
+//   });
+// }
+// /** independent get google auth token function **/
+// function getGoogleAuthToken(options, callback) {
+//   console.log('getGoogleAuthToken');
+//   console.log(options);
+//   chrome.identity.getAuthToken({ interactive: options.interactive, account:{id:'114233689112618180115'}}, function(access_token) {
+//     if (chrome.runtime.lastError) {
+//       console.log(chrome.runtime.lastError);
+//       onGoogleAuthUnauthorized(callback);
+//       return;
+//     }
+//     console.log('Got Google Auth Token');
+//     // chrome.identity.removeCachedAuthToken({token:access_token}, function() {
+//     //   console.log('OK removed');
+//     // });
+//     console.log(access_token);
+//     callback({access_token:access_token});
+//   });
+// }
 
-function onGotAuthTokenSendToServer (access_token, callback) {
-  console.log('onGotAuthTokenSendToServer');
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', zbBaseURL + zbAuthPath);
-  xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
-  xhr.onload = function(){
-    onSendAccessTokenComplete(access_token, this.status, this.response, callback);
-    retryConnection.release('onGotAuthTokenSendToServer'+access_token);
-  };
-  xhr.onerror = function(){
-    retryConnection.release('onGotAuthTokenSendToServer'+access_token);
-  }
-  xhr.send();
-}
+// function onGotAuthTokenSendToServer (access_token, callback) {
+//   console.log('onGotAuthTokenSendToServer');
+//   var xhr = new XMLHttpRequest();
+//   xhr.open('POST', zbBaseURL + zbAuthPath);
+//   xhr.setRequestHeader('Authorization', 'Bearer ' + access_token);
+//   xhr.onload = function(){
+//     onSendAccessTokenComplete(access_token, this.status, this.response, callback);
+//     retryConnection.release('onGotAuthTokenSendToServer'+access_token);
+//   };
+//   xhr.onerror = function(){
+//     retryConnection.release('onGotAuthTokenSendToServer'+access_token);
+//   }
+//   xhr.send();
+// }
 
-function onSendAccessTokenComplete(access_token, status, response, callback) {
-  console.log('onSendAccessTokenComplete ' + status + ' ' + response);
-  if (status == 401) {
-    chrome.identity.removeCachedAuthToken({ token: access_token });
-    onUserInfoFetched('SendAuthTokenToServerError', status, response, callback);
-  } else {
-    onUserInfoFetched(null, status, response, callback);
-  }
-}
+// function onSendAccessTokenComplete(access_token, status, response, callback) {
+//   console.log('onSendAccessTokenComplete ' + status + ' ' + response);
+//   if (status == 401) {
+//     chrome.identity.removeCachedAuthToken({ token: access_token });
+//     onUserInfoFetched('SendAuthTokenToServerError', status, response, callback);
+//   } else {
+//     onUserInfoFetched(null, status, response, callback);
+//   }
+// }
 
-function onUserInfoFetched (error, status, response, callback) {
-  console.log('onUserInfoFetched');
-  if (!error && status == 200) {
-    var user_info = JSON.parse(response);
-    console.log(user_info);
-    callback({status:status,user_info:user_info});
-  } else {
-    console.log({status:status,error:error});
-    callback({status:status,error:error});
-  }
-}
+// function onUserInfoFetched (error, status, response, callback) {
+//   console.log('onUserInfoFetched');
+//   if (!error && status == 200) {
+//     var user_info = JSON.parse(response);
+//     console.log(user_info);
+//     callback({status:status,user_info:user_info});
+//   } else {
+//     console.log({status:status,error:error});
+//     callback({status:status,error:error});
+//   }
+// }
 
-function onGoogleAuthUnauthorized(callback) {
-  console.log('onGoogleAuthUnauthorized');
-  callback({error:true});
-}
+// function onGoogleAuthUnauthorized(callback) {
+//   console.log('onGoogleAuthUnauthorized');
+//   callback({error:true});
+// }
 // Code updating the user interface, when the user information has been
 // fetched or displaying the error.
 /*
@@ -407,16 +407,16 @@ var zenblip = (function(zb) {
       //   });
       //   break;
 
-      case 'getAndUpdateUserInfo':
-        console.log('getAndUpdateUserInfo');
-        getAndUpdateUserInfo(msg.options, function(result) {
-          if(!result.error){
-            messenger.repost(msg, {e:'GotUser', data:result.user_info});
-          }else{
-            messenger.repost(msg, {e:'GotUser', error:true});
-          }
-        });
-        break;
+      // case 'getAndUpdateUserInfo':
+      //   console.log('getAndUpdateUserInfo');
+      //   getAndUpdateUserInfo(msg.options, function(result) {
+      //     if(!result.error){
+      //       messenger.repost(msg, {e:'GotUser', data:result.user_info});
+      //     }else{
+      //       messenger.repost(msg, {e:'GotUser', error:true});
+      //     }
+      //   });
+      //   break;
 
       case 'SenderInit':
 

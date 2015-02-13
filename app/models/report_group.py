@@ -23,6 +23,6 @@ class ReportGroup(BasicModel):
 
 
     """
-    rgid = ndb.StringProperty()  # used to specified the report group
+    rgid = ndb.StringProperty()  # used to specified the report group, can be subscription id or team id
     orgs = ndb.StringProperty(repeated=True)
     to = ndb.StringProperty(repeated=True)  # email receivers

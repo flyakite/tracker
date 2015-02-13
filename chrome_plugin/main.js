@@ -290,6 +290,7 @@ var zenblip = (function(zb, $, Gmail, React) {
 
   var ExtensionID = 'oocgfjghhllncddlnhlocnikogonjdcp';
   var zbBaseURL = 'https://zenblip.appspot.com';
+  var zbMainURL = 'https://www.zenblip.com';
   var zbExternalURL = 'http://www.email-link.com';
   var zbChannelPath = '/channels/';
   var signalResourcePath = '/resource/signals';
@@ -303,6 +304,7 @@ var zenblip = (function(zb, $, Gmail, React) {
   var raDashboard;
   var composeIDs = [];
   var debugCounter = 0;
+  var zenblipAccessToken = '';
   var zbRedirectPath = '/l',
     zbSignalPath = '/s',
     zbTmpToken = '$$$zbTmpToken$$$';
@@ -338,19 +340,19 @@ var zenblip = (function(zb, $, Gmail, React) {
       return;
     }
     switch(msg.e){
-      case 'GotUser':
-        //TODO: login dashboard
-        if(!msg.error && msg.data){
-          raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:msg.data.access_token});
-          if(!zb._trackerInitialized){
-            zb.trackerInit();
-          }
-          zb.ChannelInit();
-        }else{
-          raDashboard.onAuthenticationFailed();
-          console.log('GotUser Error');
-        }
-        break;
+      // case 'GotUser':
+      //   //TODO: login dashboard
+      //   if(!msg.error && msg.data){
+      //     raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:msg.data.access_token});
+      //     if(!zb._trackerInitialized){
+      //       zb.trackerInit();
+      //     }
+      //     zb.ChannelInit();
+      //   }else{
+      //     raDashboard.onAuthenticationFailed();
+      //     console.log('GotUser Error');
+      //   }
+      //   break;
       default:
         console.log('Messenger default Error');
         break;
@@ -524,6 +526,7 @@ var zenblip = (function(zb, $, Gmail, React) {
       version = typeof zbExtDetails == 'undefined'? '': zbExtDetails.version;
     try {
       links = zb.parseLink(bps.body);
+      //TODO: move this script to tracker domain and add csrf token
       payload = {
         version: version,
         cc: bps.cc ? bps.cc.join(',') : "",
@@ -533,6 +536,7 @@ var zenblip = (function(zb, $, Gmail, React) {
         subject: bps.subject,
         links: JSON.stringify(links),
         token:token,
+        accessToken: zenblipAccessToken,
         tz_offset:(new Date()).getTimezoneOffset()/-60
       };
       console.log(payload);
@@ -585,7 +589,11 @@ var zenblip = (function(zb, $, Gmail, React) {
     });
   };
   zb.UserInit = function() {
-    zb.getAndUpdateUserInfo(false);
+    //zb.getDirectAccessToken();
+    //TODO: get local stored permission before asking remote server
+    zb.getJSONPAccessTokenAndCheckPermission(senderID);
+    //zb.getAndUpdateUserInfo(false);
+    // zb.validateUserPlan();
   };
   zb.SenderInit = function() {
     messenger.post({'e':'SenderInit','sender':sender.email,'ukey':sender.ukey})
@@ -614,19 +622,74 @@ var zenblip = (function(zb, $, Gmail, React) {
     });
   };
 
-
-  /* methods waiting to be sorted out... */
   // zb.getAndUpdateUserInfo = function(interactive) {
+  //   //This function is used in dashboard.js
   //   console.log('zb.getAndUpdateUserInfo');
   //   var options = {interactive:interactive}
   //   messenger.post({e:'getAndUpdateUserInfo', options:options});
   // };
 
-  zb.getAndUpdateUserInfo = function(interactive) {
-    //This function is used in dashboard.js
-    console.log('zb.getAndUpdateUserInfo');
-    var options = {interactive:interactive}
-    messenger.post({e:'getAndUpdateUserInfo', options:options});
+  // zb.validateUserPlan = function(senderEmail) {
+  //   console.log('zb.validateUserPlan');
+  //   var options = {'check_permission_email': senderEmail};
+  //   messenger.post({e:'validateUserPlan', options:options})
+  // };
+
+  zb.redirectToGoogleOAuth = function(hintEmail) {
+    window.location.href = "https://accounts.google.com/o/oauth2/auth?" + 
+      "response_type=code" +
+      "&scope=" + encodeURIComponent("email https://www.googleapis.com/auth/plus.login https://mail.google.com/") +
+      "&redirect_uri=" + encodeURIComponent(zbBaseURL + "/auth/oauth2callback") +
+      "&client_id=" + encodeURIComponent("709499323932-c4a99dsihk6v1js29vg9tg3n30ph0oq8.apps.googleusercontent.com") +
+      "&state=" + encodeURIComponent(window.location.href) +
+      "&access_type=offline" +
+      "&login_hint=" + encodeURIComponent(hintEmail) +
+      "&include_granted_scopes=true"
+  };
+
+  zb.redirectToAccountManagement = function(hintEmail) {
+    window.location.href = zbMainURL + "dashboard?" +
+      "hint=addplan" +
+      "&email=" + hintEmail +
+      "&state=" + encodeURIComponent(window.location.href);
+  };
+
+  // JSONP way
+  zb.getJSONPAccessTokenAndCheckPermission = function(checkEmail) {
+    //HTTPS is required
+    var script = document.createElement('script');
+    script.src = zbMainURL + '/accounts/access_token?callback=zenblip.gotJSONPAccessToken&check_permission_email=' + checkEmail;
+    //script.src = 'https://127.0.0.1:8000/accounts/access_token?callback=zenblip.gotJSONPAccessToken&email=' + senderID;
+    document.body.appendChild(script);
+  };
+
+  //JSONP callback
+  zb.gotJSONPAccessToken = function(data) {
+
+    var error, hasPermission, signedIn;
+    console.log('gotJSONPAccessToken');
+    console.log(data);
+    if(data.signed_in){
+      zenblipAccessToken = data.access_token;
+      if(data.has_permission){
+        if(data.top){
+          raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+        }else{
+          raDashboard.onAuthenticationFailed({message:'Free Plan Enabled'});
+        }
+        //TODO: store permission
+        if(!zb._trackerInitialized){
+          zb.trackerInit();
+        }
+        zb.ChannelInit();
+      }else{
+        zb.redirectToAccountManagement();
+        raDashboard.onAuthenticationFailed();
+      }
+    }else{
+      raDashboard.onAuthenticationFailed();
+      zb.redirectToGoogleOAuth(senderID);
+    }
   };
 
   zb.Init = function(){
