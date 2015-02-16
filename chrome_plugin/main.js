@@ -370,7 +370,7 @@ var zenblip = (function(zb, $, Gmail, React) {
         // console.log(composeIDs);
         callback(composeIDs);
       }
-    }, 2000);
+    }, 1000);
   };
   zb.decodeBody = function(body) {
     return body.replace('<wbr>', ''); //TODO: WTF?
@@ -536,7 +536,7 @@ var zenblip = (function(zb, $, Gmail, React) {
         subject: bps.subject,
         links: JSON.stringify(links),
         token:token,
-        accessToken: zenblipAccessToken,
+        access_token: zenblipAccessToken,
         tz_offset:(new Date()).getTimezoneOffset()/-60
       };
       console.log(payload);
@@ -584,6 +584,7 @@ var zenblip = (function(zb, $, Gmail, React) {
       senderEmail:sender.email,
       uri: zbBaseURL + zbChannelPath
     };
+    //def in channel.js
     zb.getOrCreateChannelToken(options, function() {
       zb.openChannel(options);
     });
@@ -622,12 +623,14 @@ var zenblip = (function(zb, $, Gmail, React) {
     });
   };
 
-  // zb.getAndUpdateUserInfo = function(interactive) {
-  //   //This function is used in dashboard.js
-  //   console.log('zb.getAndUpdateUserInfo');
-  //   var options = {interactive:interactive}
-  //   messenger.post({e:'getAndUpdateUserInfo', options:options});
-  // };
+  zb.getAndUpdateUserInfo = function(interactive) {
+    //This function is used in dashboard.js
+    // console.log('zb.getAndUpdateUserInfo');
+    // var options = {interactive:interactive}
+    // messenger.post({e:'getAndUpdateUserInfo', options:options});
+
+    zb.goToGoogleOAuth(senderID);
+  };
 
   // zb.validateUserPlan = function(senderEmail) {
   //   console.log('zb.validateUserPlan');
@@ -635,8 +638,8 @@ var zenblip = (function(zb, $, Gmail, React) {
   //   messenger.post({e:'validateUserPlan', options:options})
   // };
 
-  zb.redirectToGoogleOAuth = function(hintEmail) {
-    window.location.href = "https://accounts.google.com/o/oauth2/auth?" + 
+  zb.goToGoogleOAuth = function(hintEmail) {
+    window.open("https://accounts.google.com/o/oauth2/auth?" + 
       "response_type=code" +
       "&scope=" + encodeURIComponent("email https://www.googleapis.com/auth/plus.login https://mail.google.com/") +
       "&redirect_uri=" + encodeURIComponent(zbBaseURL + "/auth/oauth2callback") +
@@ -645,10 +648,11 @@ var zenblip = (function(zb, $, Gmail, React) {
       "&access_type=offline" +
       "&login_hint=" + encodeURIComponent(hintEmail) +
       "&include_granted_scopes=true"
+      );
   };
 
   zb.redirectToAccountManagement = function(hintEmail) {
-    window.location.href = zbMainURL + "dashboard?" +
+    window.location.href = zbMainURL + "/dashboard?" +
       "hint=addplan" +
       "&email=" + hintEmail +
       "&state=" + encodeURIComponent(window.location.href);
@@ -675,7 +679,7 @@ var zenblip = (function(zb, $, Gmail, React) {
         if(data.top){
           raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
         }else{
-          raDashboard.onAuthenticationFailed({message:'Free Plan Enabled'});
+          raDashboard.onAuthenticationFailed({message:'zenblip free plan enabled'});
         }
         //TODO: store permission
         if(!zb._trackerInitialized){
@@ -683,12 +687,10 @@ var zenblip = (function(zb, $, Gmail, React) {
         }
         zb.ChannelInit();
       }else{
-        zb.redirectToAccountManagement();
-        raDashboard.onAuthenticationFailed();
+        raDashboard.onAuthenticationFailed({message:'Add this email to zenblip'});
       }
     }else{
       raDashboard.onAuthenticationFailed();
-      zb.redirectToGoogleOAuth(senderID);
     }
   };
 

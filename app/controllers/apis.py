@@ -79,15 +79,16 @@ class Apis(BaseController):
         
     @route_with('/subscription_user')
     def subscription_user(self):
+        logging.info('here')
         self.meta.change_view('json')
         if self.request.method == 'POST':
             logging.info(self.request.POST)
-            rsvp = self.request.POST.get('rsvp')
+            rsvp = self.request.get('rsvp')
             if rsvp:
                 #single email rsvp
-                subid = self.request.POST.get('subid')
-                email = self.request.POST.get('email')
-                plan = self.request.POST.get('plan')
+                subid = self.request.get('subid')
+                email = self.request.get('email')
+                plan = self.request.get('plan')
                 
                 if not is_email_valid(email):
                     logging.error("InvalidEmail %s" % email)
@@ -115,9 +116,9 @@ class Apis(BaseController):
                     logging.info("UserInfoCreated %s" % email)
                     
             else:
-                subid = self.request.POST.get('subid')
-                emails_to_remove = self.request.POST.get('emails_to_remove')
-                emails_to_create = self.request.POST.get('emails_to_create')
+                subid = self.request.get('subid')
+                emails_to_remove = self.request.get('emails_to_remove')
+                emails_to_create = self.request.get('emails_to_create')
                 rui = UserInfo.query(UserInfo.email.IN(emails_to_remove)).fetch()
                 ui_to_update = []
                 for ui in rui:
@@ -140,8 +141,8 @@ class Apis(BaseController):
     def subscription_report_group(self):
         self.meta.change_view('json')
         if self.request.method == 'POST':
-            subid = self.request.POST.get('subid')
-            emails = self.request.POST.get('emails')
+            subid = self.request.get('subid')
+            emails = self.request.get('emails')
             logging.info(self.request.POST)
             
             new_emails = set(filter(is_email_valid, emails))

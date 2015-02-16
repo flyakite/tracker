@@ -6,7 +6,18 @@
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
-      "js": ["deps.min.js", "content.js"]
+      // "js": ["deps.min.js", "content.js"],
+      "js": [
+        "deps.min.js", 
+        "jquery-1.10.2.min.js",
+        "react-with-addons.min.js",
+        "utils.js",
+        "messenger.js",
+        //"dashboard/utils/mixpanel.js",
+        "dashboard/utils/excellentexport.min.js",
+        "dashboard/js-build/dashboard.js",
+        "content2.js"
+        ]
       //"css": ["font-awesome/css/font-awesome.min.css", "dashboard/css-build/dashboard.css", "content.css"]
       // "css": ["content.css", "content.css"]
     }
@@ -27,9 +38,11 @@
     "react-with-addons.min.js",
     "deps.min.js",
     "gmail.js",
+    "messenger.js",
     "channel.js",
     "utils.js",
     "main.js",
+    "main2.js",
     "dashboard/js-build/dashboard.js",
     "backgroundMain.js"
   ],
@@ -49,7 +62,7 @@
     // "*://*.zenblip.com/*",
     // "*://*.linkedin.com/*",
   ],
-  "content_security_policy": "script-src 'self' https://www.zenblip.com https://zenblip.appspot.com https://talkgadget.google.com; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://*.zenblip.com https://zenblip.appspot.com https://talkgadget.google.com https://cdn.mxpnl.com; object-src 'self'",
   "oauth2" :{
     "client_id": "709499323932-fiasgo5aeh369gko480h7s17v63glgok.apps.googleusercontent.com",
     "scopes":[

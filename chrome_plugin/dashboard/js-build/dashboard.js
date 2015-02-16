@@ -125,7 +125,8 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       loginHelperText: 'zenblip loading...',
       queryText: '',
       senderEmail: '',
-      accessToken:''
+      accessToken:'',
+      collapse: false
       }
   },
   componentDidMount: function() {
@@ -323,10 +324,29 @@ var SignalApp = React.createClass({displayName: "SignalApp",
   exportCSV: function(e) {
     return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
+  refreshDashboardTable: function(e) {
+    switch(this.state.contentType){
+      case 'EmailTracked':
+        this.allSignals();
+        break;
+      case 'EmailOpened':
+        this.loadSignalsFromServer();
+        this.filterOpened();
+        break;
+      case 'EmailNotOpened':
+        this.loadSignalsFromServer();
+        this.filterNotOpened();
+        break;
+      case 'linksClicked':
+        this.linksClicked();
+        break;
+    } 
+  },
   onAuthenticationFailed: function(setting) {
     var message = setting && setting.message || 'Click here to login zenblip';
     this.setState({
       loginHelperText: message,
+      collapse: setting.collapse? true: false
     });
     //TODO: a setting to remove toolbar for free plan
   },
@@ -383,6 +403,10 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       'zb-tool': true,
       'zb-display-none': !this.state.dashboardEnabled,
     });
+    var toolbarRefreshClass = cx({
+      'zb-tool': true,
+      'zb-display-none': !this.state.dashboardEnabled,
+    });
     var queryIconClass = cx({
       'zb-query-icon': true,
       'zb-transparent': this.state.queryFocus || this.state.queryText.length > 0
@@ -399,21 +423,30 @@ var SignalApp = React.createClass({displayName: "SignalApp",
       'zb-logo': true,
       'zb-hide-logo': this.props.hideLogo
     });
+    var dashboardContainerClass = cx({
+      'zb-dashboard-container': true,
+      'zb-display-none': this.state.collapse
+    });
     return (
-      React.createElement("div", {className: "zb-dashboard-container"}, 
+      React.createElement("div", {className: dashboardContainerClass}, 
         React.createElement("div", {className: "zb-navbar"}, 
           React.createElement("div", {className: "zb-navbar-inner zb-clearfix"}, 
             React.createElement("div", {className: toolbarClass}, 
               React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard, "data-track": "Click Expand Button"}, 
                 React.createElement("i", {className: toggleDashboardIconClass}), " ", this.state.toggleDashboardText
               ), 
-              React.createElement("a", {className: toolbarDownloadClass, href: "#", onClick: this.exportCSV, download: this.state.contentType + '.csv', title: "export to csv", "data-track": "Export CSV", "data-trackop": "{'type':"+this.state.contentType+"}"}, 
+              React.createElement("a", {className: toolbarDownloadClass, href: "#", onClick: this.exportCSV, download: this.state.contentType + '.csv', title: "export to csv", "data-track": "Export Dashboard to CSV", "data-trackop": "{'type':"+this.state.contentType+"}"}, 
                 React.createElement("i", {className: "fa zb-white fa-download"})
+              ), 
+              React.createElement("a", {className: toolbarRefreshClass, href: "#", onClick: this.refreshDashboardTable, title: "refresh", "data-track": "Refresh Dashobard Table", "data-trackop": "{'type':"+this.state.contentType+"}"}, 
+                React.createElement("i", {className: "fa zb-white fa-refresh"})
               ), 
               React.createElement("ul", {className: "zb-nav"}, 
                 React.createElement("li", null, 
                   React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard, "data-track": "Click Logo or Detail Icon Button"}, 
-                    React.createElement("i", {className: "fa fa-bars zb-white"}), 
+                    React.createElement("i", {className: "fa fa-bars zb-white"})
+                  ), 
+                  React.createElement("a", {className: "track", href: "http://www.zenblip.com", target: "_blank", "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("img", {className: hideLogoClass, src: "https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"})
                   )
                 ), 
@@ -425,9 +458,6 @@ var SignalApp = React.createClass({displayName: "SignalApp",
                       placeholder: "Search recent events", class: "track", "data-track": "Toolbar Search"})
                     )
                   )
-                ), 
-                React.createElement("li", null
-                  
                 )
               )
             ), 

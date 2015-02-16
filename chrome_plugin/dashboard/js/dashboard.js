@@ -125,7 +125,8 @@ var SignalApp = React.createClass({
       loginHelperText: 'zenblip loading...',
       queryText: '',
       senderEmail: '',
-      accessToken:''
+      accessToken:'',
+      collapse: false
       }
   },
   componentDidMount: function() {
@@ -323,10 +324,29 @@ var SignalApp = React.createClass({
   exportCSV: function(e) {
     return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
+  refreshDashboardTable: function(e) {
+    switch(this.state.contentType){
+      case 'EmailTracked':
+        this.allSignals();
+        break;
+      case 'EmailOpened':
+        this.loadSignalsFromServer();
+        this.filterOpened();
+        break;
+      case 'EmailNotOpened':
+        this.loadSignalsFromServer();
+        this.filterNotOpened();
+        break;
+      case 'linksClicked':
+        this.linksClicked();
+        break;
+    } 
+  },
   onAuthenticationFailed: function(setting) {
     var message = setting && setting.message || 'Click here to login zenblip';
     this.setState({
       loginHelperText: message,
+      collapse: setting.collapse? true: false
     });
     //TODO: a setting to remove toolbar for free plan
   },
@@ -383,6 +403,10 @@ var SignalApp = React.createClass({
       'zb-tool': true,
       'zb-display-none': !this.state.dashboardEnabled,
     });
+    var toolbarRefreshClass = cx({
+      'zb-tool': true,
+      'zb-display-none': !this.state.dashboardEnabled,
+    });
     var queryIconClass = cx({
       'zb-query-icon': true,
       'zb-transparent': this.state.queryFocus || this.state.queryText.length > 0
@@ -399,21 +423,30 @@ var SignalApp = React.createClass({
       'zb-logo': true,
       'zb-hide-logo': this.props.hideLogo
     });
+    var dashboardContainerClass = cx({
+      'zb-dashboard-container': true,
+      'zb-display-none': this.state.collapse
+    });
     return (
-      <div className='zb-dashboard-container'>
+      <div className={dashboardContainerClass}>
         <div className="zb-navbar">
           <div className="zb-navbar-inner zb-clearfix">
             <div className={toolbarClass}>
               <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard} data-track="Click Expand Button">
                 <i className={toggleDashboardIconClass}></i> {this.state.toggleDashboardText}
               </a>
-              <a className={toolbarDownloadClass} href='#' onClick={this.exportCSV} download={this.state.contentType + '.csv'} title="export to csv" data-track="Export CSV" data-trackop={"{'type':"+this.state.contentType+"}"}>
+              <a className={toolbarDownloadClass} href='#' onClick={this.exportCSV} download={this.state.contentType + '.csv'} title="export to csv" data-track="Export Dashboard to CSV" data-trackop={"{'type':"+this.state.contentType+"}"}>
                 <i className="fa zb-white fa-download"></i> 
+              </a>
+              <a className={toolbarRefreshClass} href='#' onClick={this.refreshDashboardTable} title="refresh" data-track="Refresh Dashobard Table" data-trackop={"{'type':"+this.state.contentType+"}"}>
+                <i className="fa zb-white fa-refresh"></i> 
               </a>
               <ul className="zb-nav">
                 <li>
                   <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard} data-track="Click Logo or Detail Icon Button">
                     <i className="fa fa-bars zb-white"></i>
+                  </a>
+                  <a className="track" href='http://www.zenblip.com' target="_blank" data-track="Click Logo or Detail Icon Button">
                     <img className={hideLogoClass} src="https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"></img>
                   </a>
                 </li>
@@ -425,9 +458,6 @@ var SignalApp = React.createClass({
                       placeholder='Search recent events' class="track" data-track="Toolbar Search"/>
                     </form>
                   </div>
-                </li>
-                <li>
-                  
                 </li>
               </ul>
             </div>

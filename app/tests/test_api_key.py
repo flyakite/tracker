@@ -10,7 +10,7 @@ from uuid import uuid4
 from google.appengine.ext import testbed
 from ferrisnose import AppEngineTest, AppEngineWebTest, FerrisAppTest
 from app.models.api_key import ApiKey
-from app.controllers.api import Apis
+from app.controllers.apis import Apis
 
 
 class TestAuth(AppEngineWebTest):

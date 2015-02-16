@@ -44,7 +44,6 @@ document.addEventListener('zbNotificationMessage', function(e){
   console.log(e.detail);
   chrome.runtime.sendMessage(null, e.detail);
 });
-
 //TODO: remove this
 // document.addEventListener('zbSenderInit', function(e){
 //   console.log('zbSenderInit');
