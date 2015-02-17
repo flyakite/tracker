@@ -104,6 +104,8 @@ body {
     color: #fff;
     text-decoration: none;
     border-left: 1px solid #d2d8df; }
+    .zb-toolbar .zb-tool:hover {
+      background: #66f; }
 
 /* end of toolbar */
 /* query */
@@ -342,4 +344,4 @@ table td[class*="col-"], table th[class*="col-"] {
  *}
  */
 
-/*# sourceMappingURL=dashboard.css.map */
+/*# sourceMappingURL=tracker-dashboard.css.map */

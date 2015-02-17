@@ -133,14 +133,14 @@ var SignalApp = React.createClass({
     //this.loadSignalsFromServer();
     //setInterval
   },
-  loadSignalsFromServer: function() {
+  loadSignalsFromServer: function(callback) {
     var self = this;
-    console.log('OKKK');
     console.log({sender: this.state.senderEmail, access_token: this.state.accessToken});
     //TODO: add csrf token
     $.getJSON(this.props.baseURL + this.props.signalResourcePath, 
       {sender: this.state.senderEmail, access_token: this.state.accessToken}, function(data){
       //console.log(data);
+      console.log('loaded');
       signals = data['data']
       self.setState({
         signals: signals,
@@ -149,9 +149,12 @@ var SignalApp = React.createClass({
         contentType: 'EmailTracked'
       });
       self.filterQueryText();
+      if(callback && typeof callback == 'function'){
+        callback();
+      }
     });
   },
-  loadLinksFromServer: function() {
+  loadLinksFromServer: function(callback) {
     var self = this;
     //TODO: add csrf token
     $.getJSON(this.props.baseURL + this.props.linkResourcePath, 
@@ -165,10 +168,13 @@ var SignalApp = React.createClass({
         contentType: 'LinkClicked'
       });
       self.filterQueryText();
+      if(callback && typeof callback == 'function'){
+        callback();
+      }
     });
   },
   allSignals: function(e){
-    e.preventDefault();
+    e && e.preventDefault();
     this.setState({
       _data: this.state.signals,
       data: this.state.signals,
@@ -179,7 +185,7 @@ var SignalApp = React.createClass({
     this.filterQueryText();
   },
   filterOpened: function(e) {
-    e.preventDefault();
+    e && e.preventDefault();
     var data = $.map(this.state.signals, function(signal) {
       if (signal.access_count > 0){
         return signal;  
@@ -194,7 +200,7 @@ var SignalApp = React.createClass({
     this.filterQueryText();
   },
   filterNotOpened: function(e) {
-    e.preventDefault();
+    e && e.preventDefault();
     var data = $.map(this.state.signals, function(signal) {
       if (signal.access_count == 0){
         return signal;  
@@ -209,7 +215,7 @@ var SignalApp = React.createClass({
     this.filterQueryText();
   },
   linksClicked: function(e){
-    e.preventDefault();
+    e && e.preventDefault();
     this.setState({
       data: this.state.links,
       _data: this.state.links,
@@ -325,20 +331,27 @@ var SignalApp = React.createClass({
     return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
   },
   refreshDashboardTable: function(e) {
+    var self = this;
+    e && e.preventDefault();
     switch(this.state.contentType){
       case 'EmailTracked':
-        this.allSignals();
+        this.allSignals(e);
         break;
       case 'EmailOpened':
-        this.loadSignalsFromServer();
-        this.filterOpened();
+        this.loadSignalsFromServer(function() {
+          self.filterOpened();
+        });
         break;
       case 'EmailNotOpened':
-        this.loadSignalsFromServer();
-        this.filterNotOpened();
+        this.loadSignalsFromServer(function() {
+          self.filterNotOpened();
+        });
         break;
       case 'linksClicked':
-        this.linksClicked();
+        this.linksClicked(e);
+        break;
+      default:
+        console.log(this.state.contentType);
         break;
     } 
   },

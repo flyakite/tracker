@@ -15,10 +15,10 @@
         "messenger.js",
         //"dashboard/utils/mixpanel.js",
         "dashboard/utils/excellentexport.min.js",
-        "dashboard/js-build/dashboard.js",
-        "content2.js"
+        "dashboard/js-build/tracker-dashboard.js",
+        "content.js"
         ]
-      //"css": ["font-awesome/css/font-awesome.min.css", "dashboard/css-build/dashboard.css", "content.css"]
+      //"css": ["font-awesome/css/font-awesome.min.css", "dashboard/css-build/tracker-dashboard.css", "content.css"]
       // "css": ["content.css", "content.css"]
     }
   ],
@@ -42,8 +42,7 @@
     "channel.js",
     "utils.js",
     "main.js",
-    "main2.js",
-    "dashboard/js-build/dashboard.js",
+    "dashboard/js-build/tracker-dashboard.js",
     "backgroundMain.js"
   ],
   "permissions":[
