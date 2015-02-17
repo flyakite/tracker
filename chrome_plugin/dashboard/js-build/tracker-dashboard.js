@@ -19,37 +19,45 @@ var ListDetail = React.createClass({displayName: "ListDetail",
   render: function() {
     switch(this.props.contentType){
       case 'EmailTracked':
-        detail = 'Sent: ' + this.dateObjectToString(this.props.data.created);
+        var detail = 'Sent: ' + this.dateObjectToString(this.props.data.created);
         return (
-          React.createElement("span", null, detail)
+          React.createElement("div", null, 
+            React.createElement("span", null, detail)
+          )
         );
         break;
       case 'EmailOpened':
-        locationInfo = this.locationToString() == "" ? "": " Location: " + this.locationToString();
-        deviceInfo = this.props.data.device == null ? "": " Device: " + this.props.data.device;
-        detail = 'Opened: ' + this.dateObjectToString(this.props.data.modified) + locationInfo + deviceInfo;
+        var opened = 'Opened: ' + this.dateObjectToString(this.props.data.modified);
+        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
+        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
         return (
-          React.createElement("span", null, detail)
+          React.createElement("div", null, 
+            React.createElement("span", null, opened), 
+            React.createElement("span", null, locationInfo), 
+            React.createElement("span", null, deviceInfo)
+          )
         );
         break;
       case 'EmailNotOpened':
-        detail = 'Sent: ' + this.dateObjectToString(this.props.data.created);
+        var detail = 'Sent: ' + this.dateObjectToString(this.props.data.created);
         return (
-          React.createElement("span", null, detail)
+          React.createElement("div", null, 
+            React.createElement("span", null, detail)
+          )
         );
         break;
       case 'LinkClicked':
-        locationInfo = this.locationToString() == "" ? "": " Location: " + this.locationToString();
-        deviceInfo = this.props.data.device == null ? "": " Device: " + this.props.data.device;
-        detail = ' Clicked: ' + this.dateObjectToString(this.props.data.modified) + locationInfo + deviceInfo;
+        var clicked = ' Clicked: ' + this.dateObjectToString(this.props.data.modified);
+        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
+        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
         return (
           React.createElement("div", null, 
             React.createElement("span", {className: "zb-link-url"}, 
               React.createElement("a", {target: "_blank", href: this.props.data.url}, this.props.data.url.substr(0,50)+'...')
             ), 
-            React.createElement("span", null, 
-              detail
-            )
+            React.createElement("span", null, clicked), 
+            React.createElement("span", null, locationInfo), 
+            React.createElement("span", null, deviceInfo)
           )
         );
         break;
@@ -456,10 +464,10 @@ var SignalApp = React.createClass({displayName: "SignalApp",
               ), 
               React.createElement("ul", {className: "zb-nav"}, 
                 React.createElement("li", null, 
-                  React.createElement("a", {className: toggleDashboardClass, href: "#", onClick: this.toggleDashboard, "data-track": "Click Logo or Detail Icon Button"}, 
+                  React.createElement("a", {className: "track zb-toggle-menu pull-left", href: "#", onClick: this.toggleDashboard, "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("i", {className: "fa fa-bars zb-white"})
                   ), 
-                  React.createElement("a", {className: "track", href: "http://www.zenblip.com", target: "_blank", "data-track": "Click Logo or Detail Icon Button"}, 
+                  React.createElement("a", {className: "track pull-left", href: "http://www.zenblip.com", target: "_blank", "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("img", {className: hideLogoClass, src: "https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"})
                   )
                 ), 
