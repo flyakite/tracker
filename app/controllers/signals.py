@@ -24,6 +24,7 @@ from app.models.access import Access
 from app.models.user_info import UserInfo
 from app.models.user_track import UserTrack
 from app.models.link import Link
+from app.models.statistic import Statistic
 from accesses import Accesses
 from app.utils import is_email_valid, is_user_legit
 
@@ -252,6 +253,7 @@ class Signals(Accesses):
         signal.put() if sync else signal.put_async()
 
         self._ensure_my_ass(sender, sync)
+        self._update_statistic(signal, sync=sync)
         self.context['data'] = dict(signal=signal.to_dict(include=['token', 'sender', 'subject',
                                                                    'receivers', 'access_count','receiver_emails',
                                                                    'country', 'city', 'device']))
@@ -339,6 +341,13 @@ class Signals(Accesses):
         else:
             ndb.put_multi_async(links_to_save)
 
+    def _update_statistic(self, signal, sync=False):
+        statistic = Statistic.find_by_properties(email=signal.sender)
+        if statistic:
+            statistic.monthly_signal_count += 1
+        else:
+            statistic = Statistic.create(email=signal.sender, monthly_signal_count=1)
+    
 
     @route_with('/resource/signals')
     def get_signals(self):

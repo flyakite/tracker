@@ -21,6 +21,7 @@ from app.models.access import Access
 from app.models.signal import Signal
 from app.models.user_track import UserTrack
 from app.models.channel_client import ChannelClient
+from app.models.setting import Setting
 from base import BaseController
 from ferris import settings
 
@@ -443,28 +444,34 @@ class Accesses(BaseController):
         else:
             logging.info('no access_notification.kind')
 
-        if access_notification.kind == 'delay_notify':
-            """
-            We can't use QueueStatistics because queuename is fixed in queue.yaml and task name can't be queried
-            """
-            signal.notify_triggered = access.created
-            signal.put()  # TODO: check if it's dangerous to save here
-
-            taskqueue.add(
-                url='/tasks/delayed_access_notification',
-                method='POST',
-                countdown=3600,  # seconds
-                params={'token': signal.token,
-                        'access_id': str(access.key.id())}
-            )
-            logging.info('taskqueue added')
-            return
-
-        if access_notification.is_sending_email_notification and access_notification.kind in AccessNotification.kinds():
-            self._send_email_message(access_notification, sync=sync)
-
-        if access_notification.is_sending_desktop_notification:
-            self._send_channel_message(access_notification, sync=sync)
+        setting = Setting.find_by_properties(email=signal.sender)
+        if not setting:
+            setting = Setting.create(signal.sender)
+            
+        if setting.is_notify_by_email:
+            if access_notification.kind == 'delay_notify':
+                """
+                We can't use QueueStatistics because queuename is fixed in queue.yaml and task name can't be queried
+                """
+                signal.notify_triggered = access.created
+                signal.put()  # TODO: check if it's dangerous to save here
+    
+                taskqueue.add(
+                    url='/tasks/delayed_access_notification',
+                    method='POST',
+                    countdown=3600,  # seconds
+                    params={'token': signal.token,
+                            'access_id': str(access.key.id())}
+                )
+                logging.info('taskqueue added')
+                return
+    
+            if access_notification.is_sending_email_notification and access_notification.kind in AccessNotification.kinds():
+                self._send_email_message(access_notification, sync=sync)
+                
+        if setting.is_notify_by_desktop:
+            if access_notification.is_sending_desktop_notification:
+                self._send_channel_message(access_notification, sync=sync)
 
     def _send_email_message(self, access_notification, sync=False):
         signal = access_notification.signal

@@ -14,12 +14,12 @@ from app.models.user_info import UserInfo
 class BaseController(Controller):
     # TODO: make it a decorator
 
-    def _enable_cors(self):
+    def _enable_cors(self, origin='*'):
         logging.info('cors enabled')
         self.response.headers.content_type = 'application/json'
         # TODO: need to improve '*'
         # check domain first and retrun '*'
-        self.response.headers.add_header('Access-Control-Allow-Origin', '*')
+        self.response.headers.add_header('Access-Control-Allow-Origin', origin)
 
     def _login_required(self, url='/'):
         user = users.get_current_user()
