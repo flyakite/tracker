@@ -374,7 +374,7 @@ class Cron(BaseController):
     
     ########## NEW ############
     def query_subscriptions(self):
-        uri = 'https://www.zenblip.com/api/subscription'
+        uri = 'https://www.zenblip.com/api/subscriptions'
         query_string = {
                'fields': 'id'
         }
@@ -403,6 +403,7 @@ class Cron(BaseController):
         """
         try:
             jdata = json.loads(data)['data']
+            logging.info(jdata)
             return [sub['id'] for sub in jdata]
         except Exception as e:
             logging.error("parse_subscriptions exception: %s" % data)
@@ -411,8 +412,12 @@ class Cron(BaseController):
         
     def query_subscription_report(self, sub_id):
         uri = 'https://www.zenblip.com/api/subscription_report'
+        payload = {
+                   'sub_id': sub_id
+        }
+        payload = urlencode(payload)
         try:
-            result = urlfetch.fetch(uri)
+            result = urlfetch.fetch(uri + '?' + payload)
             if result.status_code == 200:
                 return result.content
             else:
@@ -438,13 +443,15 @@ class Cron(BaseController):
         """
         try:
             jdata = json.loads(data)['data']
+            logging.info(jdata)
             sr = SubscriptionReport()
             user_plan_emails = [up['email'] for up in jdata['user_plans']]
             sr.user_plan_emails = list(set(user_plan_emails))
             report_group_emails = []
-            for up in jdata['report_group']:
+            for up in jdata['report_groups']:
                 report_group_emails.extend(up['emails'].split(','))
             sr.report_group_emails = list(set(report_group_emails))
+            logging.info(sr)
             return sr
             
         except Exception as e:
@@ -479,19 +486,20 @@ class Cron(BaseController):
         
         start = base64.urlsafe_b64encode(start.isoformat())
         end = base64.urlsafe_b64encode(end.isoformat())
-        for sub_id in sub_ids:
-            logging.info('querying subscription id: %s' % sub_id)
-            taskqueue.add(url='/cron/dispatch_subscription_report_emails',
-                          params={
-                              'sub_id': sub_id,
-                              'start': start,
-                              'end': end,
-                              'sync': sync,
-                              'debug': debug,
-                              'daily': daily,
-                              'weekly': weekly,
-                          })
-        self.context['data'] = {'sub_ids':sub_ids}
+        if sub_ids:
+            for sub_id in sub_ids:
+                logging.info('querying subscription id: %s' % sub_id)
+                taskqueue.add(url='/cron/dispatch_subscription_report_emails',
+                              params={
+                                  'sub_id': sub_id,
+                                  'start': start,
+                                  'end': end,
+                                  'sync': sync,
+                                  'debug': debug,
+                                  'daily': daily,
+                                  'weekly': weekly,
+                              })
+            self.context['data'] = {'sub_ids':sub_ids}
          
          
     ########## NEW ############
@@ -508,25 +516,26 @@ class Cron(BaseController):
         start = self.request.get('start')
         end = self.request.get('end')
         sub_id = self.request.get('sub_id')
+        logging.info(sub_id)
         
         data = self.query_subscription_report(sub_id)
         sr = self.parse_subscriptions_report_emails(data)
-        
-        for sender in sr.user_plan_emails:
-            logging.info('sending to %s' % sender)
-            taskqueue.add(url='/cron/new_interval_report_personal',
-                          params={
-                              'sender': sender,
-                              'reportgroup': ','.join(sr.report_group_emails),
-                              'start': start,
-                              'end': end,
-                              'sync': sync,
-                              'debug': debug,
-                              'daily': daily,
-                              'weekly': weekly,
-                          })
+        if sr and sr.user_plan_emails:
+            for sender in sr.user_plan_emails:
+                logging.info('sending to %s' % sender)
+                taskqueue.add(url='/cron/new_interval_report_personal',
+                              params={
+                                  'sender': sender,
+                                  'reportgroup': ','.join(sr.report_group_emails),
+                                  'start': start,
+                                  'end': end,
+                                  'sync': sync,
+                                  'debug': debug,
+                                  'daily': daily,
+                                  'weekly': weekly,
+                              })
 
-        self.context['data'] = {'user_plan_emails':sr.user_plan_emails}
+            self.context['data'] = {'user_plan_emails':sr.user_plan_emails}
 
     ########## NEW ############
     @route_with('/cron/new_interval_report_personal')
@@ -562,8 +571,8 @@ class Cron(BaseController):
         }
 
         # user setting
-        user_setting = Setting.query(Setting.email == sender).fetch()
-        if not reportgroup:
+        user_setting = Setting.find_by_properties(email = sender)
+        if user_setting and not reportgroup:
             if daily and not user_setting.is_daily_report:
                 logging.warning('setting no daily report needs to be sent')
                 return
@@ -754,50 +763,59 @@ class Cron(BaseController):
             else:
                 subject = 'zenblip Report'
 
-
+            
+            receivers_by_seperated_emails = []
             if debug:
                 subject += ' debug'
                 logging.info('debug mode, send to admin')
-                email_set_receivers = [_ADMINS]
+                receivers_by_seperated_emails = [_ADMINS]
             else:
-                email_set_receivers = [sender]
+                if daily and user_setting and not user_setting.is_daily_report:
+                    logging.warning('setting no daily report needs to be sent for sender')
+                elif weekly and user_setting and not user_setting.is_weekly_report:
+                    logging.warning('setting no weekly report needs to be sent for sender')
+                else:
+                    receivers_by_seperated_emails = [sender]
+                    
                 if reportgroup:
-                    email_set_receivers.append(reportgroup.split(','))
+                    receivers_by_seperated_emails.append(reportgroup.split(','))
 
             logging.info('subject %s' % subject)
-            for receiver in email_set_receivers:
-
-                logging.info('receiver %s' % receiver)
+            if receivers_by_seperated_emails:
+                for receiver in receivers_by_seperated_emails:
     
-                args = [receiver, subject]
-                kwargs = dict(template_name='interval_report',
-                              context={'start': start,
-                                       'end': end,
-                                       'open_rate': open_rate,
-                                       'number_of_emails_tracked': number_of_emails_tracked,
-                                       'high_access_frequency_signals': high_access_frequency_signals,
-                                       'time_frame': time_frame,
-                                       'time_frame_text': time_frame_text,
-                                       'device_count': device_count,
-                                       'top_devices_list': top_devices_list,
-                                       'accesses_count': accesses_count,
-                                       'daily': daily,
-                                       'weekly': weekly,
-                                       'rgid': '1',
-                                       'sender': sender,
-                                       'activity_report_code': activity_report_code,
-                                       'debug': debug})
-    
-                if sync:
-                    mail.send_template(*args, **kwargs)
-                    
-                else:
-                    # Pickling of datastore_query.PropertyOrder is unsupported.
-                    deferred.defer(mail.send_template, *args, **kwargs)
+                    logging.info('receiver %s' % receiver)
+        
+                    args = [receiver, subject]
+                    kwargs = dict(template_name='interval_report',
+                                  context={'start': start,
+                                           'end': end,
+                                           'open_rate': open_rate,
+                                           'number_of_emails_tracked': number_of_emails_tracked,
+                                           'high_access_frequency_signals': high_access_frequency_signals,
+                                           'time_frame': time_frame,
+                                           'time_frame_text': time_frame_text,
+                                           'device_count': device_count,
+                                           'top_devices_list': top_devices_list,
+                                           'accesses_count': accesses_count,
+                                           'daily': daily,
+                                           'weekly': weekly,
+                                           'rgid': '1',
+                                           'sender': sender,
+                                           'activity_report_code': activity_report_code,
+                                           'debug': debug})
+        
+                    if sync:
+                        mail.send_template(*args, **kwargs)
+                        
+                    else:
+                        # Pickling of datastore_query.PropertyOrder is unsupported.
+                        deferred.defer(mail.send_template, *args, **kwargs)
 
     @route_with('/cron/activity_report')
     def activity_report(self):
         """
+        deprecated later
         """
         self.meta.change_view('json')
 

@@ -13,8 +13,8 @@ from app.models.signal import Signal
 from app.models.access import Access
 from app.models.report_group import ReportGroup
 from app.models.user_info import UserInfo
+from app.models.setting import Setting
 from app.controllers.cron import Cron
-
 
 _ADMIN_EMAIL = 'sushi@zenblip.com'
 
@@ -184,3 +184,140 @@ class TestCronController(AppEngineWebTest):
         messages = self.mail_stub.get_sent_messages(to=email)
         self.assertEqual(1, len(messages))
         self.assertEqual(email, messages[0].to)
+
+    def testNewIntervalReport(self):
+        # TODO: add dummy signals and accesses
+        r = self.testapp.get('/cron/new_interval_report?sync=1&start=2-0-0')
+        logging.debug(r)
+        r = self.testapp.get('/cron/new_interval_report?sync=1&start=1-0-0&daily=1')
+        logging.debug(r)
+        r = self.testapp.get('/cron/new_interval_report?sync=1&start=7-3-0&end=0-3-0&weekly=1')
+        logging.debug(r)
+
+
+    def testNewIntervalReportAll(self):
+        email = 'manager1@asdf.com'
+
+        sender = 'user1@asdf.com'
+        userinfo = UserInfo(
+            email=sender,
+        )
+        userinfo.put()
+        token = '123kh4kj3h454'
+        to1 = 'to1@asdf.com'
+        signal = Signal(
+            token=token,
+            sender=sender,
+            receivers={'to': {to1: 'John'}},
+            subject='test subject',
+            access_count=2,
+            tz_offset=9,
+        )
+        signal.put()
+        access = Access(
+            token=token,
+            sender=sender,
+            kind='open',
+            device='iPhone',
+            accessor=to1
+        )
+        access.put()
+        start = datetime.utcnow() - timedelta(days=1, hours=1)
+        end = datetime.utcnow()
+        start = base64.urlsafe_b64encode(start.isoformat())
+        end = base64.urlsafe_b64encode(end.isoformat())
+        
+        #test daily
+        r = self.testapp.get('/cron/new_interval_report?&start=1-0-0&end=0-0-0&daily=1')
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        
+        #test weekly
+        r = self.testapp.get('/cron/new_interval_report?&start=7-0-0&end=0-0-0&weekly=1')
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        
+        
+        #test dispatch_subscription_report_emails daily
+        r = self.testapp.get('/cron/dispatch_subscription_report_emails',
+                              params={
+                                  'start': start,
+                                  'end': end,
+                                  'sender': sender,
+                                  'sub_id':'1',
+                                  'sync': 1,
+                                  'daily': 1
+                              }
+                              )
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        
+        #test personal daily
+        r = self.testapp.get('/cron/new_interval_report_personal',
+                              params={
+                                  'start': start,
+                                  'end': end,
+                                  'sender': sender,
+                                  'reportgroup':'manager1@asdf.com,manager2@asdf.com',
+                                  'sync': 1,
+                                  'daily': 1
+                              }
+                              )
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        messages = self.mail_stub.get_sent_messages(to=email)
+        self.assertEqual(1, len(messages))
+        messages = self.mail_stub.get_sent_messages(to=sender)
+        self.assertEqual(1, len(messages))
+
+        #test personal weekly
+        r = self.testapp.get('/cron/new_interval_report_personal',
+                              params={
+                                  'start': start,
+                                  'end': end,
+                                  'sender': sender,
+                                  'reportgroup':'manager1@asdf.com,manager2@asdf.com',
+                                  'sync': 1,
+                                  'weekly': 1
+                              }
+                              )
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        messages = self.mail_stub.get_sent_messages(to=email)
+        self.assertEqual(2, len(messages)) #increase by 1
+        messages = self.mail_stub.get_sent_messages(to=sender)
+        self.assertEqual(2, len(messages)) #increase by 1
+        
+        #test personal with user setting
+        s = Setting.create(sender,
+                           is_daily_report=False)
+        
+        r = self.testapp.get('/cron/new_interval_report_personal',
+                              params={
+                                  'start': start,
+                                  'end': end,
+                                  'sender': sender,
+                                  'reportgroup':email + ',manager2@asdf.com',
+                                  'sync': 1,
+                                  'daily': 1
+                              }
+                              )
+        logging.debug(r)
+        self.assertEqual(r.status_code, 200)
+        messages = self.mail_stub.get_sent_messages(to=email)
+        self.assertEqual(3, len(messages)) #increase by 1, manager
+        messages = self.mail_stub.get_sent_messages(to=sender)
+        self.assertEqual(2, len(messages)) #increase by 0
+        
+        # test debug mode
+        r = self.testapp.post('/cron/interval_report_personal',
+                              params={
+                                  'start': start,
+                                  'end': end,
+                                  'sender': sender,
+                                  'debug': 1,
+                                  'sync': 1
+                              }
+                              )
+        messages = self.mail_stub.get_sent_messages(to=_ADMIN_EMAIL)
+        self.assertEqual(1, len(messages))
