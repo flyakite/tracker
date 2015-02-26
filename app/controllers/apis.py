@@ -20,8 +20,6 @@ from app.models.setting import Setting
 from app.utils import is_user_legit, is_email_valid
 from auths import encode_token, decode_token
 
-
-
 # class Plan(object):
 #     DEFAULT = ''
 #     FREE = 'FR'
@@ -199,7 +197,7 @@ class Apis(BaseController):
             return self.abort(403)
         data = decode_token(access_token)
         logging.info(data)
-        if data.get('email') != email:
+        if  data.get('user_plans') and email not in data.get('user_plans').keys():
             logging.info(email)
             logging.error('Access Token Invalid')
             return self.abort(403)
@@ -216,6 +214,7 @@ class Apis(BaseController):
             return
         elif self.request.method == 'POST':
             logging.info(self.request.POST.items())
+            track_by_default = self.request.get('track_by_default')
             is_notify_by_email = self.request.get('is_notify_by_email')
             is_notify_by_desktop = self.request.get('is_notify_by_desktop')
             is_daily_report = self.request.get('is_daily_report')
@@ -223,14 +222,15 @@ class Apis(BaseController):
             if not setting:
                 setting = Setting.create(email=email)
             
-            if is_notify_by_email != None:
-                setting.is_notify_by_email = True if _is_true(is_notify_by_email) else False
-            if is_notify_by_desktop != None:
-                setting.is_notify_by_desktop = True if _is_true(is_notify_by_desktop) else False
-            if is_daily_report != None:
-                setting.is_daily_report = True if _is_true(is_daily_report) else False
-            if is_weekly_report != None:
-                setting.is_weekly_report = True if _is_true(is_weekly_report) else False
+            setting.track_by_default = True if _is_true(track_by_default) else False
+            #if is_notify_by_email != None:
+            setting.is_notify_by_email = True if _is_true(is_notify_by_email) else False
+            #if is_notify_by_desktop != None:
+            setting.is_notify_by_desktop = True if _is_true(is_notify_by_desktop) else False
+            #if is_daily_report != None:
+            setting.is_daily_report = True if _is_true(is_daily_report) else False
+            #if is_weekly_report != None:
+            setting.is_weekly_report = True if _is_true(is_weekly_report) else False
             
             setting.put()
             self.context['data'] = {'success':1}

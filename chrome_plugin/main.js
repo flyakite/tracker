@@ -136,8 +136,13 @@ var zenblip = (function(zb, $, Gmail) {
     // return body + "<img src='http://www.needclickers.com/static/images/blessjewel0.gif?how=aboutthis' width='1' height='1' style='display:none'>";
     return body + "<img src='" + zbExternalURL + zbSignalPath + "/s.gif?u=" + sender.ukey + "&amp;t="+ token +"' width='1' height='1' style='display:none'>";
   };
-  zb.attachTrackCheckbox = function(){
-    var $track = $("<span><input class='zbTrack' type='checkbox' checked> Track</span>").css({
+  zb.attachTrackCheckbox = function(options){
+    var trackByDefault = options.track_by_default;
+    var trackInput = "<input class='zbTrack' type='checkbox'>";
+    if(trackByDefault){
+      trackInput = "<input class='zbTrack' type='checkbox' checked>";
+    }
+    var $track = $("<span>"+trackInput+" Track</span>").css({
       'float': 'right',
       'font-size': '13px',
       'display': 'block',
@@ -146,7 +151,10 @@ var zenblip = (function(zb, $, Gmail) {
       'white-space': 'nowrap',
       'color': '#444',
     });
-    var $hiddenInput = $("<input type='hidden' name='zbTrack' value='1'>");
+    var $hiddenInput = $("<input type='hidden' name='zbTrack'>");
+    if(trackByDefault){
+      $hiddenInput.prop('attr', true);
+    }
     var $newMails = $('.aoI').not('.zbTracked').addClass('zbTracked');
     // console.log('$newMails '+ $newMails.length + ' '+debugCounter);
     debugCounter++;
@@ -180,9 +188,12 @@ var zenblip = (function(zb, $, Gmail) {
           // .find('form').append("<input type='hidden' name='zbEmailID' value='"+zbEmailID+"'>")
           .end().find('.aWQ').prepend($thisTrack)
           // .end().find('.aoO').attr('data-tooltip', 'Send ‪without tracking? (⌘Enter)')
-          .end().find('.aoO').attr('data-tooltip', 'Send ‪and Track').addClass('tracked-send-buton')
+          .end().find('.aoO').attr('data-tooltip', 'Send ‪and Track')
           .end().find('.aWR').css('display', 'none')
           .end().find('.oG').css('display', 'none');
+        if(trackByDefault){
+          $this.find('.aoO').addClass('tracked-send-buton');
+        }
       }
     });
   };
@@ -274,7 +285,9 @@ var zenblip = (function(zb, $, Gmail) {
     console.log('TrackerInit');
     zenblipAccessToken = options.zenblipAccessToken;
     zb.Gmail.observe.before('send_message', zb.emailBeforeSend);
-    zb.watchCompose(zb.attachTrackCheckbox);
+    zb.watchCompose(function() {
+      zb.attachTrackCheckbox({track_by_default:options.track_by_default});
+    });
     zb.ChannelInit();
   };
 

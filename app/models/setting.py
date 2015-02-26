@@ -13,6 +13,7 @@ from ferris.core import mail
 
 class Setting(BasicModel):
     email = ndb.StringProperty()
+    track_by_default = ndb.BooleanProperty(default=True)
     is_notify_by_email = ndb.BooleanProperty(default=True)
     is_notify_by_desktop = ndb.BooleanProperty(default=True)
     is_daily_report = ndb.BooleanProperty(default=True)
@@ -21,12 +22,14 @@ class Setting(BasicModel):
     @classmethod
     def create(cls,
                email,
+               track_by_default=True,
                is_notify_by_email=True,
                is_notify_by_desktop=True,
                is_daily_report=True,
                is_weekly_report=True):
                    
         setting = cls(email=email,
+                      track_by_default=track_by_default,
                         is_notify_by_email=is_notify_by_email,
                         is_notify_by_desktop=is_notify_by_desktop,
                         is_daily_report=is_daily_report,
@@ -35,7 +38,8 @@ class Setting(BasicModel):
         setting.put()
         return setting
 
-    def to_dict_output(self, include=['is_notify_by_email',
+    def to_dict_output(self, include=['track_by_default',
+                                      'is_notify_by_email',
                                       'is_notify_by_desktop',
                                       'is_daily_report',
                                       'is_weekly_report',

@@ -12,7 +12,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 
 
-AES_KEY = 'asdfqwerzxcv12345678901234567890'  # must be a multiple of 16 in length
+AES_KEY = 'asdfqwerzxcv12345678901234567890'  # must be a multiple of 16 in length, deprecated
 
 
 class ActivityCompile(BasicModel):

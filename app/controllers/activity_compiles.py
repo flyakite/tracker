@@ -11,6 +11,7 @@ import random
 import logging
 import csv
 import webapp2
+import base64
 from datetime import datetime, timedelta
 from uuid import uuid4
 from urllib import urlencode
@@ -25,7 +26,7 @@ from app.models.user_track import UserTrack
 from app.models.activity_compile import ActivityCompile
 from base import BaseController, BaseView
 from ferris import settings
-
+from auths import decode_token
 
 class ActivityCompiles(webapp2.RequestHandler):
     # class ActivityCompiles(BaseController):
@@ -39,8 +40,19 @@ class ActivityCompiles(webapp2.RequestHandler):
 
         name = self.request.get('n')
         code = self.request.get('c')
-
-        ac = ActivityCompile.decrypt_code_to_activity_compile(code)
+        if code:
+            ac = ActivityCompile.decrypt_code_to_activity_compile(code)
+        else:
+            token = self.request.get('t')
+            data = decode_token(token)
+            start = datetime.strptime(base64.urlsafe_b64decode(data['start']), '%Y-%m-%dT%H:%M:%S.%f')
+            end = datetime.strptime(base64.urlsafe_b64decode(data['end']), '%Y-%m-%dT%H:%M:%S.%f')
+            ac = ActivityCompile(
+                            senders = [data['sender']],
+                            start = start,
+                            end = end
+                            )
+            
 
         if not ac:
             self.abort(404)

@@ -201,11 +201,12 @@ var zenblip = (function(zb, $, React) {
     if(data.signed_in){
       zenblipAccessToken = data.access_token;
       if(data.has_permission){
-        if(data.top){
-          raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-        }else{
+        if(data.top_plan_order == 0){
           //free plan
           raDashboard.onAuthenticationFailed({message:'zenblip free plan enabled', collapse:true});
+        }else if(data.top_plan_order > 0){
+          //paid plan
+          raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
         }
         if(!zb._trackerInitialized){
           zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
@@ -215,13 +216,16 @@ var zenblip = (function(zb, $, React) {
         raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
       }
     }else{
-      raDashboard.onAuthenticationFailed();
+      raDashboard.onAuthenticationFailed({});
     }
   };
 
   zb.requestTrackerInit = function(options) {
-    window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken}, "*");
-    zb._trackerInitialized = true;
+    $.get(zbBaseURL+'/settings', {email:sender.email, access_token:options.zenblipAccessToken}, function(data) {
+      console.log(data);
+      window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken, track_by_default:data.track_by_default}, "https://mail.google.com");
+      zb._trackerInitialized = true;
+    });
   };
 
   zb.Init = function(options){
@@ -230,7 +234,7 @@ var zenblip = (function(zb, $, React) {
     senderEmail = options.senderEmail;
     //messenger = new zb.Messenger(ExtensionID, contentMessageHandler, sender);
     zb.DashboardInit();
-    zb.UserInit(); // get access token and arize dashboard
+    zb.UserInit(); // get access token and launch dashboard
     //zb.SenderInit();
   };
   return zb;
