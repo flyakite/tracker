@@ -223,14 +223,16 @@
                                                           {% endfor %}
                                                       </tbody>
                                                   </table>
-                                                  <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">
-                                                      Activity Report
-                                                  </div>
-                                                  <div>
-                                                      <a target='_blank' href="http://report.zenblip.com/activity_report?t={{activity_report_code}}">
-                                                          Download Report
-                                                      </a>
-                                                  </div>
+                                                      {% if activity_report_code %}
+                                                      <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">
+                                                          Activity Report
+                                                      </div>
+                                                      <div>
+                                                          <a target='_blank' href="http://report.zenblip.com/activity_report?t={{activity_report_code}}">
+                                                              Download Report
+                                                          </a>
+                                                      </div>
+                                                      {% endif %}
                                                   {% endif %}
                                                   <br />
                                                   <div style="margin:30px 0 7px 0;font-weight:bold;font-size:120%">
