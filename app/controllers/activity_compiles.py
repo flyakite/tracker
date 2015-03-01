@@ -37,23 +37,50 @@ class ActivityCompiles(webapp2.RequestHandler):
     #  route with /activity_report
 
     def get(self):
-
+        LOGIN_URL = 'https://www.zenblip.com/accounts/signup'
         name = self.request.get('n')
-        code = self.request.get('c')
+        code = self.request.get('c') #deprecated
+        token = self.request.get('t')
         if code:
-            ac = ActivityCompile.decrypt_code_to_activity_compile(code)
-        else:
-            token = self.request.get('t')
+            ac = ActivityCompile.decrypt_code_to_activity_compile(code) #deprecated
+        elif token:
             data = decode_token(token)
-            start = datetime.strptime(base64.urlsafe_b64decode(data['start']), '%Y-%m-%dT%H:%M:%S.%f')
-            end = datetime.strptime(base64.urlsafe_b64decode(data['end']), '%Y-%m-%dT%H:%M:%S.%f')
+            if not data:
+                return self.redirect(LOGIN_URL)
+            try:
+                if data.has_key('end'):
+                    end = data['end']
+                    logging.info(end)
+                    end = base64.urlsafe_b64decode(end)
+                    logging.info(end)
+                    end = datetime.strptime(end, '%Y-%m-%dT%H:%M:%S.%f')
+                else:
+                    end = datetime.utcnow()
+                if data.has_key('start'):
+                    start = data['start']
+                    logging.info(start)
+                    start = base64.urlsafe_b64decode(start)
+                    logging.info(start)
+                    start = datetime.strptime(start, '%Y-%m-%dT%H:%M:%S.%f')
+                else:
+                    start = end - timedelta(days=1)
+            except Exception as e:
+                logging.error(e)
+                end = datetime.utcnow()
+                start = end - timedelta(days=1)
+            sender = data.get('sender', data.get('email'))
+            if not sender:
+                return self.redirect(LOGIN_URL)
+            if not sender:
+                logging.error('no sender')
+                return
             ac = ActivityCompile(
-                            senders = [data['sender']],
+                            senders = [sender],
                             start = start,
                             end = end
                             )
             
-
+            
         if not ac:
             self.abort(404)
             return

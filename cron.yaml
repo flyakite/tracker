@@ -14,15 +14,9 @@ cron:
   schedule: every tue,wed,thu,fri,sat 00:00
   timezone: Asia/Tokyo
 
-- description: Scheduled welcom emails
+- description: Scheduled welcome emails
   url: /cron/send_user_scheduled_emails
   schedule: every day 09:00
-  timezone: Asia/Tokyo
-
-- description: debug activity report
-  url: /cron/activity_report?org=admin&start=1-0-0&end=0-0-0
-  schedule: every mon,tue,wed,thu,fri 23:59
-  # schedule: every mon 08:59
   timezone: Asia/Tokyo
 
 - description: Apex weekly report to manager
@@ -43,4 +37,19 @@ cron:
 - description: Experis weekly report to manager
   url: /cron/interval_report?rgid=experis&start=5-0-0&end=0-0-1&weekly=1
   schedule: every sat 00:00
+  timezone: Asia/Tokyo
+
+- description: New Weekly report
+  url: /cron/new_interval_report?start=7-4-0&end=0-4-0&weekly=true
+  schedule: every mon 04:00
+  timezone: Asia/Tokyo
+
+- description: New Daily report
+  url: /cron/new_interval_report?start=1-4-0&end=0-4-0&daily=true
+  schedule: every mon,tue,wed,thu,fri 04:00
+  timezone: Asia/Tokyo
+
+- description: Rearrange Subscriptions
+  url: /cron/for_zenblip_main_site?path=%2Fsubscription%2Frearrange
+  schedule: every day 05:00
   timezone: Asia/Tokyo

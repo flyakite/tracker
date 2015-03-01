@@ -15,7 +15,6 @@ var zenblip = (function(zb, $, Gmail) {
   var sender = null;
   var senderID;
   var messenger;
-  var raDashboard;
   var composeIDs = [];
   var debugCounter = 0;
   var zenblipAccessToken = '';
@@ -101,6 +100,7 @@ var zenblip = (function(zb, $, Gmail) {
       if (plainLinks != null && plainLinks.length > 0) {
         for (var i = plainLinks.length; i--;) {
           url = plainLinks[i];
+          //do not record link already been replaced
           if(url.indexOf(zbExternalURL) == -1){
             links.push(urlPack(url, 1));
           }
@@ -125,7 +125,9 @@ var zenblip = (function(zb, $, Gmail) {
       newURL = zbExternalURL + zbRedirectPath + "?u=" + sender.ukey + "&amp;t=" + token + "&amp;h=" + l.urlHash;
       if (l.plain === 1) {
         //if plain, convert to html tag
-        newURL = "<a href='" + newURL + "'>" + l.urlDecoded + "</a>";
+        newURL = "<a href='" + newURL + "'>" + l.urlDecoded.replace(/^https?:\/\//i,'') + "</a>"; //remove starting http://
+      }else{
+        //TODO: replace link content in A tag, remove starting http://
       }
       bodyDecoded = bodyDecoded.replace(l.url, newURL);
     }
@@ -153,7 +155,7 @@ var zenblip = (function(zb, $, Gmail) {
     });
     var $hiddenInput = $("<input type='hidden' name='zbTrack'>");
     if(trackByDefault){
-      $hiddenInput.prop('attr', true);
+      $hiddenInput.val('1');
     }
     var $newMails = $('.aoI').not('.zbTracked').addClass('zbTracked');
     // console.log('$newMails '+ $newMails.length + ' '+debugCounter);

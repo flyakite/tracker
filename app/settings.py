@@ -91,3 +91,5 @@ settings['API_TOKEN_EXPIRE'] = 86400 * 30
 # API key secret salt
 settings['API_SECRET_SALTS'] = ['3$DF1k_3tqeghkqGQETG#TGAasfq3g35GQ']
 settings['API_SECRET_AES_KEY'] = '8D1e5Bd1-5S07-45'  # length of 16
+# zenblip main site
+settings['ZENBLIP_MAIN_SITE_URI'] = 'https://www.zenblip.com'

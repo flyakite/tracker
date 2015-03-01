@@ -26,6 +26,10 @@
 
           {% endfor %}
 
+		  {% if activity_report_code %}
+		      Activity Report:
+		      http://report.zenblip.com/activity_report?t={{activity_report_code}}
+		  {% endif %}
 
   {% endif %}
 

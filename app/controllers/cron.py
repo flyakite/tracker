@@ -49,6 +49,9 @@ class SubscriptionReport(object):
 class Cron(BaseController):
 
     def query_user_emails(self, start, end, rgid=None, org=None):
+        """
+        deprecated later
+        """
         # TODO: circuler query
         if rgid:
             rg = ReportGroup.find_by_properties(rgid=rgid)
@@ -72,6 +75,9 @@ class Cron(BaseController):
 
     @route_with('/cron/interval_report')
     def interval_report(self):
+        """
+        deprecated later
+        """
         self.meta.change_view('json')
 
         sync = self.request.get('sync')
@@ -118,7 +124,7 @@ class Cron(BaseController):
     @route_with('/cron/interval_report_personal')
     def interval_report_personal(self):
         """
-        by sender
+        deprecated later
         """
         self.meta.change_view('json')
         _high_frequency_email_count = 3
@@ -374,7 +380,7 @@ class Cron(BaseController):
     
     ########## NEW ############
     def query_subscriptions(self):
-        uri = 'https://www.zenblip.com/api/subscriptions'
+        uri = settings.get('ZENBLIP_MAIN_SITE_URI') + '/api/subscriptions'
         query_string = {
                'fields': 'id'
         }
@@ -384,6 +390,7 @@ class Cron(BaseController):
             if result.status_code == 200:
                 return result.content
             else:
+                logging.warning("query_subscriptions status:%s %s" % (result.status_code, result.content))
                 #simple retry
                 result = urlfetch.fetch(uri)
                 if result.status_code == 200:
@@ -411,7 +418,7 @@ class Cron(BaseController):
             return None
         
     def query_subscription_report(self, sub_id):
-        uri = 'https://www.zenblip.com/api/subscription_report'
+        uri = settings.get('ZENBLIP_MAIN_SITE_URI') + '/api/subscription_report'
         payload = {
                    'sub_id': sub_id
         }
@@ -421,6 +428,7 @@ class Cron(BaseController):
             if result.status_code == 200:
                 return result.content
             else:
+                logging.warning("query_subscription_report status:%s %s" % (result.status_code, result.content))
                 #simple retry
                 result = urlfetch.fetch(uri)
                 if result.status_code == 200:
@@ -555,13 +563,13 @@ class Cron(BaseController):
         sender = self.request.get('sender')
         logging.info(sender)
 
-        start = str(self.request.get('start'))
-        end = str(self.request.get('end'))
+        start = self.request.get('start')
+        end = self.request.get('end')
         logging.info('start: %s ,end: %s' % (start, end))
-        activity_report_code = encode_token({'email': sender, 'start':start, 'end':end})
+        activity_report_code = encode_token({'sender': sender, 'start':start, 'end':end})
         
-        start = datetime.strptime(base64.urlsafe_b64decode(start), '%Y-%m-%dT%H:%M:%S.%f')  # isoformat
-        end = datetime.strptime(base64.urlsafe_b64decode(end), '%Y-%m-%dT%H:%M:%S.%f')
+        start = datetime.strptime(base64.urlsafe_b64decode(str(start)), '%Y-%m-%dT%H:%M:%S.%f')  # isoformat
+        end = datetime.strptime(base64.urlsafe_b64decode(str(end)), '%Y-%m-%dT%H:%M:%S.%f')
         logging.info('UTC start: %s, end: %s' % (start.isoformat(), end.isoformat()))
 
         self.context['data'] = {
@@ -770,15 +778,23 @@ class Cron(BaseController):
                 logging.info('debug mode, send to admin')
                 receivers_by_seperated_emails = [_ADMINS]
             else:
+                
+                send_to_sender = True
                 if daily and user_setting and not user_setting.is_daily_report:
                     logging.warning('setting no daily report needs to be sent for sender')
+                    send_to_sender = False
                 elif weekly and user_setting and not user_setting.is_weekly_report:
                     logging.warning('setting no weekly report needs to be sent for sender')
-                else:
-                    receivers_by_seperated_emails = [sender]
+                    send_to_sender = False
                     
                 if reportgroup:
-                    receivers_by_seperated_emails.append(reportgroup.split(','))
+                    reportgroup_emails = reportgroup.split(',')
+                    if send_to_sender:
+                        receivers_by_seperated_emails.extend([sender, reportgroup_emails])
+                    else:
+                        receivers_by_seperated_emails.append(reportgroup_emails)
+                elif send_to_sender:
+                    receivers_by_seperated_emails = [sender]
 
             logging.info('subject %s' % subject)
             if receivers_by_seperated_emails:
@@ -905,7 +921,6 @@ class Cron(BaseController):
                     emails_sent[0].append(email)
                 except Exception as e:
                     logging.error(e)
-            elif duration_joined.days == 1:
                 try:
                     logging.info("1 welcome_hint %s" % email)
                     UserInfo.send_email(
@@ -916,21 +931,21 @@ class Cron(BaseController):
                     emails_sent[1].append(email)
                 except Exception as e:
                     logging.error(e)
-            elif duration_joined.days == 6:
+            elif duration_joined.days == 4:
                 try:
                     logging.info("6 welcome_any_problems %s" % email)
                     UserInfo.send_email(email, 'Any problems?', 'welcome_any_problems', sync=sync)
                     emails_sent[6].append(email)
                 except Exception as e:
                     logging.error(e)
-            elif duration_joined.days == 9:
+            elif duration_joined.days == 6:
                 try:
                     logging.info("9 welcome_tip %s" % email)
                     UserInfo.send_email(email, 'zenblip TIP: Forwarded emails', 'welcome_tip', sync=sync)
                     emails_sent[9].append(email)
                 except Exception as e:
                     logging.error(e)
-            elif duration_joined.days == 14:
+            elif duration_joined.days == 12:
                 try:
                     logging.info("14 welcome_feedback %s" % email)
                     UserInfo.send_email(email, 'zenblip Comments & Feedback', 'welcome_feedback', sync=sync)
@@ -947,10 +962,41 @@ class Cron(BaseController):
         logging.info('send_test_scheduled_emails')
         self.meta.change_view('json')
         sync = self.request.get('sync', False)
-
-        email = 'sushi@zenblip.com'
+        email = self.request.get('email', 'sushi@zenblip.com')
         UserInfo.send_email(email, 'Welcome to zenblip!', 'welcome', sync=sync)
         UserInfo.send_email(email, 'zenblip HINT: (I got a notification that says "Someone" opened an email)', 'welcome_hint', sync=sync)
         UserInfo.send_email(email, 'Any problems?', 'welcome_any_problems', sync=sync)
         UserInfo.send_email(email, 'zenblip TIP: Forwarded emails', 'welcome_tip', sync=sync)
         UserInfo.send_email(email, 'zenblip Comments & Feedback', 'welcome_feedback', sync=sync)
+
+    @route_with('/cron/for_zenblip_main_site')
+    def for_zenblip_main_site(self):
+        logging.info('for_zenblip_main_site')
+        logging.info(self.request.GET.items())
+        self.meta.change_view('json')
+        path = self.request.get('path')
+        action = self.request.get('action')
+        uri = settings.get('ZENBLIP_MAIN_SITE_URI') + path
+        
+        query_string = {
+               'action': action
+        }
+        query_string = urlencode(query_string)
+        try:
+            result = urlfetch.fetch(uri)
+            if result.status_code == 200:
+                return result.content
+            else:
+                logging.warning("cron for_zenblip_main_site status:%s %s" % (result.status_code, result.content))
+                #simple retry
+                result = urlfetch.fetch(uri)
+                if result.status_code == 200:
+                    return result.content
+                else:
+                    logging.error("cron for_zenblip_main_site status:%s %s" % (result.status_code, result.content))
+                    return None
+
+        except urlfetch.DownloadError as e:
+            logging.error("cron for_zenblip_main_site fetch DownloadError")
+            logging.error(e)
+            return None

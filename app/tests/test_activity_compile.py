@@ -12,7 +12,7 @@ from app.models.signal import Signal
 from app.models.access import Access
 from app.models.activity_compile import ActivityCompile
 from app.controllers.activity_compiles import ActivityCompiles
-
+from app.controllers.auths import encode_token, decode_token
 
 class TestEncrypt(AppEngineWebTest):
 
@@ -41,15 +41,18 @@ class TestEncrypt(AppEngineWebTest):
 class TestActivityCompileController(FerrisAppTest):
 
     def testActivityCompile(self):
+        sender = 'sender@asdf.com'
+        start = datetime.utcnow() - timedelta(days=1)
+        end = datetime.utcnow()
         ac = ActivityCompile(
-            senders=['sender@asdf.com'],
-            start=datetime.utcnow() - timedelta(days=1),
-            end=datetime.utcnow(),
+            senders=[sender],
+            start=start,
+            end=end,
         )
         ac.put()
         signal = Signal(
             token='123kh4kj3h454',
-            sender='sender@asdf.com',
+            sender=sender,
             receivers={'to': {'to1@asdf.com': ''}},
             subject='test',
             access_count=2
@@ -57,7 +60,7 @@ class TestActivityCompileController(FerrisAppTest):
         signal.put()
         signal2 = Signal(
             token='123kh4kj3h454',
-            sender='sender@asdf.com',
+            sender=sender,
             receivers={'to': {'to1@asdf.com': ''}},
             subject=u'中文',
             access_count=2
@@ -69,3 +72,8 @@ class TestActivityCompileController(FerrisAppTest):
         code = ActivityCompile.encrypt_activity_compile_to_code(ac)
         r = self.testapp.get('/activity_report?c=%s' % code)
         self.assertEqual(r.content_type, 'application/csv')
+        
+        #new way
+        activity_compile_token = encode_token({'sender':sender, 'start':start.isoformat(), 'end':end.isoformat()})
+        r = self.testapp.get('/activity_report?t=%s' % activity_compile_token)
+        

@@ -31,6 +31,9 @@ class ActivityCompile(BasicModel):
 
     @staticmethod
     def encrypt_activity_compile_to_code(activity_compile):
+        """
+        deprecated later
+        """
         try:
             code = pickle.dumps(activity_compile)
             # AES
@@ -47,6 +50,9 @@ class ActivityCompile(BasicModel):
 
     @staticmethod
     def decrypt_code_to_activity_compile(code):
+        """
+        deprecated later
+        """
         code = str(code)
         try:
             code = base64.urlsafe_b64decode(code)

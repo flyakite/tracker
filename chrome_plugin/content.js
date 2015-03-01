@@ -58,6 +58,7 @@ var zenblip = (function(zb, $, React) {
   var zbChannelPath = '/channels/';
   var signalResourcePath = '/resource/signals';
   var linkResourcePath = '/resource/links';
+  var activityReportPath = '/activity_report';
   var authUserPath = '/auth/user';
   var current_user = null;
   var gmail = null;
@@ -125,8 +126,9 @@ var zenblip = (function(zb, $, React) {
       React.createElement(SignalApp, {
         senderEmail: sender.email, 
         baseURL: zbBaseURL, 
-        signalResourcePath: signalResourcePath, 
+        signalResourcePath: signalResourcePath,
         linkResourcePath: linkResourcePath,
+        activityReportPath: activityReportPath,
         dashboardHeight: dashboardHeight
       }),
       document.getElementById(dashboard.id)

@@ -95,7 +95,8 @@ body {
     padding: 10px 15px 10px;
     color: #fff;
     text-decoration: none;
-    border-left: 1px solid #d2d8df; }
+    border-left: 1px solid #d2d8df;
+    width: 98px; }
   .zb-toolbar a.zb-toggle-menu {
     color: #fff; }
   .zb-toolbar .zb-tool {

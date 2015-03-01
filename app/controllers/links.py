@@ -67,7 +67,6 @@ class Links(Accesses):
         # TODO: should it be moved to taskqueue
 
         source = self._get_source_info()
-
         access = Access(parent=signal.key,
                         token=signal.token,
                         sender=signal.sender,
@@ -77,8 +76,8 @@ class Links(Accesses):
                         ass=ass if ass else None,
                         ip=self.request.remote_addr,
                         user_agent=self.request.headers.get('User-Agent', None),
-                        proxy=source.proxy,
-                        device=source.device,
+                        proxy=source.proxy if source else None,
+                        device=source.device if source else None,
                         tz_offset=source.tz_offset if source else None,
                         country=source.country if source else None,
                         city=source.city if source else None,

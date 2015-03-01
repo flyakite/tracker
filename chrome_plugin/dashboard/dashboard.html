@@ -31,6 +31,7 @@
     var baseURL = 'https://zenblip.appspot.com';
     var signalResourcePath = '/resource/signals';
     var linkResourcePath = '/resource/links';
+    var activityReportPath = '/activity_report';
     var dashboardHeight = '300px';
     var hideLogo = false;
     var raDashboard = React.render(
@@ -38,14 +39,16 @@
         baseURL: baseURL, 
         signalResourcePath: signalResourcePath, 
         linkResourcePath: linkResourcePath,
+        activityReportPath: activityReportPath,
         dashboardHeight: dashboardHeight,
         hideLogo: hideLogo
       }),
       document.getElementById('zb-area')
     );
-
+    //eyJhbGciOiJIUzI1NiJ9
+    //eyJfY3JlYXRlZCI6IjIwMTUtMDItMjggMTM6NDU6MjMuMTM5Nzc3IiwiZW1haWwiOiJzdXNoaUB6ZW5ibGlwLmNvbSJ9.D929ZNCiS1K1OtdekIzdbjW5I_l6yMBnMpXJPCfduNw
     setTimeout(function() {
-      raDashboard.onAuthenticated({senderEmail:senderEmail});
+      raDashboard.onAuthenticated({senderEmail:senderEmail, accessToken: ''});
       raDashboard.showDashboard();
     }, 200);
     </script>
