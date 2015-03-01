@@ -1,6 +1,6 @@
 {
   "name": "zenblip",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "zenblip beta",
   "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAirjUmBH1V+ZNeMFcuLS26jl/iBGqOvOiUW/AsVlZl9xOVpNZ5+Q4O78rmN+OrOUC7oo5I3uuXWmjbK4l1EwBhv4qd+algA99LMB8Ve7QOTkb8Tb+EU/Spgk4dKXC+Zi1I5l1wo0XncgKn9B8IzHSmMEqts4TOz1RODLJHNEdadO0rzRCBiif+4ZhxGnHMtbBt5zwtWjt4ifQ8mobV5zwkDKWlgkgZlgx0wk/CSxT7Mx1VOng9apBywsjDYsZ8sNYJCGaUmpLnwPuu+7898/qxZ2xmvBLpzNlyY1zbj6OaCkj/IFcCiBnn2sHe/cYLer7+FBt3cioKiP5CkdiV4Yx9QIDAQAB",
   "content_scripts": [
@@ -14,7 +14,7 @@
         "utils.js",
         "messenger.js",
         //"dashboard/utils/mixpanel.js",
-        "dashboard/utils/excellentexport.min.js",
+        //"dashboard/utils/excellentexport.min.js",
         "dashboard/js-build/tracker-dashboard.js",
         "content.js"
         ]

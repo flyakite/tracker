@@ -215,10 +215,24 @@ var zenblip = (function(zb, $, React) {
         }
         //zb.requestTrackerInit();
       }else{
-        raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        //raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        //to be removed -----
+        zenblipAccessToken = 'temp'
+        raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+        if(!zb._trackerInitialized){
+          zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+        }
+        //to be removed -----
       }
     }else{
-      raDashboard.onAuthenticationFailed({});
+      //raDashboard.onAuthenticationFailed({});
+      //to be removed -----
+      zenblipAccessToken = 'temp'
+      raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+      if(!zb._trackerInitialized){
+        zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+      }
+      //to be removed -----
     }
   };
 

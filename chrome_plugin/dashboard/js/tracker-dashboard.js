@@ -338,7 +338,7 @@ var SignalApp = React.createClass({
   exportCSV: function(e) {
     //return ExcellentExport.csv(e.currentTarget, 'zb-table-'+this.state.contentType);
     var activityReportPath = this.props.activityReportPath || '/activity_report'
-    var url = this.props.baseURL + activityReportPath + '?t=' + this.state.accessToken;
+    var url = this.props.baseURL + activityReportPath + '?t=' + this.state.accessToken +'&sender='+encodeURIComponent(this.state.senderEmail);
     window.open(url, '_blank');
     return
   },
@@ -426,7 +426,7 @@ var SignalApp = React.createClass({
     });
     var toolbarDownloadClass = cx({
       'zb-tool': true,
-      'zb-display-none': !this.state.dashboardEnabled,
+      'zb-display-none': false,
     });
     var toolbarRefreshClass = cx({
       'zb-tool': true,
@@ -460,7 +460,7 @@ var SignalApp = React.createClass({
               <a className={toggleDashboardClass} href='#' onClick={this.toggleDashboard} data-track="Click Expand Button">
                 <i className={toggleDashboardIconClass}></i> {this.state.toggleDashboardText}
               </a>
-              <a className={toolbarDownloadClass} href='#' onClick={this.exportCSV} download={this.state.contentType + '.csv'} title="download recent activities" data-track="Export Dashboard to CSV" data-trackop={"{'type':"+this.state.contentType+"}"}>
+              <a className={toolbarDownloadClass} href='#' onClick={this.exportCSV} title="download recent activities" data-track="Export Dashboard to CSV" >
                 <i className="fa zb-white fa-download"></i> 
               </a>
               <a className={toolbarRefreshClass} href='#' onClick={this.refreshDashboardTable} title="refresh" data-track="Refresh Dashobard Table" data-trackop={"{'type':"+this.state.contentType+"}"}>
@@ -529,3 +529,4 @@ var SignalApp = React.createClass({
     );
   }
 });
+//download={this.state.contentType + '.csv'} data-trackop={"{'type':"+this.state.contentType+"}"}

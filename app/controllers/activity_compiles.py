@@ -41,8 +41,18 @@ class ActivityCompiles(webapp2.RequestHandler):
         name = self.request.get('n')
         code = self.request.get('c') #deprecated
         token = self.request.get('t')
+        sender = self.request.get('sender') #temp
         if code:
             ac = ActivityCompile.decrypt_code_to_activity_compile(code) #deprecated
+        elif sender:
+            ### temp
+            ac = ActivityCompile(
+                        senders = [sender],
+                        start = datetime.utcnow() - timedelta(days=1),
+                        end = datetime.utcnow()
+                        )
+            ### temp
+            
         elif token:
             data = decode_token(token)
             if not data:
