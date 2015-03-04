@@ -17,7 +17,8 @@ from accesses import Accesses
 class Links(Accesses):
 
     @route_with('/l')
-    def redirect_to_original_url(self):
+    @route_with('/l/<ukey>/<token>/<url_id>')
+    def redirect_to_original_url(self, ukey='', token='', url_id=''):
         """
         1. redirect to original link
         2. save access record
@@ -27,23 +28,38 @@ class Links(Accesses):
         #But if not specified, TemplateNotFound occurs in unittest
         self.meta.change_view('json') 
         
-        token = self.request.get('t')
-        url_id = self.request.get('h')  # url hash
+        if not token:
+            token = self.request.get('t')
+        if not url_id:
+            url_id = self.request.get('h')  # url hash
         sync = self.request.get('sync', None)
-
+        url = self.request.get('url', '')
+        url = str(url) #redirect url must be string, not unicode
+        logging.info(url)
+        
         if not token or not url_id:
             logging.error('link not found: %s %s' % (token, url_id))
-            self.abort(404)
+            if url:
+                return self.redirect(url)
+            else:
+                self.abort(404)
 
         link = Link.find_by_properties(token=token, url_id=url_id)
         if not link:
             logging.error('link not found2: %s %s' % (token, url_id))
-            self.abort(404)
+            if url:
+                return self.redirect(url)
+            else:
+                self.abort(404)
 
+        
         signal = Signal.find_by_properties(token=token)
         if not signal:
             logging.error('no signal')
-            return
+            if url:
+                return self.redirect(url)
+            else:
+                self.abort(404)
 
         accessor, ass = self._recognize_user(signal, sync)
         

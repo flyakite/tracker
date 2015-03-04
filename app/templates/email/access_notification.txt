@@ -25,3 +25,9 @@
 
 
 {% endif %}
+
+
+
+Disable email tracking and desktop notification of this thread: http://ets.zenblip.com/settings/notification/update?c={{signal_code}}&ns=disable
+Receive email notification only: http://ets.zenblip.com/settings/notification/update?c={{signal_code}}&ns=e
+Receive desktop notification only(Gmail Users Only): http://ets.zenblip.com/settings/notification/update?c={{signal_code}}&ns=d

@@ -18,6 +18,7 @@ from uuid import uuid4
 from urllib import urlencode
 from google.appengine.api import users, urlfetch, memcache
 from google.appengine.ext import deferred, ndb
+from google.appengine.ext.db import TransactionFailedError
 from ferris import Controller, route_with, scaffold
 from app.models.signal import Signal
 from app.models.access import Access
@@ -250,7 +251,10 @@ class Signals(Accesses):
             logging.info(links)
             self._save_links(links, signal, sync)
 
-        signal.put() if sync else signal.put_async()
+        try:
+            signal.put() if sync else signal.put_async()
+        except TransactionFailedError:
+            signal.put_async()
 
         self._ensure_my_ass(sender, sync)
         self._update_statistic(signal, sync=sync)
@@ -486,8 +490,13 @@ class Signals(Accesses):
                         )
         # TODO: async later, now use sync for the email
         #access.put() if sync else access.put_async()
-        access.put()
-        self._notify_sender(signal, access, sync=sync)
+        try:
+            access.put()
+            self._notify_sender(signal, access, sync=sync)
+        except TransactionFailedError:
+            access.put_async()
+            #TODO: customize _notify_sender if put failed
+            
         return access
 
     @route_with('/settings/notification/update')

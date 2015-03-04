@@ -217,7 +217,7 @@ var zenblip = (function(zb, $, React) {
       }else{
         //raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
         //to be removed -----
-        zenblipAccessToken = 'temp'
+        zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
         raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
         if(!zb._trackerInitialized){
           zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
@@ -227,7 +227,7 @@ var zenblip = (function(zb, $, React) {
     }else{
       //raDashboard.onAuthenticationFailed({});
       //to be removed -----
-      zenblipAccessToken = 'temp'
+      zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
       raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
       if(!zb._trackerInitialized){
         zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});

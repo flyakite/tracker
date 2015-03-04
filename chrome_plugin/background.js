@@ -247,8 +247,10 @@ chrome.webRequest.onBeforeRequest.addListener(function(details) {
 
   var isBlocking = false;
   for(var i in UKeys){
-    if(details.url.indexOf('u='+UKeys[i]) != -1){
+    console.log('UKeys ' + i);
+    if(details.url.indexOf(UKeys[i]) != -1){
       isBlocking = true;
+      break;
     }
   }
   console.log('isBlocking: ' + isBlocking);

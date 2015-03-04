@@ -379,29 +379,31 @@ class Cron(BaseController):
                 deferred.defer(mail.send_template, *args, **kwargs)
     
     ########## NEW ############
-    def query_subscriptions(self):
+    def query_subscriptions(self, retry=3):
         uri = settings.get('ZENBLIP_MAIN_SITE_URI') + '/api/subscriptions'
         query_string = {
                'fields': 'id'
         }
         query_string = urlencode(query_string)
         try:
-            result = urlfetch.fetch(uri)
+            result = urlfetch.fetch(uri, deadline=15)
             if result.status_code == 200:
                 return result.content
             else:
                 logging.warning("query_subscriptions status:%s %s" % (result.status_code, result.content))
                 #simple retry
-                result = urlfetch.fetch(uri)
-                if result.status_code == 200:
-                    return result.content
+                if retry:
+                    self.query_subscriptions(retry=retry-1)
                 else:
                     logging.error("query_subscriptions status:%s %s" % (result.status_code, result.content))
-                    return None
 
         except urlfetch.DownloadError as e:
             logging.error("query_subscriptions fetch DownloadError")
             logging.error(e)
+            if retry:
+                self.query_subscriptions(retry=retry-1)
+            else:
+                logging.error("query_subscriptions status:%s %s" % (result.status_code, result.content))
             return None
             
     def parse_subscription_ids(self, data):

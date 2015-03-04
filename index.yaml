@@ -24,13 +24,26 @@ indexes:
 
 - kind: DeviceClient
   properties:
-  - name: owner
   - name: client_id
+  - name: modified
+    direction: desc
 
 - kind: DeviceClient
   properties:
+  - name: owner
   - name: client_id
-  - name: modified
+
+- kind: Link
+  properties:
+  - name: sender
+  - name: created
+    direction: desc
+
+- kind: Link
+  properties:
+  - name: sender
+  - name: is_accessed
+  - name: created
     direction: desc
 
 - kind: Post
@@ -52,6 +65,11 @@ indexes:
 
 - kind: Signal
   properties:
+  - name: sender
+  - name: receiver_emails
+
+- kind: Signal
+  properties:
   - name: token
   - name: created
 
@@ -60,26 +78,8 @@ indexes:
   - name: token
   - name: created
     direction: desc
-
-- kind: Signal
-  properties:
-  - name: sender
-  - name: receiver_emails
 
 - kind: UserTrack
   properties:
   - name: emails
   - name: created
-
-- kind: Link
-  properties:
-  - name: sender
-  - name: created
-    direction: desc
-
-- kind: Link
-  properties:
-  - name: sender
-  - name: is_accessed
-  - name: created
-    direction: desc

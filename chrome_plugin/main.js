@@ -64,7 +64,8 @@ var zenblip = (function(zb, $, Gmail) {
     var urlPack = function(url, plain) {
       var urlDecoded,
         urlHash;
-      urlDecoded = url.replace(/&amp;/g, '&'); //TODO:improve this if necessary
+      //urlDecoded = url.replace(/&amp;/g, '&'); //TODO:improve this if necessary //remove this to fix Gmail Error
+      urlDecoded = url;
       urlHash = zb.hashCode(urlDecoded);
       return {
         url: url,
@@ -85,12 +86,16 @@ var zenblip = (function(zb, $, Gmail) {
       //deal with links with html A tag
       var match = linkRegexWithATag.exec(bodyDecoded);
       var url;
-      while (match != null) {
+      var urlCount = 1;
+      var _MAX_URL_COUNT = 200;
+      while (match != null && urlCount < _MAX_URL_COUNT) {
+        //console.log('urlmatch');
         url = match[1];
         if(url.indexOf(zbExternalURL) == -1){
           links.push(urlPack(url, 0));
-          match = linkRegexWithATag.exec(bodyDecoded);
         }
+        match = linkRegexWithATag.exec(bodyDecoded);
+        urlCount ++;
       }
 
       //deal with plain url link
@@ -99,6 +104,7 @@ var zenblip = (function(zb, $, Gmail) {
       plainLinks = bodyDecoded2.match(linkRegexInPlainText);
       if (plainLinks != null && plainLinks.length > 0) {
         for (var i = plainLinks.length; i--;) {
+          console.log('parselink ' + i);
           url = plainLinks[i];
           //do not record link already been replaced
           if(url.indexOf(zbExternalURL) == -1){
@@ -121,8 +127,10 @@ var zenblip = (function(zb, $, Gmail) {
 
     console.log('replaceLinks');
     for (var i = 0; i < links.length; i++) { //order sequence matters
+      console.log('replaceLinks ' + i);
       l = links[i];
-      newURL = zbExternalURL + zbRedirectPath + "?u=" + sender.ukey + "&amp;t=" + token + "&amp;h=" + l.urlHash;
+      //newURL = zbExternalURL + zbRedirectPath + "?u=" + sender.ukey + "&amp;t=" + token + "&amp;h=" + l.urlHash;
+      newURL = zbExternalURL + zbRedirectPath + "/" + sender.ukey + "/" + token + "/" + l.urlHash + "?url=" + encodeURIComponent(l.url);
       if (l.plain === 1) {
         //if plain, convert to html tag
         newURL = "<a href='" + newURL + "'>" + l.urlDecoded.replace(/^https?:\/\//i,'') + "</a>"; //remove starting http://
@@ -162,7 +170,7 @@ var zenblip = (function(zb, $, Gmail) {
     debugCounter++;
     var zbEmailID, $this;
     $newMails.each(function(index){
-      console.log('index ' + index);
+      //console.log('index ' + index);
       $this = $(this);
       zbEmailID = $this.attr('zbEmailID');
       if(zbEmailID === undefined){
@@ -261,7 +269,7 @@ var zenblip = (function(zb, $, Gmail) {
   zb.emailBeforeSend = function(url, body, data, xhr) {
     var bps = xhr.xhrParams.body_params;
     if(bps.zbTrack === "1"){
-      console.log('track this email');
+      //console.log('track this email');
       var result = zb.addBeacon(bps);
       if(typeof result.error != undefined){
         bps.body = result.body;

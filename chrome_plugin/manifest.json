@@ -1,25 +1,24 @@
 {
   "name": "zenblip",
-  "version": "0.2.1",
+  "version": "0.2.4",
+  "icons": {
+    "128": "128.png"
+  },
   "description": "zenblip beta",
   "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAirjUmBH1V+ZNeMFcuLS26jl/iBGqOvOiUW/AsVlZl9xOVpNZ5+Q4O78rmN+OrOUC7oo5I3uuXWmjbK4l1EwBhv4qd+algA99LMB8Ve7QOTkb8Tb+EU/Spgk4dKXC+Zi1I5l1wo0XncgKn9B8IzHSmMEqts4TOz1RODLJHNEdadO0rzRCBiif+4ZhxGnHMtbBt5zwtWjt4ifQ8mobV5zwkDKWlgkgZlgx0wk/CSxT7Mx1VOng9apBywsjDYsZ8sNYJCGaUmpLnwPuu+7898/qxZ2xmvBLpzNlyY1zbj6OaCkj/IFcCiBnn2sHe/cYLer7+FBt3cioKiP5CkdiV4Yx9QIDAQAB",
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
-      // "js": ["deps.min.js", "content.js"],
+      
       "js": [
         "deps.min.js", 
         "jquery-1.10.2.min.js",
         "react-with-addons.min.js",
         "utils.js",
         "messenger.js",
-        //"dashboard/utils/mixpanel.js",
-        //"dashboard/utils/excellentexport.min.js",
         "dashboard/js-build/tracker-dashboard.js",
         "content.js"
         ]
-      //"css": ["font-awesome/css/font-awesome.min.css", "dashboard/css-build/tracker-dashboard.css", "content.css"]
-      // "css": ["content.css", "content.css"]
     }
   ],
   "minimum_chrome_version": "29",
@@ -54,12 +53,6 @@
     "webRequestBlocking",
     "http://*/*",
     "https://*/*"
-    // "*://*.google.com/*",
-    // "*://*.googleusercontent.com/*",
-    // "*://www.googleapis.com/*",
-    // "*://zenblip.appspot.com/*",
-    // "*://*.zenblip.com/*",
-    // "*://*.linkedin.com/*",
   ],
   "content_security_policy": "script-src 'self' https://*.zenblip.com https://zenblip.appspot.com https://talkgadget.google.com https://cdn.mxpnl.com; object-src 'self'",
   "oauth2" :{
@@ -71,7 +64,7 @@
     ]
   },
   "externally_connectable": {
-    "matches": ["*://mail.google.com/*"]
+    "matches": ["https://mail.google.com/*"]
   },
   "manifest_version": 2
 }
