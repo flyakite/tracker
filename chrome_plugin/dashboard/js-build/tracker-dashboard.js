@@ -27,16 +27,16 @@ var ListDetail = React.createClass({displayName: "ListDetail",
         );
         break;
       case 'EmailOpened':
-        var opened = 'Opened: ' + this.dateObjectToString(this.props.data.modified);
-        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
-        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
-        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
+        var opened = React.createElement("span", null, 'Opened: ' + this.dateObjectToString(this.props.data.modified));
+        var locationInfo = this.locationToString() == "" ? undefined: React.createElement("span", null, "Location: " + this.locationToString());
+        var deviceInfo = this.props.data.device == null ? undefined: React.createElement("span", null, "Device: " + this.props.data.device);
+        var accessCountInfo = this.props.data.access_count == null ? undefined: React.createElement("span", null, "Frequency: " + this.props.data.access_count);
         return (
           React.createElement("div", null, 
-            React.createElement("span", null, opened), 
-            React.createElement("span", null, locationInfo), 
-            React.createElement("span", null, deviceInfo), 
-            React.createElement("span", null, accessCountInfo)
+            opened, 
+            locationInfo, 
+            deviceInfo, 
+            accessCountInfo
           )
         );
         break;
@@ -49,19 +49,19 @@ var ListDetail = React.createClass({displayName: "ListDetail",
         );
         break;
       case 'LinkClicked':
-        var clicked = ' Clicked: ' + this.dateObjectToString(this.props.data.modified);
-        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
-        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
-        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
+        var clicked = React.createElement("span", null, 'Clicked: ' + this.dateObjectToString(this.props.data.modified));
+        var locationInfo = this.locationToString() == "" ? undefined: React.createElement("span", null, "Location: " + this.locationToString());
+        var deviceInfo = this.props.data.device == null ? undefined: React.createElement("span", null, "Device: " + this.props.data.device);
+        var accessCountInfo = this.props.data.access_count == null ? undefined: React.createElement("span", null, "Frequency: " + this.props.data.access_count);
         return (
           React.createElement("div", null, 
             React.createElement("span", {className: "zb-link-url"}, 
               React.createElement("a", {target: "_blank", href: this.props.data.url}, this.props.data.url.substr(0,50)+'...')
             ), 
-            React.createElement("span", null, clicked), 
-            React.createElement("span", null, locationInfo), 
-            React.createElement("span", null, deviceInfo), 
-            React.createElement("span", null, accessCountInfo)
+            clicked, 
+            locationInfo, 
+            deviceInfo, 
+            accessCountInfo
           )
         );
         break;

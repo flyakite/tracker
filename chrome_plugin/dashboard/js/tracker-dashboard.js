@@ -27,16 +27,16 @@ var ListDetail = React.createClass({
         );
         break;
       case 'EmailOpened':
-        var opened = 'Opened: ' + this.dateObjectToString(this.props.data.modified);
-        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
-        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
-        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
+        var opened = <span>{'Opened: ' + this.dateObjectToString(this.props.data.modified)}</span>;
+        var locationInfo = this.locationToString() == "" ? undefined: <span>{"Location: " + this.locationToString()}</span>;
+        var deviceInfo = this.props.data.device == null ? undefined: <span>{"Device: " + this.props.data.device}</span>;
+        var accessCountInfo = this.props.data.access_count == null ? undefined: <span>{"Frequency: " + this.props.data.access_count}</span>;
         return (
           <div>
-            <span>{opened}</span>
-            <span>{locationInfo}</span>
-            <span>{deviceInfo}</span>
-            <span>{accessCountInfo}</span>
+            {opened}
+            {locationInfo}
+            {deviceInfo}
+            {accessCountInfo}
           </div>
         );
         break;
@@ -49,19 +49,19 @@ var ListDetail = React.createClass({
         );
         break;
       case 'LinkClicked':
-        var clicked = ' Clicked: ' + this.dateObjectToString(this.props.data.modified);
-        var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
-        var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
-        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
+        var clicked = <span>{'Clicked: ' + this.dateObjectToString(this.props.data.modified)}</span>;
+        var locationInfo = this.locationToString() == "" ? undefined: <span>{"Location: " + this.locationToString()}</span>;
+        var deviceInfo = this.props.data.device == null ? undefined: <span>{"Device: " + this.props.data.device}</span>;
+        var accessCountInfo = this.props.data.access_count == null ? undefined: <span>{"Frequency: " + this.props.data.access_count}</span>;
         return (
           <div>
             <span className="zb-link-url">
               <a target="_blank" href={this.props.data.url}>{this.props.data.url.substr(0,50)+'...'}</a>
             </span>
-            <span>{clicked}</span>
-            <span>{locationInfo}</span>
-            <span>{deviceInfo}</span>
-            <span>{accessCountInfo}</span>
+            {clicked}
+            {locationInfo}
+            {deviceInfo}
+            {accessCountInfo}
           </div>
         );
         break;
