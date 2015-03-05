@@ -30,11 +30,13 @@ var ListDetail = React.createClass({
         var opened = 'Opened: ' + this.dateObjectToString(this.props.data.modified);
         var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
         var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
+        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
         return (
           <div>
             <span>{opened}</span>
             <span>{locationInfo}</span>
             <span>{deviceInfo}</span>
+            <span>{accessCountInfo}</span>
           </div>
         );
         break;
@@ -50,6 +52,7 @@ var ListDetail = React.createClass({
         var clicked = ' Clicked: ' + this.dateObjectToString(this.props.data.modified);
         var locationInfo = this.locationToString() == "" ? "": "Location: " + this.locationToString();
         var deviceInfo = this.props.data.device == null ? "": "Device: " + this.props.data.device;
+        var accessCountInfo = this.props.data.access_count == null ? "": "Frequency: " + this.props.data.access_count;
         return (
           <div>
             <span className="zb-link-url">
@@ -58,6 +61,7 @@ var ListDetail = React.createClass({
             <span>{clicked}</span>
             <span>{locationInfo}</span>
             <span>{deviceInfo}</span>
+            <span>{accessCountInfo}</span>
           </div>
         );
         break;
@@ -193,12 +197,22 @@ var SignalApp = React.createClass({
     this.filterQueryText();
   },
   filterOpened: function(e) {
+    function compareByLastAccessed (a, b) {
+      if(a.modified.timestamp > b.modified.timestamp){
+        return -1;
+      }
+      if(a.modified.timestamp < b.modified.timestamp){
+        return 1;
+      }
+      return 0;
+    }
     e && e.preventDefault();
     var data = $.map(this.state.signals, function(signal) {
       if (signal.access_count > 0){
         return signal;  
       }
     });
+    data.sort(compareByLastAccessed);
     this.setState({
       _data: data,
       data: data,

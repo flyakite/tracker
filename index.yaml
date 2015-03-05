@@ -43,7 +43,7 @@ indexes:
   properties:
   - name: sender
   - name: is_accessed
-  - name: created
+  - name: modified
     direction: desc
 
 - kind: Post
