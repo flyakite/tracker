@@ -120,7 +120,7 @@ class Links(Accesses):
         
         if accessed:
             #TODO: filter is_accessed
-            links = Link.query(Link.sender==sender, Link.is_accessed==True).order(-Link.created).fetch(50)
+            links = Link.query(Link.sender==sender, Link.is_accessed==True).order(-Link.modified).fetch(50)
         else:
             links = Link.query(Link.sender==sender).order(-Link.created).fetch(50)
         self.context['data'] = dict(data=[l.to_dict(
