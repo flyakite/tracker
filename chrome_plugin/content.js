@@ -9,6 +9,7 @@ var config = {
     'utils': chrome.extension.getURL('utils.js'),
     'channel': chrome.extension.getURL('channel.js'),
     'messenger': chrome.extension.getURL('messenger.js'),
+    'tracker': chrome.extension.getURL('tracker.js'),
     'main': chrome.extension.getURL('main.js')
   },
   shim: {
@@ -16,7 +17,7 @@ var config = {
       'deps': ['utils']
     },
     'main':{
-      'deps': ['jsapi', 'jquery', 'gmail', 'channel', 'messenger']
+      'deps': ['jsapi', 'jquery', 'gmail', 'channel', 'messenger', 'tracker']
     }
   },
   css:{

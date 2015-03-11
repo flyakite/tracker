@@ -56,91 +56,6 @@ var zenblip = (function(zb, $, Gmail) {
       }
     }, 1000);
   };
-  zb.decodeBody = function(body) {
-    return body.replace('<wbr>', ''); //TODO: WTF?
-  };
-
-  zb.parseLink = function(body) {
-    var urlPack = function(url, plain) {
-      var urlDecoded,
-        urlHash;
-      //urlDecoded = url.replace(/&amp;/g, '&'); //TODO:improve this if necessary //remove this to fix Gmail Error
-      urlDecoded = url;
-      urlHash = zb.hashCode(urlDecoded);
-      return {
-        url: url,
-        urlDecoded: urlDecoded,
-        urlHash: urlHash,
-        plain: plain
-      };
-    };
-    console.log('parseLink');
-    try {
-      var linkRegexWithATag = /<[Aa][^<>]* [Hh][Rr][Ee][Ff]=[\"\']([Hh][Tt][Tt][Pp][Ss]?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:;%_\+.~#?&//=]*))[\"\'].*?>.*?<\/[Aa]>/g; //"
-      var linkRegexInPlainText = /[Hh][Tt][Tt][Pp][Ss]?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:;%_\+.~#?&//=]*)/g,
-        bodyDecoded = zb.decodeBody(body),
-        links = [],
-        plainLinks = [],
-        linksDecoded = [],
-        plainLinksDecoded = [];
-      //deal with links with html A tag
-      var match = linkRegexWithATag.exec(bodyDecoded);
-      var url;
-      var urlCount = 1;
-      var _MAX_URL_COUNT = 200;
-      while (match != null && urlCount < _MAX_URL_COUNT) {
-        //console.log('urlmatch');
-        url = match[1];
-        if(url.indexOf(zbExternalURL) == -1){
-          links.push(urlPack(url, 0));
-        }
-        match = linkRegexWithATag.exec(bodyDecoded);
-        urlCount ++;
-      }
-
-      //deal with plain url link
-      var bodyDecoded2 = bodyDecoded.replace(linkRegexWithATag, '');
-
-      plainLinks = bodyDecoded2.match(linkRegexInPlainText);
-      if (plainLinks != null && plainLinks.length > 0) {
-        for (var i = plainLinks.length; i--;) {
-          console.log('parselink ' + i);
-          url = plainLinks[i];
-          //do not record link already been replaced
-          if(url.indexOf(zbExternalURL) == -1){
-            links.push(urlPack(url, 1));
-          }
-        }
-      }
-
-      console.log(links);
-      // bodyDecoded = bodyDecoded.replace(url, zbBaseURL + zbRedirectPath + '?t=' + zbTmpToken +'&h=' +urlHash);
-      return links;
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  zb.replaceLinks = function(body, token, links) {
-    var bodyDecoded = zb.decodeBody(body),
-      tag, l, newURL;
-
-    console.log('replaceLinks');
-    for (var i = 0; i < links.length; i++) { //order sequence matters
-      console.log('replaceLinks ' + i);
-      l = links[i];
-      //newURL = zbExternalURL + zbRedirectPath + "?u=" + sender.ukey + "&amp;t=" + token + "&amp;h=" + l.urlHash;
-      newURL = zbExternalURL + zbRedirectPath + "/" + sender.ukey + "/" + token + "/" + l.urlHash + "?url=" + encodeURIComponent(l.url);
-      if (l.plain === 1) {
-        //if plain, convert to html tag
-        newURL = "<a href='" + newURL + "'>" + l.urlDecoded.replace(/^https?:\/\//i,'') + "</a>"; //remove starting http://
-      }else{
-        //TODO: replace link content in A tag, remove starting http://
-      }
-      bodyDecoded = bodyDecoded.replace(l.url, newURL);
-    }
-    return bodyDecoded;
-  };
 
   zb.attachSignal = function(body, token) {
     // return body + "<img src='http://www.needclickers.com/static/images/blessjewel0.gif?how=aboutthis' width='1' height='1' style='display:none'>";
@@ -198,11 +113,10 @@ var zenblip = (function(zb, $, Gmail) {
           // .find('form').append("<input type='hidden' name='zbEmailID' value='"+zbEmailID+"'>")
           .end().find('.aWQ').prepend($thisTrack)
           // .end().find('.aoO').attr('data-tooltip', 'Send ‪without tracking? (⌘Enter)')
-          .end().find('.aoO').attr('data-tooltip', 'Send ‪and Track')
           .end().find('.aWR').css('display', 'none')
           .end().find('.oG').css('display', 'none');
         if(trackByDefault){
-          $this.find('.aoO').addClass('tracked-send-buton');
+          $this.find('.aoO').addClass('tracked-send-buton').attr('data-tooltip', 'Send ‪and Track');
         }
       }
     });
@@ -231,7 +145,7 @@ var zenblip = (function(zb, $, Gmail) {
       token = zb.uuid().replace(/-/g,'').substr(-20);
       version = typeof zbExtDetails == 'undefined'? '': zbExtDetails.version;
     try {
-      links = zb.parseLink(bps.body);
+      links = zb.parseLink(bps.body, zbExternalURL);
       //TODO: move this script to tracker domain and add csrf token
       payload = {
         version: version,
@@ -250,7 +164,7 @@ var zenblip = (function(zb, $, Gmail) {
       console.log(err);
     }
 
-    var bodyDecoded = zb.replaceLinks(bps.body, token, links);
+    var bodyDecoded = zb.replaceLinks(bps.body, token, links, sender.ukey, zbExternalURL, zbRedirectPath);
     bodyWithSignal = zb.attachSignal(bodyDecoded, token);
     return {'body':bodyWithSignal,
         'payload':payload};

@@ -1,6 +1,6 @@
 {
   "name": "zenblip",
-  "version": "0.2.4",
+  "version": "0.2.7",
   "icons": {
     "128": "128.png"
   },
@@ -16,6 +16,7 @@
         "react-with-addons.min.js",
         "utils.js",
         "messenger.js",
+        "tracker.js",
         "dashboard/js-build/tracker-dashboard.js",
         "content.js"
         ]
@@ -38,6 +39,7 @@
     "deps.min.js",
     "gmail.js",
     "messenger.js",
+    "tracker.js",
     "channel.js",
     "utils.js",
     "main.js",
