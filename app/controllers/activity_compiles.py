@@ -42,6 +42,10 @@ class ActivityCompiles(webapp2.RequestHandler):
         code = self.request.get('c') #deprecated
         token = self.request.get('t')
         sender = self.request.get('sender') #temp
+        #TODO: this is a temp solution, disable csv for optia
+        if sender.endswith('@optiapartners.com'):
+            self.response.write("Disabled")
+            return
         if code:
             ac = ActivityCompile.decrypt_code_to_activity_compile(code) #deprecated
         elif sender:
@@ -83,6 +87,10 @@ class ActivityCompiles(webapp2.RequestHandler):
                 return self.redirect(LOGIN_URL)
             if not sender:
                 logging.error('no sender')
+                return
+            #TODO: this is a temp solution, disable csv for optia
+            if sender.endswith('@optiapartners.com'):
+                self.response.write("Disabled")
                 return
             ac = ActivityCompile(
                             senders = [sender],
