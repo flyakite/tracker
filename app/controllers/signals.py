@@ -71,6 +71,9 @@ def seperate_email_and_name(mail_string):
 
 
 def decode_cipher(encrypted):
+    """
+    deprecated
+    """
     password = base64.b64decode(RFC_PASSWORD)
     salt = base64.b64decode(RFC_SALT)
     aes = Crypto.Cipher.AES.new(password, Crypto.Cipher.AES.MODE_CBC, salt)
@@ -91,10 +94,11 @@ class Signals(Accesses):
             self.response.status_code = 403
             return
 
-        sender_encrypted = self.request.get('se', '')
-        logging.debug('sender_encrypted ' + sender_encrypted)
-        sender = decode_cipher(sender_encrypted)
-        logging.debug('sender: ' + sender)
+        #sender_encrypted = self.request.get('se', '')
+        #logging.debug('sender_encrypted ' + sender_encrypted)
+        #sender = decode_cipher(sender_encrypted)
+        #logging.debug('sender: ' + sender)
+        sender = self.request.get('sender')
         subject = self.request.get('subject')
         token = self.request.get('token')
         tz_offset = int(self.request.get('tz_offset', 0))
@@ -102,6 +106,7 @@ class Signals(Accesses):
         cc = self.request.get('cc')
         links = self.request.get('links')
 
+        logging.info(sender)
         logging.info(subject)
         logging.info(token)
         logging.info(tz_offset)
