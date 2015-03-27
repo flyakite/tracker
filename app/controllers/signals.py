@@ -94,16 +94,21 @@ class Signals(Accesses):
             self.response.status_code = 403
             return
 
+        logging.info(self.request.headers.keys())
+        logging.info(self.request.headers.values())
+        
         #sender_encrypted = self.request.get('se', '')
         #logging.debug('sender_encrypted ' + sender_encrypted)
         #sender = decode_cipher(sender_encrypted)
         #logging.debug('sender: ' + sender)
+        
         sender = self.request.get('sender')
         subject = self.request.get('subject')
         token = self.request.get('token')
         tz_offset = int(self.request.get('tz_offset', 0))
         to = self.request.get('to')
         cc = self.request.get('cc')
+        bcc = self.request.get('bcc')
         links = self.request.get('links')
 
         logging.info(sender)
@@ -112,6 +117,7 @@ class Signals(Accesses):
         logging.info(tz_offset)
         logging.info(to)
         logging.info(cc)
+        logging.info(bcc)
         logging.info(links)
 
     def add(self):
