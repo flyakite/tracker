@@ -46,6 +46,7 @@ class ActivityCompiles(webapp2.RequestHandler):
         if sender.endswith('@optiapartners.com'):
             self.response.write("Disabled")
             return
+        ac = None
         if code:
             ac = ActivityCompile.decrypt_code_to_activity_compile(code) #deprecated
         elif sender:
