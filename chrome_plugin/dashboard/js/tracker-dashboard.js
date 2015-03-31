@@ -28,13 +28,11 @@ var ListDetail = React.createClass({
         break;
       case 'EmailOpened':
         var opened = <span>{'Opened: ' + this.dateObjectToString(this.props.data.modified)}</span>;
-        var locationInfo = this.locationToString() == "" ? undefined: <span>{"Location: " + this.locationToString()}</span>;
         var deviceInfo = this.props.data.device == null ? undefined: <span>{"Device: " + this.props.data.device}</span>;
         var accessCountInfo = this.props.data.access_count == null ? undefined: <span>{"Frequency: " + this.props.data.access_count}</span>;
         return (
           <div>
             {opened}
-            {locationInfo}
             {deviceInfo}
             {accessCountInfo}
           </div>
@@ -50,7 +48,6 @@ var ListDetail = React.createClass({
         break;
       case 'LinkClicked':
         var clicked = <span>{'Clicked: ' + this.dateObjectToString(this.props.data.modified)}</span>;
-        var locationInfo = this.locationToString() == "" ? undefined: <span>{"Location: " + this.locationToString()}</span>;
         var deviceInfo = this.props.data.device == null ? undefined: <span>{"Device: " + this.props.data.device}</span>;
         var accessCountInfo = this.props.data.access_count == null ? undefined: <span>{"Frequency: " + this.props.data.access_count}</span>;
         return (
@@ -59,7 +56,6 @@ var ListDetail = React.createClass({
               <a target="_blank" href={this.props.data.url}>{this.props.data.url.substr(0,50)+'...'}</a>
             </span>
             {clicked}
-            {locationInfo}
             {deviceInfo}
             {accessCountInfo}
           </div>
@@ -82,7 +78,6 @@ var ListNode = React.createClass({
     }else if( this.props.data.receivers && this.props.data.receivers.to){
       receiver = Object.keys(this.props.data.receivers.to)[0]
     }
-    var detail, locationInfo, deviceInfo;
     return (
       <tr className="zb-list-row">
         <td className="zb-receiver">
@@ -485,7 +480,7 @@ var SignalApp = React.createClass({
                   <a className='track zb-toggle-menu pull-left' href='#' onClick={this.toggleDashboard} data-track="Click Logo or Detail Icon Button">
                     <i className="fa fa-bars zb-white"></i>
                   </a>
-                  <a className="track pull-left" href='http://www.zenblip.com' target="_blank" data-track="Click Logo or Detail Icon Button">
+                  <a className="track pull-left" href='https://www.zenblip.com/dashboard/' target="_blank" data-track="Click Logo or Detail Icon Button">
                     <img className={hideLogoClass} src="https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"></img>
                   </a>
                 </li>

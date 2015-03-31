@@ -28,13 +28,11 @@ var ListDetail = React.createClass({displayName: "ListDetail",
         break;
       case 'EmailOpened':
         var opened = React.createElement("span", null, 'Opened: ' + this.dateObjectToString(this.props.data.modified));
-        var locationInfo = this.locationToString() == "" ? undefined: React.createElement("span", null, "Location: " + this.locationToString());
         var deviceInfo = this.props.data.device == null ? undefined: React.createElement("span", null, "Device: " + this.props.data.device);
         var accessCountInfo = this.props.data.access_count == null ? undefined: React.createElement("span", null, "Frequency: " + this.props.data.access_count);
         return (
           React.createElement("div", null, 
             opened, 
-            locationInfo, 
             deviceInfo, 
             accessCountInfo
           )
@@ -50,7 +48,6 @@ var ListDetail = React.createClass({displayName: "ListDetail",
         break;
       case 'LinkClicked':
         var clicked = React.createElement("span", null, 'Clicked: ' + this.dateObjectToString(this.props.data.modified));
-        var locationInfo = this.locationToString() == "" ? undefined: React.createElement("span", null, "Location: " + this.locationToString());
         var deviceInfo = this.props.data.device == null ? undefined: React.createElement("span", null, "Device: " + this.props.data.device);
         var accessCountInfo = this.props.data.access_count == null ? undefined: React.createElement("span", null, "Frequency: " + this.props.data.access_count);
         return (
@@ -59,7 +56,6 @@ var ListDetail = React.createClass({displayName: "ListDetail",
               React.createElement("a", {target: "_blank", href: this.props.data.url}, this.props.data.url.substr(0,50)+'...')
             ), 
             clicked, 
-            locationInfo, 
             deviceInfo, 
             accessCountInfo
           )
@@ -82,7 +78,6 @@ var ListNode = React.createClass({displayName: "ListNode",
     }else if( this.props.data.receivers && this.props.data.receivers.to){
       receiver = Object.keys(this.props.data.receivers.to)[0]
     }
-    var detail, locationInfo, deviceInfo;
     return (
       React.createElement("tr", {className: "zb-list-row"}, 
         React.createElement("td", {className: "zb-receiver"}, 
@@ -485,7 +480,7 @@ var SignalApp = React.createClass({displayName: "SignalApp",
                   React.createElement("a", {className: "track zb-toggle-menu pull-left", href: "#", onClick: this.toggleDashboard, "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("i", {className: "fa fa-bars zb-white"})
                   ), 
-                  React.createElement("a", {className: "track pull-left", href: "http://www.zenblip.com", target: "_blank", "data-track": "Click Logo or Detail Icon Button"}, 
+                  React.createElement("a", {className: "track pull-left", href: "https://www.zenblip.com/dashboard/", target: "_blank", "data-track": "Click Logo or Detail Icon Button"}, 
                     React.createElement("img", {className: hideLogoClass, src: "https://s3-ap-northeast-1.amazonaws.com/zenbl/prod/static/zenblip_logo_small.png"})
                   )
                 ), 
