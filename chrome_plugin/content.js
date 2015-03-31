@@ -148,7 +148,8 @@ var zenblip = (function(zb, $, React) {
     // var options = {interactive:interactive}
     // messenger.post({e:'getAndUpdateUserInfo', options:options});
 
-    zb.goToGoogleOAuth(senderEmail);
+    zb.loginZenblip(senderEmail);
+    // zb.goToGoogleOAuth(senderEmail);
   };
 
   // zb.validateUserPlan = function(senderEmail) {
@@ -156,6 +157,9 @@ var zenblip = (function(zb, $, React) {
   //   var options = {'check_permission_email': senderEmail};
   //   messenger.post({e:'validateUserPlan', options:options})
   // };
+  zb.loginZenblip = function(hintEmail) {
+    window.open(zbMainURL + "/dashboard?email="+encodeURIComponent(hintEmail));
+  };
 
   zb.goToGoogleOAuth = function(hintEmail) {
     window.open("https://accounts.google.com/o/oauth2/auth?" + 
@@ -214,25 +218,24 @@ var zenblip = (function(zb, $, React) {
         if(!zb._trackerInitialized){
           zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
         }
-        //zb.requestTrackerInit();
       }else{
-        raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        // raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
         //to be removed -----
-        //zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-        //raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-        //if(!zb._trackerInitialized){
-        //  zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-        //}
+        zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+        raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+        if(!zb._trackerInitialized){
+         zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+        }
         //to be removed -----
       }
     }else{
-      raDashboard.onAuthenticationFailed({});
+      // raDashboard.onAuthenticationFailed({});
       //to be removed -----
-      // zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-      // raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-      // if(!zb._trackerInitialized){
-      //   zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-      // }
+      zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+      raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+      if(!zb._trackerInitialized){
+        zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+      }
       //to be removed -----
     }
   };
