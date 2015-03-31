@@ -216,30 +216,33 @@ var zenblip = (function(zb, $, React) {
         }
         //zb.requestTrackerInit();
       }else{
-        //raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
         //to be removed -----
-        zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-        raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-        if(!zb._trackerInitialized){
-          zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-        }
+        //zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+        //raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+        //if(!zb._trackerInitialized){
+        //  zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+        //}
         //to be removed -----
       }
     }else{
-      //raDashboard.onAuthenticationFailed({});
+      raDashboard.onAuthenticationFailed({});
       //to be removed -----
-      zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-      raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-      if(!zb._trackerInitialized){
-        zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-      }
+      // zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+      // raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+      // if(!zb._trackerInitialized){
+      //   zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+      // }
       //to be removed -----
     }
   };
 
   zb.requestTrackerInit = function(options) {
-    $.get(zbBaseURL+'/settings', {email:sender.email, access_token:options.zenblipAccessToken}, function(data) {
+    $.get(zbBaseURL+'/settings', {email:sender.email, access_token:options.zenblipAccessToken, ref:'gmail-chrome'}, function(data) {
       console.log(data);
+      if(data.error == 1){
+        data.track_by_default = true;
+      }
       window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken, track_by_default:data.track_by_default}, "https://mail.google.com");
       zb._trackerInitialized = true;
     });
