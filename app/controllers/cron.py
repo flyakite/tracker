@@ -42,10 +42,11 @@ def to_timedelta(fmt):
     days, hours, minutes = fmt.split('-')
     return timedelta(days=int(days), hours=int(hours), minutes=int(minutes))
 
-    
+
 class SubscriptionReport(object):
     pass
-    
+
+
 class Cron(BaseController):
 
     def query_user_emails(self, start, end, rgid=None, org=None):
@@ -377,12 +378,12 @@ class Cron(BaseController):
             else:
                 # Pickling of datastore_query.PropertyOrder is unsupported.
                 deferred.defer(mail.send_template, *args, **kwargs)
-    
+
     ########## NEW ############
     def query_subscriptions(self, retry=3):
         uri = settings.get('ZENBLIP_MAIN_SITE_URI') + '/api/subscriptions'
         query_string = {
-               'fields': 'id'
+            'fields': 'id'
         }
         query_string = urlencode(query_string)
         try:
@@ -391,9 +392,9 @@ class Cron(BaseController):
                 return result.content
             else:
                 logging.warning("query_subscriptions status:%s %s" % (result.status_code, result.content))
-                #simple retry
+                # simple retry
                 if retry:
-                    self.query_subscriptions(retry=retry-1)
+                    self.query_subscriptions(retry=retry - 1)
                 else:
                     logging.error("query_subscriptions status:%s %s" % (result.status_code, result.content))
 
@@ -401,11 +402,11 @@ class Cron(BaseController):
             logging.error("query_subscriptions fetch DownloadError")
             logging.error(e)
             if retry:
-                self.query_subscriptions(retry=retry-1)
+                self.query_subscriptions(retry=retry - 1)
             else:
                 logging.error("query_subscriptions status:%s %s" % (result.status_code, result.content))
             return None
-            
+
     def parse_subscription_ids(self, data):
         """
         [{'id': 2}]
@@ -418,11 +419,11 @@ class Cron(BaseController):
             logging.error("parse_subscriptions exception: %s" % data)
             logging.error(e)
             return None
-        
+
     def query_subscription_report(self, sub_id):
         uri = settings.get('ZENBLIP_MAIN_SITE_URI') + '/api/subscription_report'
         payload = {
-                   'sub_id': sub_id
+            'sub_id': sub_id
         }
         payload = urlencode(payload)
         try:
@@ -431,7 +432,7 @@ class Cron(BaseController):
                 return result.content
             else:
                 logging.warning("query_subscription_report status:%s %s" % (result.status_code, result.content))
-                #simple retry
+                # simple retry
                 result = urlfetch.fetch(uri)
                 if result.status_code == 200:
                     return result.content
@@ -443,7 +444,6 @@ class Cron(BaseController):
             logging.error(e)
             return None
 
-        
     def parse_subscriptions_report_emails(self, data):
         """
         {
@@ -463,12 +463,12 @@ class Cron(BaseController):
             sr.report_group_emails = list(set(report_group_emails))
             logging.info(sr)
             return sr
-            
+
         except Exception as e:
             logging.error("parse_subscriptions_report exception: %s" % data)
             logging.error(e)
             return None
-            
+
     ########## NEW ############
     @route_with('/cron/new_interval_report')
     def new_interval_report(self):
@@ -493,7 +493,7 @@ class Cron(BaseController):
 
         data = self.query_subscriptions()
         sub_ids = self.parse_subscription_ids(data)
-        
+
         start = base64.urlsafe_b64encode(start.isoformat())
         end = base64.urlsafe_b64encode(end.isoformat())
         if sub_ids:
@@ -509,9 +509,8 @@ class Cron(BaseController):
                                   'daily': daily,
                                   'weekly': weekly,
                               })
-            self.context['data'] = {'sub_ids':sub_ids}
-         
-         
+            self.context['data'] = {'sub_ids': sub_ids}
+
     ########## NEW ############
     @route_with('/cron/dispatch_subscription_report_emails')
     def dispatch_subscription_report_emails(self):
@@ -527,7 +526,7 @@ class Cron(BaseController):
         end = self.request.get('end')
         sub_id = self.request.get('sub_id')
         logging.info(sub_id)
-        
+
         data = self.query_subscription_report(sub_id)
         sr = self.parse_subscriptions_report_emails(data)
         if sr and sr.user_plan_emails:
@@ -545,7 +544,7 @@ class Cron(BaseController):
                                   'weekly': weekly,
                               })
 
-            self.context['data'] = {'user_plan_emails':sr.user_plan_emails}
+            self.context['data'] = {'user_plan_emails': sr.user_plan_emails}
 
     ########## NEW ############
     @route_with('/cron/new_interval_report_personal')
@@ -561,15 +560,15 @@ class Cron(BaseController):
         daily = self.request.get('daily')
         weekly = self.request.get('weekly')
         reportgroup = self.request.get('reportgroup')
-        
+
         sender = self.request.get('sender')
         logging.info(sender)
 
         start = self.request.get('start')
         end = self.request.get('end')
         logging.info('start: %s ,end: %s' % (start, end))
-        activity_report_code = encode_token({'sender': sender, 'start':start, 'end':end})
-        
+        activity_report_code = encode_token({'sender': sender, 'start': start, 'end': end})
+
         start = datetime.strptime(base64.urlsafe_b64decode(str(start)), '%Y-%m-%dT%H:%M:%S.%f')  # isoformat
         end = datetime.strptime(base64.urlsafe_b64decode(str(end)), '%Y-%m-%dT%H:%M:%S.%f')
         logging.info('UTC start: %s, end: %s' % (start.isoformat(), end.isoformat()))
@@ -581,7 +580,7 @@ class Cron(BaseController):
         }
 
         # user setting
-        user_setting = Setting.find_by_properties(email = sender)
+        user_setting = Setting.find_by_properties(email=sender)
         if user_setting and not reportgroup:
             if daily and not user_setting.is_daily_report:
                 logging.warning('setting no daily report needs to be sent')
@@ -589,7 +588,7 @@ class Cron(BaseController):
             elif weekly and not user_setting.is_weekly_report:
                 logging.warning('setting no weekly report needs to be sent')
                 return
-                
+
         # signals statistics
         signals = Signal.query(Signal.sender == sender, Signal.created > start, Signal.created < end) \
                         .order(Signal.created) \
@@ -598,7 +597,6 @@ class Cron(BaseController):
             logging.warning('no signals')
             return
 
-        
         last_signal = signals[-1]
         tz_offset = last_signal.tz_offset or 0
 
@@ -773,14 +771,13 @@ class Cron(BaseController):
             else:
                 subject = 'zenblip Report'
 
-            
             receivers_by_seperated_emails = []
             if debug:
                 subject += ' debug'
                 logging.info('debug mode, send to admin')
                 receivers_by_seperated_emails = [_ADMINS]
             else:
-                
+
                 send_to_sender = True
                 if daily and user_setting and not user_setting.is_daily_report:
                     logging.warning('setting no daily report needs to be sent for sender')
@@ -788,7 +785,7 @@ class Cron(BaseController):
                 elif weekly and user_setting and not user_setting.is_weekly_report:
                     logging.warning('setting no weekly report needs to be sent for sender')
                     send_to_sender = False
-                    
+
                 if reportgroup:
                     reportgroup_emails = reportgroup.split(',')
                     if send_to_sender:
@@ -801,9 +798,9 @@ class Cron(BaseController):
             logging.info('subject %s' % subject)
             if receivers_by_seperated_emails:
                 for receiver in receivers_by_seperated_emails:
-    
+
                     logging.info('receiver %s' % receiver)
-        
+
                     args = [receiver, subject]
                     kwargs = dict(template_name='interval_report',
                                   context={'start': start,
@@ -822,10 +819,10 @@ class Cron(BaseController):
                                            'sender': sender,
                                            'activity_report_code': activity_report_code,
                                            'debug': debug})
-        
+
                     if sync:
                         mail.send_template(*args, **kwargs)
-                        
+
                     else:
                         # Pickling of datastore_query.PropertyOrder is unsupported.
                         deferred.defer(mail.send_template, *args, **kwargs)
@@ -979,9 +976,9 @@ class Cron(BaseController):
         path = self.request.get('path')
         action = self.request.get('action')
         uri = settings.get('ZENBLIP_MAIN_SITE_URI') + path
-        
+
         query_string = {
-               'action': action
+            'action': action
         }
         query_string = urlencode(query_string)
         try:
@@ -990,7 +987,7 @@ class Cron(BaseController):
                 return result.content
             else:
                 logging.warning("cron for_zenblip_main_site status:%s %s" % (result.status_code, result.content))
-                #simple retry
+                # simple retry
                 result = urlfetch.fetch(uri)
                 if result.status_code == 200:
                     return result.content

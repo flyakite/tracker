@@ -28,6 +28,7 @@ from base import BaseController, BaseView
 from ferris import settings
 from auths import decode_token
 
+
 class ActivityCompiles(webapp2.RequestHandler):
     # class ActivityCompiles(BaseController):
 
@@ -39,31 +40,31 @@ class ActivityCompiles(webapp2.RequestHandler):
     def get(self):
         LOGIN_URL = 'https://www.zenblip.com/accounts/signup'
         name = self.request.get('n')
-        code = self.request.get('c') #deprecated
+        code = self.request.get('c')  # deprecated
         token = self.request.get('t')
-        sender = self.request.get('sender') #temp
-        #TODO: this is a temp solution, disable csv for optia
+        sender = self.request.get('sender')  # temp
+        # TODO: this is a temp solution, disable csv for optia
         if sender.endswith('@optiapartners.com'):
             self.response.write("Disabled")
             return
         ac = None
         if code:
-            ac = ActivityCompile.decrypt_code_to_activity_compile(code) #deprecated
+            ac = ActivityCompile.decrypt_code_to_activity_compile(code)  # deprecated
         elif sender:
-            ### temp
+            # temp
             ac = ActivityCompile(
-                        senders = [sender],
-                        start = datetime.utcnow() - timedelta(days=1),
-                        end = datetime.utcnow()
-                        )
-            ### temp
-            
+                senders=[sender],
+                start=datetime.utcnow() - timedelta(days=1),
+                end=datetime.utcnow()
+            )
+            # temp
+
         elif token:
             data = decode_token(token)
             if not data:
                 return self.redirect(LOGIN_URL)
             try:
-                if data.has_key('end'):
+                if 'end' in data:
                     end = data['end']
                     logging.info(end)
                     end = base64.urlsafe_b64decode(end)
@@ -71,7 +72,7 @@ class ActivityCompiles(webapp2.RequestHandler):
                     end = datetime.strptime(end, '%Y-%m-%dT%H:%M:%S.%f')
                 else:
                     end = datetime.utcnow()
-                if data.has_key('start'):
+                if 'start' in data:
                     start = data['start']
                     logging.info(start)
                     start = base64.urlsafe_b64decode(start)
@@ -89,17 +90,16 @@ class ActivityCompiles(webapp2.RequestHandler):
             if not sender:
                 logging.error('no sender')
                 return
-            #TODO: this is a temp solution, disable csv for optia
+            # TODO: this is a temp solution, disable csv for optia
             if sender.endswith('@optiapartners.com'):
                 self.response.write("Disabled")
                 return
             ac = ActivityCompile(
-                            senders = [sender],
-                            start = start,
-                            end = end
-                            )
-            
-            
+                senders=[sender],
+                start=start,
+                end=end
+            )
+
         if not ac:
             self.abort(404)
             return

@@ -14,6 +14,7 @@ from app.models.activity_compile import ActivityCompile
 from app.controllers.activity_compiles import ActivityCompiles
 from app.controllers.auths import encode_token, decode_token
 
+
 class TestEncrypt(AppEngineWebTest):
 
     """
@@ -72,8 +73,7 @@ class TestActivityCompileController(FerrisAppTest):
         code = ActivityCompile.encrypt_activity_compile_to_code(ac)
         r = self.testapp.get('/activity_report?c=%s' % code)
         self.assertEqual(r.content_type, 'application/csv')
-        
-        #new way
-        activity_compile_token = encode_token({'sender':sender, 'start':start.isoformat(), 'end':end.isoformat()})
+
+        # new way
+        activity_compile_token = encode_token({'sender': sender, 'start': start.isoformat(), 'end': end.isoformat()})
         r = self.testapp.get('/activity_report?t=%s' % activity_compile_token)
-        

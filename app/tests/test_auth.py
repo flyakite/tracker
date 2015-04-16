@@ -40,7 +40,7 @@ class TestAuth(TestBase):
         j = json.loads(r.body)
         logging.info(j)
         self.assertEqual(j['error'], True)
-        #TODO: test login session user
+        # TODO: test login session user
 
     def testAuthLegit(self):
 

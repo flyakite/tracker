@@ -17,17 +17,20 @@ from app.models.user_info import UserInfo
 from app.models.device_client import DeviceClient
 from app.utils import is_user_legit, is_email_valid
 from libs.itsdangerous import JSONWebSignatureSerializer
+from ferris import settings
 
 logger = logging.getLogger('default')
 PROJECT_SECRET = 'zenblip_secret'
 PROJECT_SALT = 'zenblip_salt'
 ZENBLIP_AUTH_SERVER = "https://www.zenblip.com"
 
+
 def encode_token(dict_object):
     s = JSONWebSignatureSerializer(PROJECT_SECRET, salt=PROJECT_SALT)
-    dict_object.update(_created = str(datetime.utcnow()))
+    dict_object.update(_created=str(datetime.utcnow()))
     return s.dumps(dict_object)
-    
+
+
 def decode_token(code):
     s = JSONWebSignatureSerializer(PROJECT_SECRET, salt=PROJECT_SALT)
     try:
@@ -35,9 +38,9 @@ def decode_token(code):
     except:
         return None
 
+
 class Auths(BaseController):
 
-    
     @route_with('/auth/login')
     def login(self):
         return self.redirect(users.create_login_url())
@@ -58,7 +61,6 @@ class Auths(BaseController):
             self.context['data'] = {'user': user.user_id()}
             return
 
-
     def get_userinfo_from_google(self, access_token):
         logging.info('access_token: %s' % access_token)
         if not access_token.startswith('Bearer '):
@@ -71,7 +73,7 @@ class Auths(BaseController):
         except Exception as e:
             logging.error(e)
             return {'error': str(e)}
-            
+
     def update_or_create_userinfo(self, user_from_plus, refresh_token=None):
         user_info = UserInfo.find_by_properties(google_id=user_from_plus['id'])
         if not user_info:
@@ -111,14 +113,14 @@ class Auths(BaseController):
             if refresh_token:
                 user_info.refresh_token = refresh_token
             user_info.put()
-            
+
     @route_with('/auth/google')
     def auth_chrome(self):
         """
         TODO:
         We used email to identify user.
         But in Google APIs, Google suggest not to use email, as one email can represent different identities.
-        
+
         TODO: how to test this handler?
         """
         self.meta.change_view('json')
@@ -129,8 +131,6 @@ class Auths(BaseController):
         if not access_token:
             logging.warning('no access_token')
             return
-            
-        
 
         """
         {
@@ -147,24 +147,22 @@ class Auths(BaseController):
             hd: "zenblip.com"
         }
         """
-        
+
         result = self.get_userinfo_from_google(access_token)
-        if result.has_key('error'):
+        if 'error' in result:
             self.context['data'] = {'error': 'status_error: %s' % result.status_code}
             return
-            
+
         user_from_plus = result
 
         self.update_or_create_userinfo(user_from_plus)
 
-        self.context['data'] = {'success': 1, 
+        self.context['data'] = {'success': 1,
                                 'email': user_from_plus['email'],
-                                'access_token': encode_token({'email':user_from_plus['email']})}
-        
+                                'access_token': encode_token({'email': user_from_plus['email']})}
+
         self.set_session_user(user_from_plus['email'])
         self.get_or_set_csrf_token()
-            
-
 
     @route_with('/auth/oauth2callback')
     def auth_google_oauth2(self):
@@ -178,50 +176,50 @@ class Auths(BaseController):
         error = self.request.get('error')
         logging.info(code)
         logging.info(state)
-        
+
         if error:
             logging.error(error)
             return self.redirect(state)
-            
+
         payload = {
-                   'code': code,
-                   'client_id': '709499323932-c4a99dsihk6v1js29vg9tg3n30ph0oq8.apps.googleusercontent.com',
-                   'client_secret': 'nA-THrzr56AGDMfH4CJjKCgb',
-                   'redirect_uri': 'https://zenblip.appspot.com/auth/oauth2callback',
-                   'grant_type': 'authorization_code'
+            'code': code,
+            'client_id': settings.get('GOOGLE_CLIENT_ID'),
+            'client_secret': settings.get('GOOGLE_CLIENT_SECRET'),
+            'redirect_uri': 'https://zenblip.appspot.com/auth/oauth2callback',
+            'grant_type': 'authorization_code'
         }
-        
+
         payload = urllib.urlencode(payload)
         r = urlfetch.fetch("https://www.googleapis.com/oauth2/v3/token", payload=payload, method=urlfetch.POST)
         if r.status_code != 200:
             logging.error(r.content)
-            return self.redirect(state)
-            
+            return self.redirect(str(state))
+
         logging.info(r.content)
         jdata = json.loads(r.content)
         access_token = jdata['access_token']
-        refresh_token = jdata['refresh_token'] if jdata.has_key('refresh_token') else None
+        refresh_token = jdata['refresh_token'] if 'refresh_token' in jdata else None
         expires_in = jdata['expires_in']
         token_type = jdata['token_type']
-        
+
         result = self.get_userinfo_from_google(access_token)
         logging.info(result)
-        if result.has_key('error'):
+        if 'error' in result:
             logging.error('get_userinfo_from_google error')
-            return self.redirect(state)
-            
+            return self.redirect(str(state))
+
         user_from_plus = result
 
         self.update_or_create_userinfo(user_from_plus, refresh_token=refresh_token)
         payload = {
-                   'hint':'addplan',
-                   'hint_email': user_from_plus['email'],
-                   'state': state
+            'hint': 'addplan',
+            'hint_email': user_from_plus['email'],
+            'state': state
         }
-        return self.redirect(ZENBLIP_AUTH_SERVER + "/dashboard?%s" % urllib.urlencode(payload))
-        
-        
-    
+#         return self.redirect(ZENBLIP_AUTH_SERVER + "/dashboard?%s" % urllib.urlencode(payload))
+        #redirect to mailbox
+        return self.redirect(str(state))
+
     @route_with('/auth/user')
     def auth_user(self):
         """
@@ -235,12 +233,12 @@ class Auths(BaseController):
                                     'name': user.name,
                                     'orgs': user.orgs,
                                     'role': user.role,
-                                    'access_token': encode_token({'email':user.email}),
+                                    'access_token': encode_token({'email': user.email}),
                                     'tz_offset': user.tz_offset
                                     }
         else:
             self.context['data'] = {'error': True}
-            
+
     @route_with('/auth/demo')
     def auth_demo(self):
         """
@@ -258,7 +256,7 @@ class Auths(BaseController):
                                     }
         else:
             self.context['data'] = {'error': True}
-            
+
     @route_with('/auth/legit')
     def auth_legit(self):
         """
@@ -332,7 +330,7 @@ class Auths(BaseController):
             self.context['data'] = {'success': False,
                                     'error': 'invalid_client_id',
                                     'data': ''}
-                                    
+
     @route_with('/auth/access_token')
     def get_access_token(self):
         """
@@ -341,23 +339,23 @@ class Auths(BaseController):
         self.meta.change_view('json')
         callback = self.request.get('callback')
         check_permission_email = self.request.get('check_permission_email')
-        
+
         data = {}
         if self.current_user():
             url = ZENBLIP_AUTH_SERVER + "/accounts/access_token"
-            payload = {'user_email':self.current_user().email, 
-                       'check_permission_email':check_permission_email,
-                       'from_tracker_server':True
+            payload = {'user_email': self.current_user().email,
+                       'check_permission_email': check_permission_email,
+                       'from_tracker_server': True
                        }
             payload = urllib.urlencode(payload)
             result = urlfetch.fetch(url=url)
             if result.status_code == 200:
                 data = json.loads(result.content)
         else:
-            data = {'error':True, 'tracker_signed_in': False}
-            
+            data = {'error': True, 'tracker_signed_in': False}
+
         logging.info(data)
-        
+
         if callback and re.match(r'^[\w\.-]+$', callback):
             """
             JSONP

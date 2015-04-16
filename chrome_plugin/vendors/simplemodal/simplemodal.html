@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> SimpleModal Basic Modal Dialog </title>
+<meta name='author' content='Eric Martin' />
+<meta name='copyright' content='2013 - Eric Martin' />
+
+<!-- Page styles -->
+<link type='text/css' href='css/demo.css' rel='stylesheet' media='screen' />
+
+<!-- Contact Form CSS files -->
+<link type='text/css' href='css-build/simplemodal.css' rel='stylesheet' media='screen' />
+
+
+<!-- JS files are loaded at the bottom of the page -->
+</head>
+<body>
+<div id='container'>
+  <div id='logo'>
+    <h1>Simple<span>Modal</span></h1>
+    <span class='title'>A Modal Dialog Framework Plugin for jQuery</span>
+  </div>
+  <div id='content'>
+    <div id='basic-modal'>
+      <h3>Basic Modal Dialog</h3>
+      <p>A basic modal dialog with minimal styling and no additional options. There are a few CSS properties set internally by SimpleModal, however, SimpleModal relies mostly on style options and/or external CSS for the look and feel.</p>
+      <input type='button' name='basic' value='Demo' class='basic'/> or <a href='#' class='basic'>Demo</a>
+    </div>
+    
+    <!-- modal content -->
+    <div id="basic-modal-content">
+      <h3>Basic Modal Dialog</h3>
+      <p>For this demo, SimpleModal is using this "hidden" data for its content. You can also populate the modal dialog with an AJAX response, standard HTML or DOM element(s).</p>
+      <p>Examples:</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci voluptate illo veniam at odio labore quod recusandae molestiae ullam, dolorem, ipsam nobis excepturi ea dolore accusantium nostrum. Qui, nesciunt, aperiam?</p>
+    
+      <p><a href='http://www.ericmmartin.com/projects/simplemodal/'>More details...</a></p>
+    </div>
+
+    <!-- preload the images -->
+    <div style='display:none'>
+      <img src='img/basic/x.png' alt='' />
+    </div>
+  </div>
+  <div id='footer'>
+    &copy; 2013 <a href='http://www.ericmmartin.com/'>Eric Martin</a><br/>
+    <a href='https://github.com/ericmmartin/simplemodal'>SimpleModal on GitHub</a><br/>
+    <a href='http://twitter.com/ericmmartin'>@ericmmartin</a> | <a href='http://twitter.com/simplemodal'>@simplemodal</a>
+  </div>
+</div>
+<!-- Load jQuery, SimpleModal and Basic JS files -->
+<script type='text/javascript' src='../../jquery-1.10.2.min.js'></script>
+<script type='text/javascript' src='js/jquery.simplemodal.min.js'></script>
+<script>
+jQuery(function ($) {
+  // Load dialog on page load
+  //$('#basic-modal-content').modal();
+
+  // Load dialog on click
+  $('#basic-modal .basic').click(function (e) {
+    $('#basic-modal-content').modal();
+
+    return false;
+  });
+});
+</script>
+</body>
+</html>

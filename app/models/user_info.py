@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 2014/9/22
 
@@ -47,6 +48,7 @@ class UserInfo(BasicModel):
                     started=None,
                     tz_offset=None,
                     google_id=None,
+                    refresh_token=None,
                     created=None,
                     save=True,
                     sync=True):
@@ -68,8 +70,9 @@ class UserInfo(BasicModel):
             started=started,
             tz_offset=tz_offset,
             google_id=google_id,
+            refresh_token=refresh_token,
             created=created
-            )
+        )
 
         if save:
             u.put() if sync else u.put_async()

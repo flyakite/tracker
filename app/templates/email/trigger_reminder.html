@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <!-- base on http://zurb.com/playground/projects/responsive-email-templates/basic.html -->
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>zenblip</title>
+    <style>
+        [touch-action="none"] {
+            -ms-touch-action: none;
+            touch-action: none;
+        }
+        [touch-action="pan-x"] {
+            -ms-touch-action: pan-x;
+            touch-action: pan-x;
+        }
+        [touch-action="pan-y"] {
+            -ms-touch-action: pan-y;
+            touch-action: pan-y;
+        }
+        [touch-action="scroll"],
+        [touch-action="pan-x pan-y"],
+        [touch-action="pan-y pan-x"] {
+            -ms-touch-action: pan-x pan-y;
+            touch-action: pan-x pan-y;
+        }
+    </style>
+</head>
+
+<body bgcolor="#FFFFFF">
+    <!-- HEAD Logo -->
+    <!-- 95,183,255 -->
+    <table style="width:100%;-webkit-font-smoothing:antialiased;" bgcolor="#5Fb7ff">
+        <tbody>
+            <tr>
+                <td></td>
+                <td class="header container" style='display: block!important;max-width: 600px!important;margin: 0 auto!important;clear: both!important;'>
+                    <div class="content" style="padding: 5px;max-width: 600px;margin: 0 auto;display: block;">
+                        <table bgcolor="#5Fb7ff" style='width:100%'>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <h1 style='color:#fff;font-size:32px;font-weight:400;margin:0;font-family:HelveticaNeue-UltraLight,Helvetica;'>
+                                            zenblip Reminder
+                                        </h1>
+                                        <!-- <img src="http://zenblip.appspot.com/img/zenblip_logo_small.png"> -->
+                                    </td>
+                                    <td align="right" style='color:#f2f2f2'>
+                                        <h6 class="collapse" style='margin:0;padding:0;font-size:17px;font-family:Helvetica;font-weight:300;'>zenblip for recruiters</h6>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Main body -->
+    <table class="body-wrap" style='width:100%;-webkit-font-smoothing:antialiased;font-size:14px;'>
+        <tbody>
+            <tr>
+                <td class="container" bgcolor="#FFFFFF" style="display:block!important;max-width: 600px!important;margin:0 auto!important;clear:both!important;">
+                    <div class="content" style="padding:5px;max-width: 600px;margin:0 auto;display:block;">
+                        Hi There!<br>
+                        <br>
+                        {% if reminder.if_no_reply %}
+                        We believe you sent an email to the following person and unfortunately there's no reply from the primary recipient.<br>
+                        <br>
+                        {% endif %}
+                        Maybe it's a good time to follow up with them again.<br>
+                        <br>
+                        <h4>Subject</h4>
+                        {{ signal.subject }} <br>
+                        <br>
+                        <h4>Recipient</h4> 
+                        {{ ', '.join(signal.receiver_emails) }} <br>
+                        <br>
+                        <h4>Date Sent</h4>
+                        {{ signal.created_consider_tz_offset().strftime('%Y/%m/%d') }} <br>
+                        <br> 
+                        <h4>Note</h4>
+                        {{ reminder.note }} <br>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                </td>
+            </tr>
+            <tr style='width:100%'>
+                <td style='width:100%'>
+                    <div style="width:100%;background-color:#5Fb7ff;height: 1px;"></div>
+                </td>
+            </tr>
+            <tr style="margin-top:30px;">
+                <td>
+                    <br><br>
+                    Cheers, <br><br>
+                    The zenblip team <br>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+
+</html>

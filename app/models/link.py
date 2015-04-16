@@ -21,9 +21,9 @@ class Link(BasicModel):
     url_id = ndb.StringProperty(required=True)  # hash of url
     url = ndb.TextProperty(required=True)  # TextProperty: due to 500 characters limit
     access_count = ndb.IntegerProperty(default=0)
-    subject = ndb.TextProperty() #email subject
+    subject = ndb.TextProperty()  # email subject
     receiver_emails = ndb.StringProperty(repeated=True)
-    country = ndb.TextProperty() #last access
-    city = ndb.TextProperty() #last access
-    device = ndb.TextProperty() #last access
+    country = ndb.TextProperty()  # last access
+    city = ndb.TextProperty()  # last access
+    device = ndb.TextProperty()  # last access
     is_accessed = ndb.BooleanProperty()

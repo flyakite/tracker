@@ -1,6 +1,7 @@
 import logging
 import base64
 import zlib
+from datetime import timedelta
 from ferris import BasicModel
 from google.appengine.ext import ndb
 
@@ -29,13 +30,15 @@ class Signal(BasicModel):
     access_count = ndb.IntegerProperty(default=0)
     receivers = ndb.JsonProperty()
     receiver_emails = ndb.StringProperty(repeated=True)
-    country = ndb.TextProperty() #last access
-    city = ndb.TextProperty() #last access
-    device = ndb.TextProperty() #last access
+    country = ndb.TextProperty()  # last access
+    city = ndb.TextProperty()  # last access
+    device = ndb.TextProperty()  # last access
     tz_offset = ndb.IntegerProperty(default=0)
     notification_setting = ndb.StringProperty()
     notify_triggered = ndb.DateTimeProperty()
     client = ndb.StringProperty()  # None for Gmail, 'outlook'
+    gmail_id = ndb.StringProperty()
+    track_state = ndb.BooleanProperty()
 
     @staticmethod
     def receiver_keys():
@@ -43,7 +46,7 @@ class Signal(BasicModel):
 
     def to_dict_output(self, include=['token', 'sender', 'subject', 'access_count'], exclude=[]):
         return self.to_dict(include=include, exclude=exclude)
-        
+
     @staticmethod
     def notification_settings():
         """
@@ -70,3 +73,6 @@ class Signal(BasicModel):
     @staticmethod
     def encode_signal_token(token):
         return "%s.%s" % (base64.urlsafe_b64encode(token), zlib.crc32(token, _CRC_START))
+
+    def created_consider_tz_offset(self):
+        return self.created + timedelta(hours=self.tz_offset)

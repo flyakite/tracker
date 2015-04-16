@@ -4,25 +4,48 @@ var zbBaseURL = 'https://zenblip.appspot.com';
 var config = {
   paths: {
     'jsapi': zbBaseURL + '/_ah/channel/jsapi',
+    'gapi': 'https://apis.google.com/js/client.js?onload=init',
     'jquery': chrome.extension.getURL('jquery-1.10.2.min.js'),
     'gmail': chrome.extension.getURL('gmail.js'),
     'utils': chrome.extension.getURL('utils.js'),
     'channel': chrome.extension.getURL('channel.js'),
     'messenger': chrome.extension.getURL('messenger.js'),
     'tracker': chrome.extension.getURL('tracker.js'),
+    'databind': chrome.extension.getURL('vendors/databind/js/databind.js'),
+    'simplemodal': chrome.extension.getURL('vendors/simplemodal/js/jquery.simplemodal.min.js'),
+    'pickadate': chrome.extension.getURL('vendors/pickadate/js/picker.js'),
+    'pickadate.date': chrome.extension.getURL('vendors/pickadate/js/picker.date.js'),
+    'composeToolBox': chrome.extension.getURL('composeToolBox/js/composeToolBox.js'),
     'main': chrome.extension.getURL('main.js')
   },
   shim: {
     'channel': {
       'deps': ['utils']
     },
+    'simplemodal': {
+      'deps': ['jquery']
+    },
+    'pickadate': {
+      'deps': ['jquery']
+    },
+    'pickadate.date': {
+      'deps': ['jquery', 'pickadate']
+    },
+    'composeToolBox': {
+      'deps': ['utils', 'jquery', 'databind', 'simplemodal', 'pickadate', 'pickadate.date']
+    },
     'main':{
-      'deps': ['jsapi', 'jquery', 'gmail', 'channel', 'messenger', 'tracker']
+      // 'deps': ['jsapi', 'jquery', 'gmail', 'channel', 'messenger', 'tracker', 'simplemodal', 'databind']
+      'deps': ['gapi', 'jsapi', 'jquery','gmail', 'channel', 'messenger', 'tracker', 'composeToolBox']
     }
   },
   css:{
     'font-awesome': chrome.extension.getURL('font-awesome/css/font-awesome.min.css'),
     'dashboard': chrome.extension.getURL('dashboard/css-build/tracker-dashboard.css'),
+    'simplemodal': chrome.extension.getURL('vendors/simplemodal/css-build/simplemodal.css'),
+    'pickadate': chrome.extension.getURL('vendors/pickadate/css/default.css'),
+    'pickadate.date': chrome.extension.getURL('vendors/pickadate/css/default.date.css'),
+    'composeToolBox': chrome.extension.getURL('composeToolBox/css-build/composeToolBox.css'),
     'content': chrome.extension.getURL('content.css')
   }
 };
@@ -162,16 +185,17 @@ var zenblip = (function(zb, $, React) {
   };
 
   zb.goToGoogleOAuth = function(hintEmail) {
-    window.open("https://accounts.google.com/o/oauth2/auth?" + 
+    var url = "https://accounts.google.com/o/oauth2/auth?" + 
       "response_type=code" +
-      "&scope=" + encodeURIComponent("email https://www.googleapis.com/auth/plus.login https://mail.google.com/") +
-      "&redirect_uri=" + encodeURIComponent(zbBaseURL + "/auth/oauth2callback") +
       "&client_id=" + encodeURIComponent("709499323932-c4a99dsihk6v1js29vg9tg3n30ph0oq8.apps.googleusercontent.com") +
+      "&redirect_uri=" + encodeURIComponent(zbBaseURL + "/auth/oauth2callback") +
+      "&scope=" + encodeURIComponent("email https://www.googleapis.com/auth/plus.login https://mail.google.com/") +
       "&state=" + encodeURIComponent(window.location.href) +
       "&access_type=offline" +
       "&login_hint=" + encodeURIComponent(hintEmail) +
-      "&include_granted_scopes=true"
-      );
+      "&include_granted_scopes=true";
+    
+    window.location.href = url;
   };
   zb.UserInit = function() {
     //zb.getDirectAccessToken();
@@ -246,6 +270,11 @@ var zenblip = (function(zb, $, React) {
       if(data.error == 1){
         data.track_by_default = true;
       }
+      if(!data.has_refresh_token){
+        zb.goToGoogleOAuth(sender);
+      }
+      //console.log(sender);
+      //zb.goToGoogleOAuth(sender);
       window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken, track_by_default:data.track_by_default}, "https://mail.google.com");
       zb._trackerInitialized = true;
     });

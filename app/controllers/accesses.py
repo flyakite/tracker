@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on 2014/8/23
 
@@ -220,7 +221,7 @@ class Accesses(BaseController):
                     if ip_secs[1] == '37':
                         proxy = 'MicrosoftHosting'
             except Exception as ex:
-                logging.error(ex)
+                logging.exception(ex)
                 pass
 
         user_agent = self.request.headers.get('User-Agent', '')
@@ -340,15 +341,14 @@ class Accesses(BaseController):
                     return source
 
                 except Exception as e:
-                    logging.error("db_ip exception: %s" % result.content)
+                    logging.exception("db_ip exception: %s" % result.content)
                     return None
             else:
                 logging.error("db_ip status not 200: %s %s" % (result.status_code, result.content))
                 return None
 
         except urlfetch.DownloadError as e:
-            logging.error("db_ip fetch DownloadError")
-            logging.error(e)
+            logging.exception("db_ip fetch DownloadError")
             return None
 
     def _check_notify_time_threshold(self, an, signal):
@@ -447,7 +447,7 @@ class Accesses(BaseController):
         setting = Setting.find_by_properties(email=signal.sender)
         if not setting:
             setting = Setting.create(signal.sender)
-            
+
         if setting.is_notify_by_email:
             if access_notification.kind == 'delay_notify':
                 """
@@ -455,7 +455,7 @@ class Accesses(BaseController):
                 """
                 signal.notify_triggered = access.created
                 signal.put()  # TODO: check if it's dangerous to save here
-    
+
                 taskqueue.add(
                     url='/tasks/delayed_access_notification',
                     method='POST',
@@ -465,10 +465,10 @@ class Accesses(BaseController):
                 )
                 logging.info('taskqueue added')
                 return
-    
+
             if access_notification.is_sending_email_notification and access_notification.kind in AccessNotification.kinds():
                 self._send_email_message(access_notification, sync=sync)
-                
+
         if setting.is_notify_by_desktop:
             if access_notification.is_sending_desktop_notification:
                 self._send_channel_message(access_notification, sync=sync)

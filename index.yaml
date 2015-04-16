@@ -66,6 +66,13 @@ indexes:
 - kind: Signal
   properties:
   - name: sender
+  - name: track_state
+  - name: created
+    direction: desc
+
+- kind: Signal
+  properties:
+  - name: sender
   - name: receiver_emails
 
 - kind: Signal

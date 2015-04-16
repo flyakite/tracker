@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 This file is used to configure application settings.
 
@@ -93,3 +94,5 @@ settings['API_SECRET_SALTS'] = ['3$DF1k_3tqeghkqGQETG#TGAasfq3g35GQ']
 settings['API_SECRET_AES_KEY'] = '8D1e5Bd1-5S07-45'  # length of 16
 # zenblip main site
 settings['ZENBLIP_MAIN_SITE_URI'] = 'https://www.zenblip.com'
+settings['GOOGLE_CLIENT_ID'] = '709499323932-c4a99dsihk6v1js29vg9tg3n30ph0oq8.apps.googleusercontent.com'
+settings['GOOGLE_CLIENT_SECRET'] = 'nA-THrzr56AGDMfH4CJjKCgb'

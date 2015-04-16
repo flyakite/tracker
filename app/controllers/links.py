@@ -24,19 +24,19 @@ class Links(Accesses):
         2. save access record
         """
 
-        #actually, this is not a json view. 
-        #But if not specified, TemplateNotFound occurs in unittest
-        self.meta.change_view('json') 
-        
+        # actually, this is not a json view.
+        # But if not specified, TemplateNotFound occurs in unittest
+        self.meta.change_view('json')
+
         if not token:
             token = self.request.get('t')
         if not url_id:
             url_id = self.request.get('h')  # url hash
         sync = self.request.get('sync', None)
         url = self.request.get('url', '')
-        url = str(url) #redirect url must be string, not unicode
+        url = str(url)  # redirect url must be string, not unicode
         logging.info(url)
-        
+
         if not token or not url_id:
             logging.error('link not found: %s %s' % (token, url_id))
             if url:
@@ -52,7 +52,6 @@ class Links(Accesses):
             else:
                 self.abort(404)
 
-        
         signal = Signal.find_by_properties(token=token)
         if not signal:
             logging.error('no signal')
@@ -62,7 +61,7 @@ class Links(Accesses):
                 self.abort(404)
 
         accessor, ass = self._recognize_user(signal, sync)
-        
+
         # prevent self access
         if accessor and signal.sender in accessor.keys():
             logging.info('self access')
@@ -110,20 +109,20 @@ class Links(Accesses):
     def get_links(self):
         self.meta.change_view('json')
         self._enable_cors()
-        
+
         sender = self.request.get('sender')
         accessed = self.request.get('accessed')
         logging.info('sender %s' % sender)
         if not sender:
             logging.error('no sender')
             return
-        
+
         if accessed:
-            #TODO: filter is_accessed
-            links = Link.query(Link.sender==sender, Link.is_accessed==True).order(-Link.modified).fetch(50)
+            # TODO: filter is_accessed
+            links = Link.query(Link.sender == sender, Link.is_accessed == True).order(-Link.modified).fetch(50)
         else:
-            links = Link.query(Link.sender==sender).order(-Link.created).fetch(50)
+            links = Link.query(Link.sender == sender).order(-Link.created).fetch(50)
         self.context['data'] = dict(data=[l.to_dict(
             include=['token', 'subject', 'url', 'access_count', 'receiver_emails',
-            'country', 'city', 'device', 
-            'created', 'modified']) for l in links])
+                     'country', 'city', 'device',
+                     'created', 'modified']) for l in links])

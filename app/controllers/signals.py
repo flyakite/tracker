@@ -16,18 +16,21 @@ from email.utils import parseaddr
 from libs.pkcs7 import PKCS7Encoder
 from uuid import uuid4
 from urllib import urlencode
-from google.appengine.api import users, urlfetch, memcache
+from google.appengine.api import users, urlfetch, memcache, taskqueue
 from google.appengine.ext import deferred, ndb
 from google.appengine.ext.db import TransactionFailedError
 from ferris import Controller, route_with, scaffold
+from ferris import settings
 from app.models.signal import Signal
 from app.models.access import Access
 from app.models.user_info import UserInfo
 from app.models.user_track import UserTrack
 from app.models.link import Link
+from app.models.reminder import Reminder
 from app.models.statistic import Statistic
 from accesses import Accesses
 from app.utils import is_email_valid, is_user_legit
+from app.libs.google_client import GoogleMessageClient
 
 # encrypt secret
 # RFC_PASSWORD = "mS3S7HvYgijDGRmKfUD0DxiaUCrPBhdd6yz73zQol5o="
@@ -55,9 +58,9 @@ def seperate_email_and_name(mail_string):
         return {email: name}
 
     if mail_string.endswith('>'):
-        m = re.match(r'\"(.*?)\"\s*\<(.*)\>', mail_string)
+        m = re.match(r'\"(.*?)\"\s*\<(.*)\>', mail_string, re.UNICODE)
         if not m:
-            m = re.match(r'(.*?)\s*\<(.*)\>', mail_string)
+            m = re.match(r'(.*?)\s*\<(.*)\>', mail_string, re.UNICODE)
         if m and is_email_valid(m.group(2)):
             return {m.group(2): m.group(1)}
         else:
@@ -84,11 +87,12 @@ def decode_cipher(encrypted):
     return in_utf16.decode('utf-16')
 
 
-class Signals(Accesses):
+class Signals(Accesses):  # TODO: bad inheritance
 
     @route_with('/signals/debug')
     def debug(self):
         self.meta.change_view('json')
+        self._enable_cors()
 
         if self.request.method != 'POST':
             self.response.status_code = 403
@@ -96,12 +100,12 @@ class Signals(Accesses):
 
         logging.info(self.request.headers.keys())
         logging.info(self.request.headers.values())
-        
+
         #sender_encrypted = self.request.get('se', '')
         #logging.debug('sender_encrypted ' + sender_encrypted)
         #sender = decode_cipher(sender_encrypted)
         #logging.debug('sender: ' + sender)
-        
+
         sender = self.request.get('sender')
         subject = self.request.get('subject')
         token = self.request.get('token')
@@ -159,15 +163,30 @@ class Signals(Accesses):
 
         outlook = self.request.get('outlook')
         debuginfo = self.request.get('debuginfo')
-        
+
+        track_state = self.request.get('track_state')
+        track_state = False if track_state == "0" else True
+        # reminder
+        reminder_enabled = self.request.get('reminder_enabled')
+        reminder_enabled = True if reminder_enabled == "1" else False
+        reminder_timer_string = self.request.get('reminder_timer_string')
+        reminder_if_no_reply = self.request.get('reminder_if_no_reply')
+        reminder_if_no_reply = True if reminder_if_no_reply == "1" else False
+        reminder_note = self.request.get('reminder_note')
+
+        logging.info('track_state: %s' % track_state)
+        logging.info('reminder_timer_string: %s' % reminder_timer_string)
+        logging.info('reminder_if_no_reply: %s' % reminder_if_no_reply)
+        logging.info('reminder_note: %s' % reminder_note)
+
         if self.current_user:
             logging.info('current_user: %s' % self.current_user)
-        
-        client = None
+
+        client = self.request.get("client")
         if outlook:
             logging.info("is_outlook")
             client = 'outlook'
-
+        
         logging.info("sender %s" % sender)
         logging.info("version %s" % version)
         logging.info("token %s" % token)
@@ -187,7 +206,7 @@ class Signals(Accesses):
             tz_offset = int(self.request.get('tz_offset', 0))
             logging.info("tz_offset: %s" % tz_offset)
         except Exception as ex:
-            logging.error(ex)
+            logging.exception(ex)
             tz_offset = None
         try:
             timezoneinfo = self.request.get('timezoneinfo', "")
@@ -232,15 +251,19 @@ class Signals(Accesses):
                             receiver_emails.append(email_and_name.keys()[0])
                         count += 1
             else:
-                receivers[k] = None
+                receivers[k] = {}
         receivers.update(c=count)
+        
+        logging.info(receivers)
+        logging.info(receiver_emails)
+        
         try:
             links = self.request.get('links', '')
             if not links:
                 links = '[]'
             links = json.loads(links)
         except Exception as ex:
-            logging.error(ex)
+            logging.exception(ex)
 
         # seperate the name and email
 
@@ -254,11 +277,13 @@ class Signals(Accesses):
                         sender=sender,
                         subject=subject,
                         receivers=receivers,
-                        receiver_emails = receiver_emails,
+                        receiver_emails=receiver_emails,
                         tz_offset=tz_offset,
                         client=client,
+                        track_state=track_state
                         )
-        if links:
+
+        if links and track_state:  # do not track links if not in track_state
             logging.info(links)
             self._save_links(links, signal, sync)
 
@@ -270,10 +295,75 @@ class Signals(Accesses):
         self._ensure_my_ass(sender, sync)
         self._update_statistic(signal, sync=sync)
         self.context['data'] = dict(signal=signal.to_dict(include=['token', 'sender', 'subject',
-                                                                   'receivers', 'access_count','receiver_emails',
+                                                                   'receivers', 'access_count', 'receiver_emails',
                                                                    'country', 'city', 'device']))
+        # add_reminder
+        if reminder_enabled:
+            Reminder.add_reminder_to_taskqueue(reminder_timer_string, reminder_if_no_reply, reminder_note, sender, token)
+        
+        #asign gmail id to signal
+        if client == "gmail":
+            tos = receivers["to"].keys() if receivers.get("to") else []
+            ccs = receivers["cc"].keys() if receivers.get("cc") else []
+            bccs = receivers["bcc"].keys() if receivers.get("bcc") else []
+            naughty_gmail_api_calm_down_and_will_give_me_real_thread_id_in_seconds = 60
+            taskqueue.add(
+                url='/assign_gmail_id_to_signal',
+                method='GET',
+                countdown=naughty_gmail_api_calm_down_and_will_give_me_real_thread_id_in_seconds,
+                params={'sender': sender,
+                        'signal_id': signal.key.id(),
+                        'tos': json.dumps(tos),
+                        'ccs': json.dumps(ccs),
+                        'bccs': json.dumps(bccs)
+                        }
+            )
         return
 #         self.response.headers.add_header('Access-Control-Allow-Origin', '*.google.com')
+        
+    @route_with('/assign_gmail_id_to_signal')
+    def assign_gmail_id_to_signal(self):
+        self.meta.change_view('json')
+        sender = self.request.get('sender')
+        logging.info("reminder sender: %s" % sender)
+        try:
+            signal_id = int(self.request.get('signal_id'))
+        except:
+            logging.exception("signal_id")
+            return
+        tos = json.loads(self.request.get('tos'))
+        ccs = json.loads(self.request.get('ccs'))
+        bccs = json.loads(self.request.get('bccs'))
+        user_info = UserInfo.find_by_properties(email=sender)
+        user_google_id = user_info.google_id
+        logging.info('user_google_id %s' % user_google_id)
+            
+        if not user_google_id:
+            logging.error("UserInfoNoGoogleID %s" % sender)
+            return
+        if not (user_info.google_id and user_info.refresh_token):
+            return
+            
+        signal = Signal.get_by_id(signal_id)
+        if not signal:
+            logging.error('Signal not found')
+            return
+        logging.info(signal.token)
+        try:
+            client = GoogleMessageClient(user_info=user_info)
+            result = client.search_threads(limit=3)
+            logging.info(result)
+            result = client.search_threads(signal.subject, tos, ccs, bccs, limit=1)
+            logging.info("ThreadsSearchResult:")
+            logging.info(result)
+            if result and result["threads"]:
+                thread_id = result["threads"][0]["id"]
+                logging.info("thread_id %s" % thread_id)
+                signal.gmail_id = thread_id
+                signal.put()
+        except Exception as ex:
+            logging.exception(ex)
+        self.context['data'] = {}
 
     def _check_user_legit_and_create_or_update_user_last_seen_and_started(self, sender, tz_offset=0, sync=True):
         """
@@ -362,27 +452,30 @@ class Signals(Accesses):
             statistic.monthly_signal_count += 1
         else:
             statistic = Statistic.create(email=signal.sender, monthly_signal_count=1)
-    
 
     @route_with('/resource/signals')
     def get_signals(self):
         self.meta.change_view('json')
         self._enable_cors()
-        
+
         sender = self.request.get('sender')
         logging.info('sender %s' % sender)
         if not sender:
             logging.error('no sender')
             return
-        
-        signals = Signal.query(Signal.sender==sender).order(-Signal.created).fetch(100)
+
+        signals = Signal.query(Signal.sender == sender).order(-Signal.created).fetch(100)
+        logging.info("query result type %s" % type(signals))
+        # TODO: add signals_new
+        #signals_new = Signal.query(Signal.sender==sender, Signal.track_state==True).order(-Signal.created).fetch(100)
+        #signals = list(signals)
+        #signals_new = list(signals_new)
+        #signals_new = signals.extend(signals)
         self.context['data'] = dict(data=[s.to_dict(
-            include=['token', 'sender', 'subject', 'access_count', 
-                     'receivers', 'receiver_emails', 
+            include=['token', 'sender', 'subject', 'access_count',
+                     'receivers', 'receiver_emails',
                      'country', 'city', 'device',
                      'created', 'modified']) for s in signals])
-        
-
 
     @route_with('/s/')
     def reply_robot(self):
@@ -423,7 +516,6 @@ class Signals(Accesses):
             return self.response
         else:
             memcache.add('signal::%s' % token, True, 1)  # @UndefinedVariable
-            
 
         signal = Signal.find_by_properties(token=token)
         if not signal:
@@ -431,13 +523,13 @@ class Signals(Accesses):
             logging.warning('no signal')
             self.create_response_image()
             return self.response
-        
+
         if datetime.utcnow() - signal.modified < timedelta(seconds=5) \
-            and signal.modified - signal.created > timedelta(seconds=3):
+                and signal.modified - signal.created > timedelta(seconds=3):
             logging.warning('access_too_frequently2')
             self.create_response_image()
             return self.response
-        
+
         logging.info('headers')
         logging.info(self.request.headers.keys())
         logging.info(self.request.headers.values())
@@ -468,7 +560,7 @@ class Signals(Accesses):
             logging.info('self_access')
 
         memcache.set('signal::%s' % token, None)  # @UndefinedVariable
-        
+
         self.create_response_image()
         return self.response
 
@@ -506,8 +598,8 @@ class Signals(Accesses):
             self._notify_sender(signal, access, sync=sync)
         except TransactionFailedError:
             access.put_async()
-            #TODO: customize _notify_sender if put failed
-            
+            # TODO: customize _notify_sender if put failed
+
         return access
 
     @route_with('/settings/notification/update')
@@ -538,4 +630,5 @@ class Signals(Accesses):
         else:
             logging.warning('notification_setting %s not in %s' % (notification_setting, Signal.notification_settings()))
             self.context['success'] = False
-            
+
+

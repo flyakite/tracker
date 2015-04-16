@@ -10,9 +10,11 @@ from uuid import uuid4
 from google.appengine.ext import testbed
 from ferrisnose import AppEngineTest, AppEngineWebTest, FerrisAppTest
 from app.models.api_key import ApiKey
+from app.models.user_info import UserInfo
 from app.models.setting import Setting
 from app.controllers.apis import Apis
 from app.controllers.auths import encode_token, decode_token
+
 
 class TestAuth(AppEngineWebTest):
 
@@ -29,7 +31,7 @@ class TestAuth(AppEngineWebTest):
 #         key = ApiKey.create_key()
 #         secret = ApiKey.create_secret(key)
 #         self.assertTrue(ApiKey.verify_secret(key, secret))
-# 
+#
 #     def test_create_token(self):
 #         key = ApiKey.create_key()
 #         secret = ApiKey.create_secret(key)
@@ -37,37 +39,53 @@ class TestAuth(AppEngineWebTest):
 #         self.assertTrue(ApiKey.verify_token(key, token))
 
     def test_settings(self):
-        sender='sender@asdf.com'
-        access_token = encode_token({'email':sender})
+        sender = 'sender@asdf.com'
+        user_info = UserInfo.create_user(sender)
+        access_token = encode_token({'email': sender})
         r = self.testapp.get('/settings',
-                              {
-                               'access_token': access_token,
-                               'email': sender,
-                               'is_notify_by_email': 1,
-                               'is_notify_by_desktop': ''
-                              },
-                              xhr=True)
+                             {
+                                 'access_token': access_token,
+                                 'email': sender,
+                                 'is_notify_by_email': 1,
+                                 'is_notify_by_desktop': ''
+                             },
+                             xhr=True)
         self.assertEqual(r.status_code, 200)
-        
+
         r = self.testapp.post('/settings',
                               {
-                               'access_token': access_token,
-                               'email': sender,
-                               'is_notify_by_email': 1,
-                               'is_notify_by_desktop': ''
+                                  'access_token': access_token,
+                                  'email': sender,
+                                  'is_notify_by_email': 1,
+                                  'is_notify_by_desktop': ''
                               },
                               xhr=True)
         self.assertEqual(r.status_code, 200)
         s = Setting.find_by_properties(email=sender)
         self.assertEqual(s.is_notify_by_email, True)
         self.assertEqual(s.is_notify_by_desktop, False)
-        
+
         r = self.testapp.get('/settings',
-                              {
-                               'access_token': access_token,
-                               'email': sender,
-                               'is_notify_by_email': 1,
-                               'is_notify_by_desktop': ''
-                              },
-                              xhr=True)
+                             {
+                                 'access_token': access_token,
+                                 'email': sender,
+                             },
+                             xhr=True)
         self.assertEqual(r.status_code, 200)
+        jsetting = json.loads(r.body)
+        self.assertEqual(jsetting['is_notify_by_email'], True)
+        self.assertEqual(jsetting['is_notify_by_desktop'], False)
+        self.assertEqual(jsetting['has_refresh_token'], False)
+        
+        user_info.refresh_token = 'aaa'
+        user_info.put()
+        r = self.testapp.get('/settings',
+                             {
+                                 'access_token': access_token,
+                                 'email': sender,
+                             },
+                             xhr=True)
+        self.assertEqual(r.status_code, 200)
+        jsetting = json.loads(r.body)
+        logging.info(jsetting)
+        self.assertEqual(jsetting['has_refresh_token'], True)

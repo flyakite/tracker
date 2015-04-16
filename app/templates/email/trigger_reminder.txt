@@ -1,0 +1,19 @@
+Hi There!
+
+{% if reminder.if_no_reply %}
+We believe you sent an email to the following person and unfortunately there's no reply from the primary recipient.
+
+{% endif %}
+Maybe it's a good time to follow up with them again.
+
+Subject: {{signal.subject}} 
+
+Recipient: {{','.join(signal.receiver_emails)}}
+
+Date Sent: {{ signal.created_consider_tz_offset().strftime('%Y/%m/%d') }}
+
+Note: {{reminder.note}}
+
+Cheers,
+
+The zenblip team

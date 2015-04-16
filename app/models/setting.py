@@ -18,7 +18,7 @@ class Setting(BasicModel):
     is_notify_by_desktop = ndb.BooleanProperty(default=True)
     is_daily_report = ndb.BooleanProperty(default=True)
     is_weekly_report = ndb.BooleanProperty(default=True)
-    
+
     @classmethod
     def create(cls,
                email,
@@ -27,14 +27,14 @@ class Setting(BasicModel):
                is_notify_by_desktop=True,
                is_daily_report=True,
                is_weekly_report=True):
-                   
+
         setting = cls(email=email,
                       track_by_default=track_by_default,
-                        is_notify_by_email=is_notify_by_email,
-                        is_notify_by_desktop=is_notify_by_desktop,
-                        is_daily_report=is_daily_report,
-                        is_weekly_report=is_weekly_report
-                        )
+                      is_notify_by_email=is_notify_by_email,
+                      is_notify_by_desktop=is_notify_by_desktop,
+                      is_daily_report=is_daily_report,
+                      is_weekly_report=is_weekly_report
+                      )
         setting.put()
         return setting
 

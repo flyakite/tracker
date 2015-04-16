@@ -20,7 +20,7 @@ class Statistic(BasicModel):
                email,
                monthly_signal_count=1,
                ):
-                   
+
         statistic = cls(email=email,
                         monthly_signal_count=monthly_signal_count
                         )

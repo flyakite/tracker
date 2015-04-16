@@ -81,7 +81,7 @@ def z(plugin="chrome"):
         with lcd("chrome_plugin"):
             local("rm -rf dashboard/.sass-cache/")
             local("rm -rf dashboard/js-build/.module-cache/")
-            local("zip zb.zip * -v -r -x *.sass-cache* *sass* *.module-cache* *.sh* test/*")
+            local("zip zb.zip * -v -r -x *.sass-cache* *sass* *.module-cache* *.sh* test/* *.html")
 
 def firefox(action="activate"):
     """

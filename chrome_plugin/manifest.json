@@ -1,22 +1,19 @@
 {
   "name": "zenblip",
-  "version": "0.2.8",
+  "version": "0.3.1",
   "icons": {
     "128": "128.png"
   },
-  "description": "zenblip beta",
+  "description": "A kick-ass email tool that gives recruiters the edge.",
   "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAirjUmBH1V+ZNeMFcuLS26jl/iBGqOvOiUW/AsVlZl9xOVpNZ5+Q4O78rmN+OrOUC7oo5I3uuXWmjbK4l1EwBhv4qd+algA99LMB8Ve7QOTkb8Tb+EU/Spgk4dKXC+Zi1I5l1wo0XncgKn9B8IzHSmMEqts4TOz1RODLJHNEdadO0rzRCBiif+4ZhxGnHMtbBt5zwtWjt4ifQ8mobV5zwkDKWlgkgZlgx0wk/CSxT7Mx1VOng9apBywsjDYsZ8sNYJCGaUmpLnwPuu+7898/qxZ2xmvBLpzNlyY1zbj6OaCkj/IFcCiBnn2sHe/cYLer7+FBt3cioKiP5CkdiV4Yx9QIDAQAB",
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/*"],
-      
       "js": [
         "deps.min.js", 
         "jquery-1.10.2.min.js",
-        "react-with-addons.min.js",
         "utils.js",
-        "messenger.js",
-        "tracker.js",
+        "react-with-addons.min.js",
         "dashboard/js-build/tracker-dashboard.js",
         "content.js"
         ]
@@ -33,6 +30,8 @@
   "web_accessible_resources": [
     "font-awesome/*",
     "dashboard/*",
+    "composeToolBox/*",
+    "vendors/*",
     "content.css",
     "jquery-1.10.2.min.js",
     "react-with-addons.min.js",
@@ -42,9 +41,7 @@
     "tracker.js",
     "channel.js",
     "utils.js",
-    "main.js",
-    "dashboard/js-build/tracker-dashboard.js",
-    "backgroundMain.js"
+    "main.js"
   ],
   "permissions":[
     "identity",

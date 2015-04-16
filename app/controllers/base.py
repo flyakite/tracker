@@ -11,6 +11,7 @@ from ferris import Controller, route_with, scaffold
 from ferris.core.views import View
 from app.models.user_info import UserInfo
 
+
 class BaseController(Controller):
     # TODO: make it a decorator
 
@@ -49,22 +50,22 @@ class BaseController(Controller):
             return UserInfo.find_by_properties(email=user_email)
         else:
             return None
-    
+
     def get_or_set_csrf_token(self):
         _csrf_token = self.request.cookies.get('_csrf_token')
         logging.info('_csrf_token: %s' % _csrf_token)
         if not _csrf_token:
             logging.info('create csrf_token')
             _csrf_token = str(uuid4())[:8]
-            self.response.set_cookie('_csrf_token', _csrf_token, max_age=30*86400)
+            self.response.set_cookie('_csrf_token', _csrf_token, max_age=30 * 86400)
         return _csrf_token
-            
+
     def csrf_token_valid(self):
-        if self.request.method in ['POST','PUT'] \
-            and self.csrf_token != self.request.get('_csrf_token'):
+        if self.request.method in ['POST', 'PUT'] \
+                and self.csrf_token != self.request.get('_csrf_token'):
             return False
         return True
-    
+
 
 class BaseView(View):
 
