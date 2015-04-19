@@ -45,7 +45,7 @@ var zenblip = (function(zb, $, dbi) {
       }
     });
 
-    console.log($mail);
+    //console.log($mail);
     //init state
     $mail
       //.find('form').append($hiddenInput)
@@ -76,7 +76,7 @@ var zenblip = (function(zb, $, dbi) {
   };
 
   zb.Reminder.prototype.calculateTimerString = function() {
-    console.log("calculateTimerString");
+    //console.log("calculateTimerString");
     //
     //Unfortunately there's no databinding for radio group
     //
@@ -141,10 +141,10 @@ var zenblip = (function(zb, $, dbi) {
               <input id='option3-"+mid+"' data-key='option3' name='reminddatetime-"+mid+"' value='7d' type='radio'>\
               <label for='option3-"+mid+"'> 7 Days </label>\
               </div>\
-              <div>\
+              <!--div>\
               <input id='option4-"+mid+"' data-key='option4' name='reminddatetime-"+mid+"' value='5m' type='radio'>\
               <label for='option4-"+mid+"'> 5 Minutes (for test) </label>\
-              </div>\
+              </div-->\
               <div>\
               <input id='option-custom-"+mid+"' data-key='optionCustom' name='reminddatetime-"+mid+"' value='"+customString+"' type='radio'>\
               <label for='option-custom-"+mid+"'> Custom\
@@ -176,14 +176,13 @@ var zenblip = (function(zb, $, dbi) {
       dbi.bind($reminderForm, reminder);
       $reminderForm
       .on('click', '.zb-datepicker', function(e) {
-        console.log('clicked');
         // e.preventDefault();
-        var MAX_REMINDER_TIME_IN_DAYS = 14; //server limit 29 days
+        var MAX_REMINDER_TIME_IN_DAYS = 21; //server limit 29 days
         var $this = $(this);
         var now = new Date();
         var min = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
         var max = new Date(now.getFullYear(), now.getMonth(), now.getDate() + MAX_REMINDER_TIME_IN_DAYS);
-        console.log(max);
+        //console.log(max);
         $this.pickadate({
           format: 'yyyy-mm-dd',
           formatSubmit: 'yyyy-mm-dd', //useless, we don't use the hidden input
@@ -199,7 +198,7 @@ var zenblip = (function(zb, $, dbi) {
             reminder.datePicked = $this.val();
             reminder.optionCustom = true;
             // document.getElementById('option-custom-'+mid).checked = true;
-            console.log(reminder.datePicked);
+            //console.log(reminder.datePicked);
           }
         });
       })
@@ -324,7 +323,7 @@ var zenblip = (function(zb, $, dbi) {
 
     $toolbox.find('td.zb-tracker-td').append($trackControl);
     $toolbox.find('td.zb-reminder-td').append($reminderControl);
-    $toolbox.find('td.zb-template-td').append($templateControl);
+    //$toolbox.find('td.zb-template-td').append($templateControl);
     return $toolbox;
   };
   zb.addComposeToolBoxToComposingMails = function(options) {
