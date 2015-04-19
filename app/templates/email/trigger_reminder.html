@@ -72,15 +72,14 @@
                         We believe you sent an email to the following person and unfortunately there's no reply from the primary recipient.<br>
                         <br>
                         {% endif %}
-                        Maybe it's a good time to follow up with them again.<br>
+                        Maybe it's a good time to follow up with them again:<br>
+                        <br>
+                        {{ ', '.join(signal.receiver_emails) }} <br>
                         <br>
                         <h4>Subject</h4>
                         {{ signal.subject }} <br>
                         <br>
-                        <h4>Recipient</h4> 
-                        {{ ', '.join(signal.receiver_emails) }} <br>
-                        <br>
-                        <h4>Date Sent</h4>
+                        <h4>Email Sent</h4>
                         {{ signal.created_consider_tz_offset().strftime('%Y/%m/%d') }} <br>
                         <br> 
                         <h4>Note</h4>
