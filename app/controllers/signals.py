@@ -464,13 +464,8 @@ class Signals(Accesses):  # TODO: bad inheritance
             logging.error('no sender')
             return
 
-        signals = Signal.query(Signal.sender == sender).order(-Signal.created).fetch(100)
-        logging.info("query result type %s" % type(signals))
-        # TODO: add signals_new
-        #signals_new = Signal.query(Signal.sender==sender, Signal.track_state==True).order(-Signal.created).fetch(100)
-        #signals = list(signals)
-        #signals_new = list(signals_new)
-        #signals_new = signals.extend(signals)
+        #signals = Signal.query(Signal.sender == sender).order(-Signal.created).fetch(100)
+        signals = Signal.query(Signal.sender==sender, Signal.track_state.IN([True, None])).order(-Signal.created).fetch(100)
         self.context['data'] = dict(data=[s.to_dict(
             include=['token', 'sender', 'subject', 'access_count',
                      'receivers', 'receiver_emails',
