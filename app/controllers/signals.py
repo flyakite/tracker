@@ -455,6 +455,9 @@ class Signals(Accesses):  # TODO: bad inheritance
 
     @route_with('/resource/signals')
     def get_signals(self):
+        """
+        TODO: authentication
+        """
         self.meta.change_view('json')
         self._enable_cors()
 
@@ -465,7 +468,7 @@ class Signals(Accesses):  # TODO: bad inheritance
             return
 
         #signals = Signal.query(Signal.sender == sender).order(-Signal.created).fetch(100)
-        signals = Signal.query(Signal.sender==sender, Signal.track_state.IN([True, None])).order(-Signal.created).fetch(100)
+        signals = Signal.query(Signal.sender==sender, Signal.track_state.IN([True, None])).order(-Signal.created).fetch(500)
         self.context['data'] = dict(data=[s.to_dict(
             include=['token', 'sender', 'subject', 'access_count',
                      'receivers', 'receiver_emails',
