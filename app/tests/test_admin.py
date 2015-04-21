@@ -29,7 +29,7 @@ class TestAdminOperation(AppEngineWebTest):
         self.add_controller(Admins)
         self.mail_stub = self.testbed.testbed.get_stub(testbed.MAIL_SERVICE_NAME)
 
-    def testUserList(self):
+    def test_user_list(self):
 
         try:
             r = self.testapp.get('/admin/user_list')
@@ -53,11 +53,17 @@ class TestAdminOperation(AppEngineWebTest):
         r = self.testapp.get('/admin/user_list?org=test')
         logging.debug(r)
         assert r.status_code == 200
-        r = self.testapp.get('/admin/user_list?connected=1')
+        r = self.testapp.get('/admin/user_list?legacy=1')
+        logging.debug(r)
+        assert r.status_code == 200
+        r = self.testapp.get('/admin/user_list?legacy=1&active=1')
+        logging.debug(r)
+        assert r.status_code == 200
+        r = self.testapp.get('/admin/user_list?active=1')
         logging.debug(r)
         assert r.status_code == 200
 
-    def testFixUserStarted(self):
+    def test_fix_user_started(self):
         for email in ['user1@asdf.com', 'user2@asdf.com']:
             UserInfo(email=email,
                      orgs=['test'],
@@ -69,7 +75,7 @@ class TestAdminOperation(AppEngineWebTest):
         logging.info(user)
         assert user.started
 
-    def testLegitUser(self):
+    def test_legit_user(self):
         for email in ['user1@asdf.com', 'user2@asdf.com']:
             UserInfo(email=email,
                      orgs=['test'],

@@ -46,14 +46,24 @@ class Admins(BaseController):
 
         org = self.request.get('org')
         legacy = self.request.get('legacy', False)
-
+        active = self.request.get('active', False)
+        
+        if active:
+            active_start = datetime.utcnow() - timedelta(days=60)
+        else:
+            active_start = datetime(1, 1, 1) #in case active_start is not defined
+            
         users = []
         emails = []
 
         if legacy:
             # list all recent users
             # based on UserInfo and ChannelClient
-            ccs = ChannelClient.query().order(-ChannelClient.created).fetch(500)
+            if active:
+                ccs = ChannelClient.query(ChannelClient.modified > active_start).order(-ChannelClient.modified).fetch(500)
+            else:
+                ccs = ChannelClient.query().order(-ChannelClient.created).fetch(500)
+                
             logging.info('channelclients: %s' % len(ccs))
             emails = [cc.owner for cc in ccs]
             is_connected = {cc.owner: {'last_seen': cc.modified} for cc in ccs}
@@ -75,10 +85,14 @@ class Admins(BaseController):
         else:
             # based on UserInfo
             if org:
+                #org is deprecated
                 userinfos = UserInfo.query(UserInfo.orgs == org).fetch(500)
                 userinfos.sort(key=lambda x: x.created, reverse=True)
             else:
-                userinfos = UserInfo.query().order(-UserInfo.created).fetch(500)
+                if active:
+                    userinfos = UserInfo.query(UserInfo.modified > active_start).order(-UserInfo.modified).fetch(500)
+                else:
+                    userinfos = UserInfo.query().order(-UserInfo.created).fetch(500)
             logging.info('userinfos: %s' % len(userinfos))
             emails = [u.email for u in userinfos]
             ccs = ChannelClient.query(ChannelClient.owner.IN(emails)).fetch()

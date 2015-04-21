@@ -339,7 +339,7 @@ class Signals(Accesses):  # TODO: bad inheritance
         logging.info('user_google_id %s' % user_google_id)
             
         if not user_google_id:
-            logging.error("UserInfoNoGoogleID %s" % sender)
+            logging.warning("UserInfoNoGoogleID %s" % sender)
             return
         if not (user_info.google_id and user_info.refresh_token):
             return

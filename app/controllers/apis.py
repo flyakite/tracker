@@ -212,9 +212,9 @@ class Apis(BaseController):
             user_info = UserInfo.find_by_properties(email=email)
             
             s = setting.to_dict_output()
-            logging.info(s)
             has_refresh_token = True if user_info and user_info.refresh_token else False
             s.update(dict(has_refresh_token=has_refresh_token))
+            logging.info(s)
             self.context['data'] = s
             return
         elif self.request.method == 'POST':

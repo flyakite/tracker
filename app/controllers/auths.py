@@ -98,7 +98,7 @@ class Auths(BaseController):
             )
         else:
             hd = user_from_plus.get('hd')
-            user_info.email = user_from_plus['email']
+            #user_info.email = user_from_plus['email']
             user_info.domain = user_info.email.split('@')[1].lower()
             user_info.name = user_from_plus.get('name')
             user_info.given_name = user_from_plus.get('given_name')
@@ -122,6 +122,11 @@ class Auths(BaseController):
         But in Google APIs, Google suggest not to use email, as one email can represent different identities.
 
         TODO: how to test this handler?
+        
+        This method is deprecated.
+        This is a way to do authentication for a entire Chrome context.
+        There's no control in user interface to choose email in a Chrome context.
+        Our user may have multiple email accounts in a Chrome context.
         """
         self.meta.change_view('json')
         self._enable_cors()
@@ -152,9 +157,11 @@ class Auths(BaseController):
         if 'error' in result:
             self.context['data'] = {'error': 'status_error: %s' % result.status_code}
             return
-
+        
+        logging.info(result)
+        
         user_from_plus = result
-
+        
         self.update_or_create_userinfo(user_from_plus)
 
         self.context['data'] = {'success': 1,
@@ -179,7 +186,7 @@ class Auths(BaseController):
 
         if error:
             logging.error(error)
-            return self.redirect(state)
+            return self.redirect(str(state))
 
         payload = {
             'code': code,
@@ -190,7 +197,15 @@ class Auths(BaseController):
         }
 
         payload = urllib.urlencode(payload)
-        r = urlfetch.fetch("https://www.googleapis.com/oauth2/v3/token", payload=payload, method=urlfetch.POST)
+        try:
+            r = urlfetch.fetch("https://www.googleapis.com/oauth2/v3/token", payload=payload, method=urlfetch.POST)
+        except:
+            try:
+                r = urlfetch.fetch("https://www.googleapis.com/oauth2/v3/token", payload=payload, method=urlfetch.POST)
+            except:
+                logging.exception("oauth2callback GetAccessTokenFailed")
+                return self.redirect(str(state))
+                
         if r.status_code != 200:
             logging.error(r.content)
             return self.redirect(str(state))
@@ -198,7 +213,12 @@ class Auths(BaseController):
         logging.info(r.content)
         jdata = json.loads(r.content)
         access_token = jdata['access_token']
-        refresh_token = jdata['refresh_token'] if 'refresh_token' in jdata else None
+        if 'refresh_token' in jdata:
+            refresh_token = jdata['refresh_token']
+        else:
+            logging.error('callback no refresh_token')
+            return self.redirect(str(state))
+
         expires_in = jdata['expires_in']
         token_type = jdata['token_type']
 
@@ -209,7 +229,9 @@ class Auths(BaseController):
             return self.redirect(str(state))
 
         user_from_plus = result
-
+        
+        logging.info(result)
+        
         self.update_or_create_userinfo(user_from_plus, refresh_token=refresh_token)
         payload = {
             'hint': 'addplan',
