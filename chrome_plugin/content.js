@@ -87,7 +87,7 @@ var zenblip = (function(zb, $, React) {
   var current_user = null;
   var gmail = null;
   var sender = null;
-  var senderEmail;
+  // var senderEmail;
   //var messenger;
   var raDashboard;
   var composeIDs = [];
@@ -96,13 +96,20 @@ var zenblip = (function(zb, $, React) {
   var zbRedirectPath = '/l',
     zbSignalPath = '/s',
     zbTmpToken = '$$$zbTmpToken$$$';
-  /* user */
-  zb.User = function(email) {
-    this.email = email;
-    this.ukey = zb.hashFnv32a(email, true);
+
+  var setting = null;
+
+  zb.FREE_PLAN = 0;
+  zb.PRO_PLAN = 1;
+  zb.TEAM_PLAN = 2;
+
+  zb.Setting = function() {
+    this.track_by_default = true;
+    this.has_refresh_token = false;
+    this.enable_reminder = false;
+    this.plan = zb.FREE_PLAN;
   };
 
-  
   // var contentMessageHandler = function(msg) {
   //   console.log('contentMessageHandler');
   //   console.log(msg);
@@ -171,7 +178,7 @@ var zenblip = (function(zb, $, React) {
     // var options = {interactive:interactive}
     // messenger.post({e:'getAndUpdateUserInfo', options:options});
 
-    zb.loginZenblip(senderEmail);
+    zb.loginZenblip(sender.email);
     // zb.goToGoogleOAuth(senderEmail);
   };
 
@@ -181,7 +188,8 @@ var zenblip = (function(zb, $, React) {
   //   messenger.post({e:'validateUserPlan', options:options})
   // };
   zb.loginZenblip = function(hintEmail) {
-    window.open(zbMainURL + "/dashboard?email="+encodeURIComponent(hintEmail));
+    window.location.href = zbMainURL + "/accounts/login/?next=" +
+      encodeURIComponent('/accounts/redirect?u='+encodeURIComponent(window.location.href));
   };
 
   zb.goToGoogleOAuth = function(hintEmail) {
@@ -189,9 +197,10 @@ var zenblip = (function(zb, $, React) {
       "response_type=code" +
       "&client_id=" + encodeURIComponent("709499323932-c4a99dsihk6v1js29vg9tg3n30ph0oq8.apps.googleusercontent.com") +
       "&redirect_uri=" + encodeURIComponent(zbBaseURL + "/auth/oauth2callback") +
-      "&scope=" + encodeURIComponent("email https://www.googleapis.com/auth/plus.login https://mail.google.com/") +
+      "&scope=" + encodeURIComponent("email profile https://mail.google.com/") +
       "&state=" + encodeURIComponent(window.location.href) +
       "&access_type=offline" +
+      "&approval_prompt=force" +
       "&login_hint=" + encodeURIComponent(hintEmail) +
       "&include_granted_scopes=true";
     
@@ -200,7 +209,7 @@ var zenblip = (function(zb, $, React) {
   zb.UserInit = function() {
     //zb.getDirectAccessToken();
     //TODO: get local stored permission before asking remote server
-    zb.getJSONPAccessTokenAndCheckPermission(senderEmail);
+    zb.getJSONPAccessTokenAndCheckPermission(sender.email);
     //zb.getAndUpdateUserInfo(false);
     // zb.validateUserPlan();
   };
@@ -232,10 +241,11 @@ var zenblip = (function(zb, $, React) {
     if(data.signed_in){
       zenblipAccessToken = data.access_token;
       if(data.has_permission){
-        if(data.top_plan_order == 0){
+        setting.plan = data.top_plan_order;
+        if(setting.plan == zb.FREE_PLAN){
           //free plan
           raDashboard.onAuthenticationFailed({message:'zenblip free plan enabled', collapse:true});
-        }else if(data.top_plan_order > 0){
+        }else if([zb.PRO_PLAN, zb.TEAM_PLAN].indexOf(setting.plan) != -1){
           //paid plan
           raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
         }
@@ -243,23 +253,25 @@ var zenblip = (function(zb, $, React) {
           zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
         }
       }else{
-        // raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
         //to be removed -----
-        zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-        raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-        if(!zb._trackerInitialized){
-         zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-        }
+        // zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+        // raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+        // if(!zb._trackerInitialized){
+        //  zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+        //  setting.plan = zb.TEAM_PLAN;
+        // }
         //to be removed -----
       }
     }else{
-      // raDashboard.onAuthenticationFailed({});
+      raDashboard.onAuthenticationFailed({});
       //to be removed -----
-      zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
-      raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
-      if(!zb._trackerInitialized){
-        zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
-      }
+      // zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
+      // raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
+      // if(!zb._trackerInitialized){
+      //   zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
+      //   setting.plan = zb.TEAM_PLAN;
+      // }
       //to be removed -----
     }
   };
@@ -267,15 +279,21 @@ var zenblip = (function(zb, $, React) {
   zb.requestTrackerInit = function(options) {
     $.get(zbBaseURL+'/settings', {email:sender.email, access_token:options.zenblipAccessToken, ref:'gmail-chrome'}, function(data) {
       console.log(data);
-      if(data.error == 1){
-        data.track_by_default = true;
+      if(data.error != 1){
+        setting.track_by_default = data.track_by_default;
+        setting.has_refresh_token = data.has_refresh_token;
+      }else{
+        setting.track_by_default = true;
+        setting.has_refresh_token = false;
       }
-      if(!data.has_refresh_token){
-        zb.goToGoogleOAuth(sender);
+      if([zb.PRO_PLAN, zb.TEAM_PLAN].indexOf(setting.plan) != -1 && !setting.has_refresh_token){
+        zb.goToGoogleOAuth(sender.email);
+      }else{
+        setting.enable_reminder = true;
       }
-      //console.log(sender);
-      //zb.goToGoogleOAuth(sender);
-      window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken, track_by_default:data.track_by_default}, "https://mail.google.com");
+
+      //zb tracker init in main.js
+      window.postMessage({type:'zbTrackerInit', zenblipAccessToken:options.zenblipAccessToken, setting:setting}, "https://mail.google.com");
       zb._trackerInitialized = true;
     });
   };
@@ -283,17 +301,18 @@ var zenblip = (function(zb, $, React) {
   zb.Init = function(options){
     console.log('zenblip init');
     sender = options.sender;
-    senderEmail = options.senderEmail;
+    //senderEmail = options.senderEmail;
     //messenger = new zb.Messenger(ExtensionID, contentMessageHandler, sender);
     zb.DashboardInit();
     zb.UserInit(); // get access token and launch dashboard
     //zb.SenderInit();
+    setting = new zb.Setting();
   };
   return zb;
 }(zenblip || {}, jQuery, React));
 
 document.addEventListener('zbInit', function(e){
   console.log('zbInit');
-  console.log(e.detail);
+  //console.log(e.detail);
   zenblip.Init(e.detail);
 });

@@ -16,6 +16,7 @@ var zenblip = (function(zb, $, Gmail) {
   var senderID;
   var messenger;
   var composeIDs = [];
+  var setting;
   // var debugCounter = 0;
   var zenblipAccessToken = '';
   var zbRedirectPath = '/l';
@@ -30,6 +31,9 @@ var zenblip = (function(zb, $, Gmail) {
   zb.User = function(email) {
     this.email = email;
     this.ukey = zb.hashFnv32a(email, true);
+    this.plan = '';
+    this.trackByDefault = false;
+    this.hasRefreshToken = false;
   };
 
   var contentMessageHandler = function(msg) {
@@ -228,10 +232,14 @@ var zenblip = (function(zb, $, Gmail) {
     //applied when user authorized
     console.log('TrackerInit');
     zenblipAccessToken = options.zenblipAccessToken;
+    setting = options.setting;
     zb.Gmail.observe.before('send_message', zb.emailBeforeSend);
     zb.watchCompose(function() {
       // zb.attachTrackCheckbox({track_by_default:options.track_by_default});
-      zb.addComposeToolBoxToComposingMails({track_by_default:options.track_by_default});
+      zb.addComposeToolBoxToComposingMails({
+        track_by_default:options.track_by_default,
+        enable_reminder:options.setting.enable_reminder
+        });
     });
     zb.ChannelInit();
   };

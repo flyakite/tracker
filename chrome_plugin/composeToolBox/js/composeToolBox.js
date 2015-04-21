@@ -295,6 +295,17 @@ var zenblip = (function(zb, $, dbi) {
     6: "<div>Hi ,<br><br> This is a test for zenblip template 6. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>"
   }
 
+
+  zb.composeToolBoxCronJob = function($mail, options) {
+    window.setInterval(function() {
+      if($mail.find('.aX').is(':visible')){
+        $mail.find('.ct-inner').css('height', '82px');
+      }else{
+        $mail.find('.ct-inner').css('height', '42px');
+      }
+    }, 500);
+  };
+
   zb.createComposeToolBox = function($mail, options) {
     var $trackControl = zb.createTrackControl($mail, options);
     var $reminderControl = zb.createReminderControl($mail, options);
@@ -322,10 +333,15 @@ var zenblip = (function(zb, $, dbi) {
         </div>");
 
     $toolbox.find('td.zb-tracker-td').append($trackControl);
-    $toolbox.find('td.zb-reminder-td').append($reminderControl);
+    if(options.enable_reminder){
+      $toolbox.find('td.zb-reminder-td').append($reminderControl);
+    }
     //$toolbox.find('td.zb-template-td').append($templateControl);
+
+    zb.composeToolBoxCronJob($mail, options);
     return $toolbox;
   };
+
   zb.addComposeToolBoxToComposingMails = function(options) {
     // var $newMails = $('.AD').not('.zbTracked');
     var $newMails = $('.aoI').not('.zbTracked');
