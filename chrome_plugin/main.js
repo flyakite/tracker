@@ -3,7 +3,6 @@ var zenblip = (function(zb, $, Gmail) {
   // console.log(zb);
 
   var ExtensionID = 'oocgfjghhllncddlnhlocnikogonjdcp';
-  var zbBaseURL = 'https://zenblip.appspot.com';
   var zbMainURL = 'https://www.zenblip.com';
   var zbExternalURL = 'http://www.email-link.com';
   var zbChannelPath = '/channels/';
@@ -21,8 +20,11 @@ var zenblip = (function(zb, $, Gmail) {
   var zenblipAccessToken = '';
   var zbRedirectPath = '/l';
   var zbSignalPath = '/s';
-  var zbTmpToken = '$$$zbTmpToken$$$';
+  var zbToken = '_';
 
+  zb.baseURL = 'https://zenblip.appspot.com';
+  zb.templarsResourcePath = '/resource/templars';
+  zb.templarResourcePath = '/resource/templar';
   zb.trackStateName = zb.trackStateName || 'zb-track-state';
   zb.composedToolBoxData = zb.composedToolBoxData || 'zb-post-data';
 
@@ -68,7 +70,7 @@ var zenblip = (function(zb, $, Gmail) {
 
   zb.attachSignal = function(body, token) {
     // return body + "<img src='http://www.needclickers.com/static/images/blessjewel0.gif?how=aboutthis' width='1' height='1' style='display:none'>";
-    return body + "<div style='float:right'><img src='" + zbExternalURL + zbSignalPath + "/s.gif?u=" + sender.ukey + "&amp;t="+ token +"' width='0' height='0' style='display:none;opacity:0'></div>";
+    return body + "<div style='float:right' rel='__zbtk__'><img src='" + zbExternalURL + zbSignalPath + "/s.gif?u=" + sender.ukey + "&amp;t="+ token +"' width='0' height='0' style='display:none;opacity:0'></div>";
   };
 
 
@@ -198,7 +200,7 @@ var zenblip = (function(zb, $, Gmail) {
     zb.retryConnection.hold(registerID, 30*1000, function() {
       zb.sendBeaconToServer(payload);
     });
-    $.post(zbBaseURL + '/signals/add?sync=1', payload, function(jdata) {
+    $.post(zb.baseURL + '/signals/add?sync=1', payload, function(jdata) {
       //console.log(jdata);
       zb.retryConnection.release(registerID);
     });
@@ -220,7 +222,7 @@ var zenblip = (function(zb, $, Gmail) {
     var options = {
       isCreate: false, 
       senderEmail:sender.email,
-      uri: zbBaseURL + zbChannelPath
+      uri: zb.baseURL + zbChannelPath
     };
     //def in channel.js
     zb.getOrCreateChannelToken(options, function() {
@@ -238,7 +240,9 @@ var zenblip = (function(zb, $, Gmail) {
       // zb.attachTrackCheckbox({track_by_default:options.track_by_default});
       zb.addComposeToolBoxToComposingMails({
         track_by_default:options.track_by_default,
-        enable_reminder:options.setting.enable_reminder
+        enable_reminder:options.setting.enable_reminder,
+        access_token: zenblipAccessToken,
+        sender: sender
         });
     });
     zb.ChannelInit();

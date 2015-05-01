@@ -7,6 +7,7 @@ from google.appengine.ext import testbed
 from ferrisnose import AppEngineTest, AppEngineWebTest, FerrisAppTest
 from app.models.signal import Signal
 from app.models.access import Access
+from app.models.templar import Templar
 from app.models.user_info import UserInfo
 from app.controllers.signals import Signals
 from app.controllers.signals import seperate_email_and_name
@@ -55,7 +56,7 @@ class TestSignalController(TestBase):
         self.assertEqual(seperate_email_and_name('Nice <asdf@asdf.com>'), {'asdf@asdf.com': 'Nice'})
         self.assertEqual(seperate_email_and_name('Nice <asdf!asdf.com>'), None)
 
-    def testrequest_create_signal(self):
+    def test_request_create_signal(self):
         self.loginUser('sender@asdf.com')
         sender = 'sender@asdf.com'
         subject = 'Mail to Su'
@@ -83,7 +84,7 @@ class TestSignalController(TestBase):
 #         assert ipinfo.country == 'TW'
 
 
-    def testrequest_create_signal_gmail(self):
+    def test_request_create_signal_gmail(self):
         self.loginUser('sender@asdf.com')
         sender = 'sender@asdf.com'
         subject = 'Mail to Su'
@@ -190,7 +191,7 @@ class TestSignalController(TestBase):
     def testAccessLink(self):
         pass
 
-    def testAccessSignalEmailSent(self):
+    def test_access_signal_email_sent(self):
         """
         test for
         1. first access
@@ -222,8 +223,24 @@ class TestSignalController(TestBase):
         assert signal.notify_triggered
         self.assertEqual(2, len(messages))
         self.assertEqual('sender@asdf.com', messages[0].to)
-
-    def testUpdateNotificationSetting(self):
+        
+    def test_access_signal_with_templar(self):
+        sender = 'sender@asdf.com'
+        self.create_user(sender)
+        templar = self.create_templar()
+        signal = self.create_signal(templar_id=templar.tid)
+        token = signal.token
+        
+        self.testapp.get('/s/s.gif?sync=1&t=%s' % token, extra_environ={'REMOTE_ADDR': '168.95.1.1'}, xhr=True)
+        messages = self.mail_stub.get_sent_messages(to='sender@asdf.com')
+        signal = Signal.find_by_properties(token=token)
+        self.assertEqual(sender, messages[0].to)
+        templar = Templar.find_by_properties(tid=templar.tid)
+        self.assertEqual(templar.used_times, 1)
+        self.assertEqual(templar.opened_times, 1)
+        self.assertEqual(templar.replied_times, 0)
+        
+    def test_update_notification_setting(self):
         sender = 'sender@asdf.com'
         self.create_user(sender)
         self.loginUser(sender)
@@ -239,7 +256,7 @@ class TestSignalController(TestBase):
             signal = Signal.find_by_properties(token=token)
             self.assertEqual(signal.notification_setting, ns)
 
-    def testLegitimateUserUpdate1(self):
+    def test_legitimate_user_update1(self):
         controller = Signals()
         sender = 'sender@asdf.com'
         tz_offset = 9
@@ -250,7 +267,7 @@ class TestSignalController(TestBase):
         user = UserInfo.find_by_properties(email=sender)
         self.assertEqual(user.email, sender)  # test user successfully created
 
-    def testLegitimateUserUpdate2(self):
+    def test_legitimate_user_update2(self):
         controller = Signals()
         sender = 'sender@asdf.com'
         tz_offset = 9
@@ -262,7 +279,7 @@ class TestSignalController(TestBase):
         assert result_user.started
         self.assertEqual(result_user.tz_offset, tz_offset)
 
-    def testAccessFromProxyMicrosoft(self):
+    def test_access_from_proxy_microsoft(self):
         sender = 'sender@asdf.com'
         self.loginUser(sender)
         self.create_user(sender)
@@ -276,7 +293,7 @@ class TestSignalController(TestBase):
         print messages[0].body.decode()
         self.assertIn('Microsoft', messages[0].body.decode())
 
-    def testAccessFromProxyGmail(self):
+    def test_access_from_proxy_gmail(self):
         sender = 'sender@asdf.com'
         self.loginUser(sender)
         self.create_user(sender)
@@ -291,3 +308,108 @@ class TestSignalController(TestBase):
         self.assertEqual('sender@asdf.com', messages[0].to)
         print messages[0].body.decode()
         self.assertIn('Gmail', messages[0].body.decode())
+
+    
+    def test_update_signal_replied_from_message(self):
+        message = """
+        {
+      "historyId": "3093653", 
+      "id": "14cfbf8b941e64d9", 
+      "snippet": "Sincerely, Shih-Wen Su", 
+      "sizeEstimate": 954, 
+      "threadId": "14cfbf8b941e64d9", 
+      "labelIds": [
+        "SENT", 
+        "INBOX", 
+        "IMPORTANT", 
+        "UNREAD"
+      ], 
+      "payload": {
+        "mimeType": "multipart/alternative", 
+        "headers": [
+          {
+            "name": "MIME-Version", 
+            "value": "1.0"
+          }, 
+          {
+            "name": "Received", 
+            "value": "by 10.229.15.202 with HTTP; Mon, 27 Apr 2015 10:42:03 -0700 (PDT)"
+          }, 
+          {
+            "name": "Date", 
+            "value": "Tue, 28 Apr 2015 01:42:03 +0800"
+          }, 
+          {
+            "name": "Delivered-To", 
+            "value": "ck890358@gmail.com"
+          }, 
+          {
+            "name": "Message-ID", 
+            "value": "<CANnUM8TtdaQNrB688x33aBFjVCTn33f7FLEuwkSk9wKHL-SRSQ@mail.gmail.com>"
+          }, 
+          {
+            "name": "Subject", 
+            "value": "test mail"
+          }, 
+          {
+            "name": "From", 
+            "value": "Shih-Wen Su <ck890358@gmail.com>"
+          }, 
+          {
+            "name": "To", 
+            "value": "Shih-Wen Su <sushi@zenblip.com>"
+          }, 
+          {
+            "name": "Content-Type", 
+            "value": "multipart/alternative; boundary=001a113a36b28f21c30514b84317"
+          }
+        ], 
+        "parts": [
+          {
+            "mimeType": "text/plain", 
+            "headers": [
+              {
+                "name": "Content-Type", 
+                "value": "text/plain; charset=UTF-8"
+              }
+            ], 
+            "body": {
+              "data": "U2luY2VyZWx5LA0KU2hpaC1XZW4gU3UNCg==", 
+              "size": 25
+            }, 
+            "partId": "0", 
+            "filename": ""
+          }, 
+          {
+            "mimeType": "text/html", 
+            "headers": [
+              {
+                "name": "Content-Type", 
+                "value": "text/html; charset=UTF-8"
+              }
+            ], 
+            "body": {
+              "data": "PGRpdiBkaXI9Imx0ciI-PGJyIGNsZWFyPSJhbGwiPjxkaXY-PGRpdiBjbGFzcz0iZ21haWxfc2lnbmF0dXJlIj48ZGl2IGRpcj0ibHRyIj5TaW5jZXJlbHksPGJyPlNoaWgtV2VuIFN1PGJyPjwvZGl2PjwvZGl2PjwvZGl2Pg0KPC9kaXY-PGRpdiBzdHlsZT0iZmxvYXQ6cmlnaHQiIHJlbD0iX196YnRrX18iPjxpbWcgc3JjPSJodHRwOi8vd3d3LmVtYWlsLWxpbmsuY29tL3Mvcy5naWY_dT01OTFkMzAxNiZhbXA7dD00NWEwOGE2OTM0ZWVhOGJlNjNhNCIgd2lkdGg9IjAiIGhlaWdodD0iMCIgc3R5bGU9ImRpc3BsYXk6bm9uZTtvcGFjaXR5OjAiPjwvZGl2Pg0K", 
+              "size": 318
+            }, 
+            "partId": "1", 
+            "filename": ""
+          }
+        ], 
+        "body": {
+          "size": 0
+        }, 
+        "filename": ""
+      }
+    }
+    """
+        s = self.create_signal()
+        s.update_signal_replied_from_message(json.loads(message))
+        self.assertTrue(s.replied)
+        
+    def test_create_signal_with_templar(self):
+        t = self.create_templar()
+        self.create_signal(templar_id=t.tid)
+        self.assertEqual(t.used_times, 1)
+        
+        

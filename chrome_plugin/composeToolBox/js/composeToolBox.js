@@ -1,6 +1,6 @@
 //require simplemodal.js
 
-var zenblip = (function(zb, $, dbi) {
+var zenblip = (function(zb, $, dbi, React) {
 
   var trackControlClass = 'zb-track-control';
   var trackInputClass = 'zb-track-input';
@@ -126,52 +126,67 @@ var zenblip = (function(zb, $, dbi) {
 
     $reminderControl.click(function(e) {
       var $reminderForm = $("\
-        <div class='basic-modal-content'>\
-          <h3>Remind me after:</h3>\
+        <div class='zb-reminder-modal-content'>\
+          <div class='zb-re'>\
+            <h3>Remind me after:</h3>\
             <form>\
-              <div>\
-              <input id='option1-"+mid+"' data-key='option1' name='reminddatetime-"+mid+"' value='24h' type='radio'>\
-              <label for='option1-"+mid+"'> 24 Hours </label>\
+              <div class='zb-re-form'>\
+                <div>\
+                <input id='option1-"+mid+"' data-key='option1' name='reminddatetime-"+mid+"' value='24h' type='radio'>\
+                <label for='option1-"+mid+"'> 24 Hours </label>\
+                </div>\
+                <div>\
+                <input id='option2-"+mid+"' data-key='option2' name='reminddatetime-"+mid+"' value='3d' type='radio'>\
+                <label for='option2-"+mid+"'> 3 Days </label>\
+                </div>\
+                <div>\
+                <input id='option3-"+mid+"' data-key='option3' name='reminddatetime-"+mid+"' value='7d' type='radio'>\
+                <label for='option3-"+mid+"'> 7 Days </label>\
+                </div>\
+                <!--div>\
+                <input id='option4-"+mid+"' data-key='option4' name='reminddatetime-"+mid+"' value='5m' type='radio'>\
+                <label for='option4-"+mid+"'> 5 Minutes (for test) </label>\
+                </div-->\
+                <div>\
+                <input id='option-custom-"+mid+"' data-key='optionCustom' name='reminddatetime-"+mid+"' value='"+customString+"' type='radio'>\
+                <label for='option-custom-"+mid+"'> Custom\
+                <input\
+                  id='datepicker-"+mid+"'\
+                  class='zb-datepicker'\
+                  name='date'\
+                  type='text'\
+                  autofocuss\
+                  data-key='datePicked'\
+                  >\
+                </label>\
+                <div id='datepicker-container-"+mid+"'></div>\
+                </div>\
+                <br>\
+                <div>\
+                <input id='ifnoreply-"+mid+"' data-key='ifNoReply' type='checkbox'>\
+                <label for='ifnoreply-"+mid+"'> Notify me only if there is no reply.\
+                </div>\
+                <div>\
+                <h4>Note:</h4>\
+                <div class='zb-re-note'>\
+                  <textarea data-key='note' cols='40' rows='3' placeholder='Write a memo to be reminded of.'></textarea>\
+                </div>\
+                </div>\
               </div>\
-              <div>\
-              <input id='option2-"+mid+"' data-key='option2' name='reminddatetime-"+mid+"' value='3d' type='radio'>\
-              <label for='option2-"+mid+"'> 3 Days </label>\
+              <div class='zb-re-tool-bar'>\
+                <ul>\
+                  <li>\
+                    <a href='#' id='zb-re-enable-"+mid+"' class='zb-btn' > Enable Reminder </a>\
+                    <!--a href='#' id='zb-re-enable-"+mid+"' class='zb-re-btn zb-re-enable-btn' > Enable Reminder </a-->\
+                  </li>\
+                  <li>\
+                    <a href='#' cid='zb-re-cancel-"+mid+"' class='zb-btn' > Disable Reminder </a>\
+                    <!--a href='#' cid='zb-re-cancel-"+mid+"' class='zb-re-btn zb-re-disable-btn' > Disable Reminder </a-->\
+                  </li>\
+                </ul>\
               </div>\
-              <div>\
-              <input id='option3-"+mid+"' data-key='option3' name='reminddatetime-"+mid+"' value='7d' type='radio'>\
-              <label for='option3-"+mid+"'> 7 Days </label>\
-              </div>\
-              <!--div>\
-              <input id='option4-"+mid+"' data-key='option4' name='reminddatetime-"+mid+"' value='5m' type='radio'>\
-              <label for='option4-"+mid+"'> 5 Minutes (for test) </label>\
-              </div-->\
-              <div>\
-              <input id='option-custom-"+mid+"' data-key='optionCustom' name='reminddatetime-"+mid+"' value='"+customString+"' type='radio'>\
-              <label for='option-custom-"+mid+"'> Custom\
-              <input\
-                id='datepicker-"+mid+"'\
-                class='zb-datepicker'\
-                name='date'\
-                type='text'\
-                autofocuss\
-                data-key='datePicked'\
-                >\
-              </label>\
-              <div id='datepicker-container-"+mid+"'></div>\
-              </div>\
-              <br>\
-              <div>\
-              <input id='ifnoreply-"+mid+"' data-key='ifNoReply' type='checkbox'>\
-              <label for='ifnoreply-"+mid+"'> Notify me only if there is no reply.\
-              </div>\
-              <div>\
-              <h4>Note: </h4>\
-              <textarea data-key='note' cols='40' rows='3'></textarea>\
-              </div>\
-              <button id='enable-"+mid+"' class='zb-btn zb-enable-reminder'>Enable Reminder</button>\
-              <button id='cancel-"+mid+"' class='zb-btn zb-cancel-reminder'>Disable Reminder</button>\
             </form>\
-          <p></p>\
+          </div>\
         </div>");
       dbi.bind($reminderForm, reminder);
       $reminderForm
@@ -202,7 +217,7 @@ var zenblip = (function(zb, $, dbi) {
           }
         });
       })
-      .on('click', '.zb-enable-reminder', function(e) {
+      .on('click', '.zb-re-enable-btn', function(e) {
         e.preventDefault();
         var timerString = reminder.calculateTimerString();
         if (timerString != ""){
@@ -212,7 +227,7 @@ var zenblip = (function(zb, $, dbi) {
         reminder.update();
         $.modal.close();
       })
-      .on('click', '.zb-cancel-reminder', function(e) {
+      .on('click', '.zb-re-disable-btn', function(e) {
         e.preventDefault();
         reminder.clear();
         $.modal.close();
@@ -222,94 +237,82 @@ var zenblip = (function(zb, $, dbi) {
     return $reminderControl;
   };
 
-  zb.Template = function() {
-    this.id = "";
-    this.name = "";
+  zb.Templar = function($mail) {
+    //this is just a shell
+    this.$mail = $mail;
+    this.tid = '';
+    this.subject = '';
+    this.body = '';
   };
 
-  zb.createTemplateControl = function($mail, options) {
-    var $templateControl = $("<button class='zb-btn zb-template-btn'><i class='fa fa-book'></i> Template</button>");
-    var template = $mail.data('zb-template') || new zb.Template($mail);
+  zb.Templar.prototype.update = function() {
+    var data = this.$mail.data(zb.composedToolBoxData) || {};
+    data.templar_id = this.tid;
+    this.$mail.data(zb.composedToolBoxData, data);
+    return this;
+  };
+
+  zb.createTemplarControl = function($mail, options) {
+    var $templarControl = $("<button class='zb-btn zb-template-btn'><i class='fa fa-book'></i> Template</button>");
+    var templar = $mail.data('zb-templar') || new zb.Templar($mail);
     var mid = $mail.data('mid');
-    template.id = mid;
 
-    $templateControl.click(function(e) {
+    $templarControl.click(function(e) {
+
       var $templateForm = $("\
-        <div class='basic-modal-content'>\
-          <h3>Save this email as a template</h3>\
-          <p>\
-            <form>\
-              <div>\
-              <label for='template-name-"+mid+"'>Template name: </label>\
-              <input id='template-name-"+mid+"' data-key='name' value='' name='name' type='text'>\
-              </div>\
-              <br>\
-              <button id='enable-"+mid+"' class='zb-btn zb-save-template'>Save Template</button>\
-            </form>\
-          </p>\
-          <br>\
-          <br>\
-          <h3>Load a Template</h3>\
-          <p>\
-            <form>\
-              <div>\
-                <select id='template-select-"+mid+"'>\
-                  <option value='1'>Product introduction</option>\
-                  <option value='2'>Subscription enabled</option>\
-                  <option value='3'>Follow up 1</option>\
-                  <option value='4'>Follow up 2</option>\
-                  <option value='5'>Follow up 3</option>\
-                  <option value='6'>Thank you letter</option>\
-                </select>\
-              </div>\
-              <br>\
-              <button id='cancel-"+mid+"' class='zb-btn zb-load-template'>Load Template</button>\
-            </form>\
-          </p>\
-          <p></p>\
+        <div id='zb-templar-"+mid+"' class='zb-templar-modal-content'>\
         </div>");
-      //dbi.bind($reminderForm, reminder);
-      $templateForm
-      .find('.zb-save-template')
-      .on('click', function(e) {
-        e.preventDefault();
-        $.modal.close();
-      }).end().find('.zb-load-template')
-      .on('click', function(e) {
-        e.preventDefault();
-        var tval = $('#template-select-' + mid).val();
-        var newBody = EBody[tval];
-        $mail.find(".Am").html(newBody);
-        $.modal.close();
-      }).end().modal();
+      $templateForm.modal({onShow: function(dialog) {
+          var onTemplarSelected = function(t) {
+            $mail.find(".aoT").val(t.subject);
+            $mail.find(".Am").html(t.body);
+            templar.tid = t.tid;
+            templar.update();
+            $.modal.close();
+          };
+          var emailTemplarApp = React.render(
+            React.createElement(TemplarApp, {
+              templars: [],
+              accessToken: options.access_token,
+              baseURL: zb.baseURL,
+              templarsResourcePath: zb.templarsResourcePath,
+              templarResourcePath: zb.templarResourcePath,
+              onTemplarSelected: onTemplarSelected,
+              owner: options.sender
+            }),
+              document.getElementById('zb-templar-'+mid)
+          );
+          emailTemplarApp.loadTemplars();
+        }
+      });
     });
-    return $templateControl;
+    return $templarControl;
   };
 
-  var EBody = {
-    1: "<div>Hi ,<br><br> This is a test for zenblip template 1. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>",
-    2: "<div>Hi ,<br><br> This is a test for zenblip template 2. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>",
-    3: "<div>Hi ,<br><br> This is a test for zenblip template 3. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>",
-    4: "<div>Hi ,<br><br> This is a test for zenblip template 4. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>",
-    5: "<div>Hi ,<br><br> This is a test for zenblip template 5. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>",
-    6: "<div>Hi ,<br><br> This is a test for zenblip template 6. <br><br>Thank you for Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias dolorum natus vitae sint quo repudiandae ratione assumenda fugit! A voluptate totam exercitationem aliquam, debitis id voluptas libero aliquid officia porro.</div>"
-  }
 
 
   zb.composeToolBoxCronJob = function($mail, options) {
     window.setInterval(function() {
-      if($mail.find('.aX').is(':visible')){
+      if($mail.find('.aX').is(':visible')){ //has font toolbar
+        if($mail.find('.HM').length > 0 || $mail.width() >= 500){ //embedded mail input box or max
+          
+          $mail.find('.aDg').css({'margin-top': '-63px'});
+        }
         $mail.find('.ct-inner').css('height', '82px');
       }else{
+        if($mail.find('.HM').length > 0  || $mail.width() >= 500){
+          
+          $mail.find('.aDg').css({'margin-top': '0'});
+        }
         $mail.find('.ct-inner').css('height', '42px');
       }
-    }, 500);
+    }, 300);
   };
 
   zb.createComposeToolBox = function($mail, options) {
     var $trackControl = zb.createTrackControl($mail, options);
     var $reminderControl = zb.createReminderControl($mail, options);
-    var $templateControl = zb.createTemplateControl($mail, options);
+    var $templarControl = zb.createTemplarControl($mail, options);
     var $toolbox = $("\
         <div class='ct-container'> \
           <div class='ct-inner'> \
@@ -336,7 +339,7 @@ var zenblip = (function(zb, $, dbi) {
     if(options.enable_reminder){
       $toolbox.find('td.zb-reminder-td').append($reminderControl);
     }
-    //$toolbox.find('td.zb-template-td').append($templateControl);
+    $toolbox.find('td.zb-template-td').append($templarControl);
 
     zb.composeToolBoxCronJob($mail, options);
     return $toolbox;
@@ -357,7 +360,11 @@ var zenblip = (function(zb, $, dbi) {
       var $toolbox = zb.createComposeToolBox($mail, options);
       // $toolbox.insertBefore($mail.find('table.iN > tbody > tr:last'));
       $mail.find('.aDj').prepend($toolbox);
+      if($mail.find('.HM').length > 0){
+        //embedded mail input box
+        $mail.find('.HE').css({height: '124px'});
+      }
     });
   };
 return zb;
-}(zenblip || {}, jQuery, DataBind));
+}(zenblip || {}, jQuery, DataBind, React));

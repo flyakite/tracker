@@ -8,8 +8,7 @@
  *   http://www.opensource.org/licenses/mit-license.php
  */
 
-.basic-modal-content
-  display: none
+
 
 #simplemodal-overlay
   background-color: #000
@@ -17,11 +16,13 @@
 #simplemodal-container
   height: 360px
   width: 600px
+  height: 0
+  width: 0
   color: #333
   background-color: #fefefe
-  padding: 12px
+  //padding: 12px
   .simplemodal-data
-    padding: 0 15px
+    padding: 0
     vertical-align: middle
     box-shadow: none
     position: relative
@@ -33,14 +34,17 @@
     color: #666
     width: 15px
     height: 15px
+    top: -1px
+    right: -4px
     display: inline
     z-index: 3200
     position: absolute
-    top: -1px
-    right: -4px
     padding: 10px
     cursor: pointer
     &:hover
       color: #4ae
   h3
     color: #555
+
+.basic-modal-content
+  display: none

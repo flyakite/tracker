@@ -6,12 +6,15 @@ Created on 2015/1/21
 '''
 import json
 import logging
+from uuid import uuid4
 from datetime import datetime, timedelta
 from uuid import uuid4
 from google.appengine.ext import testbed
 from ferrisnose import AppEngineTest, AppEngineWebTest, FerrisAppTest
 from app.models.user_info import UserInfo
 from app.models.signal import Signal
+from app.models.templar import Templar
+from app.controllers.signals import Signals
 
 
 class TestBase(AppEngineWebTest):
@@ -22,6 +25,7 @@ class TestBase(AppEngineWebTest):
 
     def setUp(self):
         AppEngineWebTest.setUp(self)
+        self.add_controller(Signals)
 
     def create_user(self,
                     sender='sender@asdf.com',
@@ -37,6 +41,7 @@ class TestBase(AppEngineWebTest):
                     last_seen=datetime.utcnow() - timedelta(days=1),
                     domain='asdf.com',
                     google_id='1234567890123456789',
+                    refresh_token=''
                     ):
 
         user = UserInfo.create_user(
@@ -52,7 +57,8 @@ class TestBase(AppEngineWebTest):
             tz_offset=tz_offset,
             last_seen=last_seen,
             domain=domain,
-            google_id=google_id
+            google_id=google_id,
+            refresh_token=refresh_token
         )
         user.put()
         return user
@@ -60,7 +66,7 @@ class TestBase(AppEngineWebTest):
     def create_legit_user(self):
         return self.create_user(role=1)
 
-    def request_create_signal(self, sender='sender@asdf.com', subject='Mail to Su', to='', cc='', bcc='', client='gmail'):
+    def request_create_signal(self, sender='sender@asdf.com', subject='Mail to Su', to='', cc='', bcc='', client='gmail', templar_id=''):
         r = self.testapp.post('/signals/add?sync=1',
                               {'sender': sender,
                                'subject': subject,
@@ -68,18 +74,35 @@ class TestBase(AppEngineWebTest):
                                'to': to,
                                'cc': cc,
                                'bcc': bcc,
-                               'client': client},
+                               'client': client,
+                               'templar_id': templar_id
+                               },
                               xhr=True)
         return r
 
-    def create_signal(self, sender='sender@asdf.com', subject='Mail to Su', to='蘇 <to1@asdf.com>'):
+    def create_signal(self, sender='sender@asdf.com', subject='Mail to Su', to='蘇 <to1@asdf.com>', client='gmail', templar_id=''):
 
-        r = self.request_create_signal(sender, subject, to=to)
+        r = self.request_create_signal(sender, subject, to=to, client=client, templar_id=templar_id)
         logging.debug(r.status)
         logging.debug(r.body)
         #signal = json.loads(r.body)['signal']
         signal = Signal.find_by_properties(token=json.loads(r.body)['signal']['token'])
         return signal
+        
+    def create_templar(self, tid=uuid4().hex, subject='subject', body='body', owner='sender@asdf.com', 
+                       used_times=0, replied_times=0, opened_times=0, is_active=True):
+        t = Templar(
+            tid = tid,
+            subject = subject,
+            body = body,
+            owner = owner,
+            used_times = used_times,
+            replied_times = replied_times,
+            opened_times = opened_times,
+            is_active = is_active
+        )
+        t.put()
+        return t
 
 
 class TestBaseWithMail(TestBase):

@@ -15,6 +15,7 @@ from app.models.report_group import ReportGroup
 from app.models.user_info import UserInfo
 from app.models.setting import Setting
 from app.controllers.cron import Cron
+from test_base import TestBase
 
 _ADMIN_EMAIL = 'sushi@zenblip.com'
 
@@ -70,7 +71,7 @@ class TestCronController(AppEngineWebTest):
         self.mail_stub = self.testbed.testbed.get_stub(testbed.MAIL_SERVICE_NAME)
         self.taskqueue_stub = self.testbed.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
 
-    def testIntervalReport(self):
+    def test_interval_report(self):
         # TODO: add dummy signals and accesses
         r = self.testapp.get('/cron/interval_report?sync=1&start=2-0-0')
         logging.debug(r)
@@ -79,7 +80,7 @@ class TestCronController(AppEngineWebTest):
         r = self.testapp.get('/cron/interval_report?sync=1&start=7-3-0&end=0-3-0&weekly=1')
         logging.debug(r)
 
-    def testIntervalReportWithReportGroup(self):
+    def test_interval_report_with_report_group(self):
         # TODO: add dummy signals and accesses
         email = 'sushi@zenblip.com'
         org = 'test'
@@ -101,7 +102,7 @@ class TestCronController(AppEngineWebTest):
         tasks = self.taskqueue_stub.get_filtered_tasks(url='/cron/interval_report_personal')
         self.assertEqual(1, len(tasks))
 
-    def testIntervalReportWithReportGroupPersonal(self):
+    def test_interval_report_with_report_group_personal(self):
         email = 'manager1@asdf.com'
         org = 'test'
         rgid = 'test'
@@ -170,7 +171,7 @@ class TestCronController(AppEngineWebTest):
         messages = self.mail_stub.get_sent_messages(to=_ADMIN_EMAIL)
         self.assertEqual(1, len(messages))
 
-    def testActivityCompileReport(self):
+    def test_activity_compile_report(self):
         email = 'user1@asdf.com'
         userinfo = UserInfo(
             email=email,
@@ -185,7 +186,7 @@ class TestCronController(AppEngineWebTest):
         self.assertEqual(1, len(messages))
         self.assertEqual(email, messages[0].to)
 
-    def testNewIntervalReport(self):
+    def test_new_interval_report(self):
         # TODO: add dummy signals and accesses
         r = self.testapp.get('/cron/new_interval_report?sync=1&start=2-0-0')
         logging.debug(r)
@@ -194,7 +195,7 @@ class TestCronController(AppEngineWebTest):
         r = self.testapp.get('/cron/new_interval_report?sync=1&start=7-3-0&end=0-3-0&weekly=1')
         logging.debug(r)
 
-    def testNewIntervalReportAll(self):
+    def test_new_interval_report_all(self):
         email = 'manager1@asdf.com'
 
         sender = 'user1@asdf.com'
@@ -319,3 +320,25 @@ class TestCronController(AppEngineWebTest):
                               )
         messages = self.mail_stub.get_sent_messages(to=_ADMIN_EMAIL)
         self.assertEqual(1, len(messages))
+
+class TestCron2(TestBase):
+    
+    def setUp(self):
+        TestBase.setUp(self)
+        self.add_controller(Cron)
+        self.mail_stub = self.testbed.testbed.get_stub(testbed.MAIL_SERVICE_NAME)
+        self.taskqueue_stub = self.testbed.testbed.get_stub(testbed.TASKQUEUE_SERVICE_NAME)
+    
+    def test_update_gmail_replies(self):
+        sender = 'user1@asdf.com'
+        u = self.create_user(sender, google_id='me', refresh_token='test')
+        s = self.create_signal(sender)
+        r = self.testapp.get('/cron/update_gmail_replies')
+        self.assertEqual(r.status_code, 200)
+        r = self.testapp.get('/update_gmail_replies_by_user', {'userinfo_id':u.key.id()})
+        self.assertEqual(r.status_code, 200)
+        r = self.testapp.get('/update_gmail_reply_by_mail', {'signal_id':s.key.id()})
+        self.assertEqual(r.status_code, 200)
+        
+        
+        

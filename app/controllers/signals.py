@@ -27,6 +27,7 @@ from app.models.user_info import UserInfo
 from app.models.user_track import UserTrack
 from app.models.link import Link
 from app.models.reminder import Reminder
+from app.models.templar import Templar
 from app.models.statistic import Statistic
 from accesses import Accesses
 from app.utils import is_email_valid, is_user_legit
@@ -179,6 +180,9 @@ class Signals(Accesses):  # TODO: bad inheritance
         logging.info('reminder_if_no_reply: %s' % reminder_if_no_reply)
         logging.info('reminder_note: %s' % reminder_note)
 
+        #templar
+        templar_id = self.request.get('templar_id')
+
         if self.current_user:
             logging.info('current_user: %s' % self.current_user)
 
@@ -282,7 +286,10 @@ class Signals(Accesses):  # TODO: bad inheritance
                         client=client,
                         track_state=track_state
                         )
-
+        if templar_id:
+            signal.templar_id = templar_id
+            Templar.update_statistics(templar_id, used_times_delta=1)
+        
         if links and track_state:  # do not track links if not in track_state
             logging.info(links)
             self._save_links(links, signal, sync)
@@ -351,15 +358,17 @@ class Signals(Accesses):  # TODO: bad inheritance
         logging.info(signal.token)
         try:
             client = GoogleMessageClient(user_info=user_info)
-            result = client.search_threads(limit=3)
+            result = client.search_messages(limit=3)
             logging.info(result)
-            result = client.search_threads(signal.subject, tos, ccs, bccs, limit=1)
+            result = client.search_messages(signal.subject, tos, ccs, bccs, limit=1)
             logging.info("ThreadsSearchResult:")
             logging.info(result)
-            if result and result["threads"]:
-                thread_id = result["threads"][0]["id"]
+            if result and result["messages"]:
+                gmail_id = result["messages"][0]["id"]
+                thread_id = result["messages"][0]["threadId"]
                 logging.info("thread_id %s" % thread_id)
-                signal.gmail_id = thread_id
+                signal.gmail_id = gmail_id
+                signal.thread_id = thread_id
                 signal.put()
         except Exception as ex:
             logging.exception(ex)
@@ -546,6 +555,10 @@ class Signals(Accesses):  # TODO: bad inheritance
         # prevent self access
         if not (accessor and signal.sender in accessor.keys()):
             signal.access_count += 1
+            if not signal.first_accessed:
+                signal.first_accessed = datetime.utcnow()
+                if signal.templar_id:
+                    Templar.update_statistics(signal.templar_id, opened_times_delta=1)
             # save signal first, to generate signal.key for access as parent
             signal.put()
             # no deferred here, a handler function can't be deferred

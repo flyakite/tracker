@@ -40,6 +40,7 @@ class GoogleClient():
         self.user_id = user_info.google_id
         
         #set access token
+        self.access_token = None
         self.obtain_new_access_token_from_refresh_token(user_info.refresh_token)
 
     def obtain_new_access_token_from_refresh_token(self, refresh_token):
@@ -51,7 +52,6 @@ class GoogleClient():
           "token_type":"Bearer",
         }
         """
-        
         assert refresh_token
         access_token = memcache.get("GoogleClientAccessToken::%s" % refresh_token)
         if access_token:
@@ -106,31 +106,7 @@ class GoogleClient():
 
 class GoogleMessageClient(GoogleClient):
 
-    def search_threads(self, subject="", tos="", ccs="", bccs="", limit=1):
-        """
-        parms:
-        https://support.google.com/mail/answer/7190?hl=en
-        
-        return:
-        {
-          "nextPageToken": "04980553828346998384", 
-          "resultSizeEstimate": 12, 
-          "threads": [
-            {
-              "snippet": "", 
-              "id": "14cab994b7e4148e", 
-              "historyId": "3044106"
-            }, 
-            {
-              "snippet": "", 
-              "id": "14cab6b07de9b360", 
-              "historyId": "3044055"
-            }
-          ]
-        }
-        """
-        
-        #build query string
+    def to_query_string(self, subject, tos=[], ccs=[], bccs=[], after=None):
         query_string=""
         if subject:
             try:
@@ -159,6 +135,37 @@ class GoogleMessageClient(GoogleClient):
                     query_string += "bcc:%s " % bcc
             except:
                 logging.exception(tos)
+
+        if after:
+            query_string += "after:%s" % datetime.strftime(after, '%Y/%m/%d')
+
+        return query_string
+
+    def search_threads(self, subject="", tos=[], ccs=[], bccs=[], limit=1, after=None):
+        """
+        parms:
+        https://support.google.com/mail/answer/7190?hl=en
+        
+        return:
+        {
+          "nextPageToken": "04980553828346998384", 
+          "resultSizeEstimate": 12, 
+          "threads": [
+            {
+              "snippet": "", 
+              "id": "14cab994b7e4148e", 
+              "historyId": "3044106"
+            }, 
+            {
+              "snippet": "", 
+              "id": "14cab6b07de9b360", 
+              "historyId": "3044055"
+            }
+          ]
+        }
+        """
+        
+        query_string = self.to_query_string(subject, tos, ccs, bccs, after)
         
         logging.info(query_string)
         query_string = urllib.urlencode(dict(q=query_string, maxResults=limit))
@@ -167,6 +174,36 @@ class GoogleMessageClient(GoogleClient):
         jdata = self.get_resource(uri)
         return jdata
             
+    def search_messages(self, subject="", tos=[], ccs=[], bccs=[], limit=1, after=None):
+        """
+        {
+          "resultSizeEstimate": 3, 
+          "messages": [
+            {
+              "id": "14cf96f0816634b0", 
+              "threadId": "14ce1358610e3579"
+            }, 
+            {
+              "id": "14cf90f457f5824f", 
+              "threadId": "14cea0c016dead78"
+            }, 
+            {
+              "id": "14cf7ee1c5d7068e", 
+              "threadId": "14ced89300defc90"
+            }
+          ]
+        }
+        """
+        
+        query_string = self.to_query_string(subject, tos, ccs, bccs, after)
+        
+        logging.info(query_string)
+        query_string = urllib.urlencode(dict(q=query_string, maxResults=limit))
+        uri = 'https://www.googleapis.com/gmail/v1/users/%s/messages?%s' % (self.user_id, query_string)
+        logging.info(uri)
+        jdata = self.get_resource(uri)
+        return jdata
+        
 
     def get_messages_from_threads(self, threads):
         return threads.get('messages', [])

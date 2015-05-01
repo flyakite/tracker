@@ -1,0 +1,124 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="../font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="css-build/composeToolBox.css">
+  </head>
+  <body>
+    <div id="template-app-container">
+      <div class="zb-et">
+        <div class="zb-et-top-bar">
+          <div class="zb-et-top-search">
+            <input type="text">
+          </div>
+        </div>
+        <div class="zb-et-list-container">
+        </div>
+        <div class="zb-et-bottom-bar">
+          <ul>
+            <li>
+              <a href="#" class="zb-et-new-btn"></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  <script src="../react-with-addons.min.js"></script>
+  <script src="../jquery-1.10.2.min.js"></script>
+  <!--script src="../utils.js"></script-->
+  <script src="js-build/templar.js"></script>
+  <script>
+    var templars = [{
+      tid: 'test1',
+      subject:'This is the Subject',
+      body: 'This is the Body',
+      owner: 'sushi@zenlbip.com',
+      used_times: 200,
+      replied_times: 200,
+      opened_times: 30
+    },{
+      tid: 'test2',
+      subject:'This is an template example2',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 200,
+      replied_times: 33,
+      opened_times: 30
+    },{
+      tid: 'test3',
+      subject:'This is an template example3',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 200,
+      replied_times: 12,
+      opened_times: 30
+    },{
+      tid: 'test4',
+      subject:'This is an template example4',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 200,
+      replied_times: 0,
+      opened_times: 30
+    },{
+      tid: 'test5',
+      subject:'This is an template example5',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 2,
+      replied_times: 0,
+      opened_times: 30
+    },{
+      tid: 'test6',
+      subject:'This is an template example6',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 2,
+      replied_times: 0,
+      opened_times: 30
+    },{
+      tid: 'test7',
+      subject:'This is an template example7',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 2,
+      replied_times: 0,
+      opened_times: 30
+    },{
+      tid: 'test8',
+      subject:'This is an template example8',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 2,
+      replied_times: 0,
+      opened_times: 30
+    },{
+      tid: 'test9',
+      subject:'This is an template example9',
+      body: 'Click New to create your own template',
+      owner: 'sushi@zenlbip.com',
+      used_times: 2,
+      replied_times: 0,
+      opened_times: 30
+    }
+    ];
+    var onTemplarSelected = function(t) {
+      console.log(t);
+      console.log('got onTemplarSelected');
+    };
+    var et = React.render(
+      React.createElement(TemplarApp, {
+        templars: templars,
+        accessToken: 'eyJhbGciOiJIUzI1NiJ9.eyJfY3JlYXRlZCI6IjIwMTUtMDQtMjYgMTQ6MDc6MDkuNzAyNjQ1IiwidXNlcl9wbGFucyI6eyJzdXNoaUB6ZW5ibGlwLmNvbSI6IlBSIn0sInVzZXJfZW1haWwiOiJzdXNoaUB6ZW5ibGlwLmNvbSIsInRvcF9wbGFuIjoiUFIifQ.RLDvdGIQ2z4y1DDKfkeieeGdvd16EH9_A31IJMr-7K8',
+        baseURL: 'https://zenblip.appspot.com',
+        templarsResourcePath: '/resource/templars',
+        templarResourcePath: '/resource/templar',
+        onTemplarSelected: onTemplarSelected,
+        owner: {email:'sushi@zenblip.com'}
+      }),
+      document.getElementById('template-app-container')
+    );
+    // et.loadTemplars();
+  </script>
+  </body>
+</html>

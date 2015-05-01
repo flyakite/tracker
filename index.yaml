@@ -86,6 +86,12 @@ indexes:
   - name: created
     direction: desc
 
+- kind: Signal
+  properties:
+  - name: thread_id
+  - name: sender
+  - name: replied
+
 - kind: UserTrack
   properties:
   - name: emails

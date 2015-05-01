@@ -27,7 +27,7 @@ from app.models.setting import Setting
 from base import BaseController
 from auths import encode_token, decode_token
 from ferris import settings
-
+from app.libs.google_client import GoogleMessageClient
 
 _ADMINS = ['sushi@zenblip.com']
 # _ADMINS = ['sushi@zenblip.com', 'christopher@zenblip.com']
@@ -999,3 +999,73 @@ class Cron(BaseController):
             logging.error("cron for_zenblip_main_site fetch DownloadError")
             logging.error(e)
             return None
+
+    @route_with('/cron/update_gmail_replies')
+    def update_gmail_replies(self):
+        logging.info('cron_update_gmail_replies')
+        self.meta.change_view('json')
+        userinfos = UserInfo.query(UserInfo.google_id != None).fetch()
+        for userinfo in userinfos:
+            logging.info('update_gmail_replies %s' % userinfo.email)
+            if userinfo.google_id:
+                taskqueue.add(url='/update_gmail_replies_by_user',
+                    params={
+                        'userinfo_id': userinfo.key.id(),
+                    })
+       
+    @route_with('/update_gmail_replies_by_user')
+    def update_gmail_replies_by_user(self):
+        """
+        update gmail replies of a user
+        """
+        logging.info('update_gmail_replies_by_user')
+        self.meta.change_view('json')
+        userinfo_id = self.request.get('userinfo_id')
+        email = self.request.get('email')
+        user_info = None
+        if userinfo_id:
+            user_info = UserInfo.get_by_id(int(userinfo_id))
+        elif email:
+            user_info = UserInfo.find_by_properties(email=email)
+        if not user_info:
+            logging.error('NoUserInfo')
+            return
+        
+        logging.info('update_gmail_replies_by_user %s' % user_info.email)
+        client = GoogleMessageClient(user_info=user_info)
+        result = client.search_messages(subject='+re:', tos=['me'], limit=1000, after=datetime.utcnow() - timedelta(days=2))
+        logging.info(result)
+        if not result or not result.has_key('messages'):
+            logging.info('NoMessage')
+            return
+        thread_ids = [m['threadId'] for m in result['messages']]
+        logging.info(thread_ids)
+        #TODO: check signal query index
+        signals = Signal.query(Signal.thread_id.IN(thread_ids), Signal.sender == user_info.email, Signal.replied == None).fetch()
+        if not signals:
+            logging.info('NoSignal')
+            return
+        tokens = []
+        for s in signals:
+            logging.info('signal_token %s' % s.token)
+            tokens.append(s.token)
+            taskqueue.add(url='/update_gmail_reply_by_mail',
+                params={
+                    'signal_id': s.key.id(),
+                })
+        self.context['data'] = dict(signal_tokens=tokens)
+        
+        
+    @route_with('/update_gmail_reply_by_mail')
+    def update_gmail_reply_by_mail(self):
+        logging.info('update_gmail_reply_by_mail')
+        self.meta.change_view('json')
+        signal_id = self.request.get('signal_id')
+        signal = Signal.get_by_id(int(signal_id))
+        if signal:
+            logging.info(signal.token)
+            result = signal.has_reply(update_signal=True)
+            logging.info(result)
+            
+        
+        

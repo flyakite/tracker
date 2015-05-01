@@ -180,6 +180,7 @@ class Apis(BaseController):
         self.meta.change_view('json')
         self._enable_cors()
         email = self.request.get('email')
+        logging.info(email)
         if not is_email_valid(email):
             self.context['data'] = {'error_message': 'No Email',
                                     'error': 1}
@@ -189,7 +190,6 @@ class Apis(BaseController):
         # TODO: create a decorator to verify access_token
         access_token = self.request.get('access_token')
         if not access_token:
-            logging.info(email)
             logging.error('No Access Token')
             return self.abort(403)
         if access_token not in ['temp', '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25']:  # TODO: to be removed

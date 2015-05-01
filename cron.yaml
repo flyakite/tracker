@@ -53,3 +53,8 @@ cron:
   url: /cron/for_zenblip_main_site?path=%2Fsubscription%2Frearrange
   schedule: every day 05:00
   timezone: Asia/Tokyo
+
+- description: Update Gmail Replies
+  url: /cron/update_gmail_replies
+  schedule: every day 03:00
+  timezone: Asia/Tokyo

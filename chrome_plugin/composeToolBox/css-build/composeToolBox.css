@@ -1,3 +1,8 @@
+ul, li {
+  list-style: none;
+  margin: 0;
+  padding: 0; }
+
 .zb-white {
   color: #fff; }
 
@@ -12,10 +17,12 @@
   margin: 0; }
 
 .ct-inner {
-  background-color: #f5f5f5;
+  background: #f5f5f5;
   border: 1px solid #cfcfcf;
   border-width: 1px;
   margin: -1px;
+  padding-bottom: 1px;
+  margin-bottom: -2px;
   height: 42px;
   overflow-y: hidden; }
 
@@ -52,9 +59,9 @@
 
 .zb-btn {
   color: #444;
-  height: 30px;
+  line-height: 16px;
   margin: 3px 2px;
-  padding: 0 8px;
+  padding: 6px 8px;
   border-radius: 2px;
   border: 1px solid #d3d3d3;
   background-color: #f8f8f8;
@@ -65,13 +72,171 @@
   position: relative;
   display: inline-block;
   font-weight: bold;
+  font-size: 12px;
   text-align: center;
-  white-space: nowrap; }
+  white-space: nowrap;
+  text-decoration: none; }
+
+.zb-re {
+  padding: 0; }
+  .zb-re h3 {
+    padding: 30px 30px 0 30px; }
+
+.zb-re-form {
+  padding: 10px 30px;
+  height: 457px; }
+
+.zb-re-note {
+  padding-bottom: 20px; }
+  .zb-re-note textarea {
+    width: 430px;
+    height: 100px;
+    border: 1px solid #cfcfcf; }
+
+.zb-re-tool-bar {
+  display: block;
+  height: 38px;
+  padding: 10px 28px;
+  background: #f2f2f2;
+  border-top: 1px solid #cfcfcf;
+  font-size: 16px;
+  clear: both; }
+  .zb-re-tool-bar ul {
+    display: block; }
+    .zb-re-tool-bar ul li {
+      display: block;
+      float: left; }
 
 .zb-reminder-btn {
   min-width: 80px; }
 
 .zb-datepicker {
   cursor: pointer !important; }
+
+.zb-display-none {
+  display: none !important; }
+
+.zb-invisible {
+  visibility: hidden !important; }
+
+.zb-reminder-modal-content {
+  width: 500px;
+  height: 620px; }
+
+.zb-et {
+  background-color: #fff;
+  width: 500px;
+  font-family: arial, sans-serif; }
+
+.zb-et-search-bar {
+  display: block;
+  height: 30px;
+  padding: 15px;
+  background: #f2f2f2;
+  border-bottom: 1px solid #ddd; }
+  .zb-et-search-bar .zb-et-search-frame input {
+    line-height: 14px;
+    width: 240px;
+    font-size: 14px;
+    padding: 7px;
+    font-family: arial, sans-serif; }
+
+.zb-et-tool-bar {
+  display: block;
+  height: 38px;
+  padding: 10px 28px;
+  background: #f2f2f2;
+  border-top: 1px solid #cfcfcf;
+  color: white;
+  font-size: 16px;
+  clear: both; }
+  .zb-et-tool-bar ul {
+    display: block; }
+    .zb-et-tool-bar ul li {
+      display: block;
+      float: left; }
+
+.zb-et-list-container {
+  height: 500px;
+  overflow-y: scroll;
+  overflow-x: hidden; }
+
+.zb-et-item {
+  display: block;
+  width: 100%;
+  height: 60px;
+  clear: both;
+  border-bottom: 1px solid #ddd; }
+  .zb-et-item:hover {
+    background-color: #f2f2f2; }
+  .zb-et-item ul {
+    width: 100%;
+    height: 60px;
+    clear: both;
+    display: block; }
+  .zb-et-item li {
+    float: left;
+    display: block;
+    position: relative; }
+
+.zb-et-item-reply-rate {
+  width: 50px;
+  padding: 8px 5px;
+  font-size: 12px;
+  text-align: right;
+  color: #555;
+  font-weight: 200; }
+  .zb-et-item-reply-rate .zb-et-item-reply-rate-figure {
+    font-size: 26px; }
+
+.zb-et-item-content {
+  width: 390px;
+  padding: 5px;
+  cursor: pointer; }
+  .zb-et-item-content .zb-et-item-subject {
+    overflow: hidden;
+    color: #333;
+    font-size: 16px;
+    padding: 2px; }
+  .zb-et-item-content .zb-et-item-body {
+    overflow: hidden;
+    color: #aaa;
+    font-size: 14px;
+    padding: 2px; }
+
+.zb-et-item-function {
+  width: 0; }
+  .zb-et-item-function .zb-et-delete-btn {
+    text-decoration: none;
+    position: absolute;
+    top: 0;
+    right: -40px;
+    padding: 5px 12px 5px 5px;
+    color: #ddd; }
+
+.zb-et-form {
+  width: 500px;
+  height: 620px; }
+  .zb-et-form .zb-et-form-subject {
+    padding: 30px 30px 10px 30px; }
+    .zb-et-form .zb-et-form-subject input {
+      height: 20px;
+      width: 430px;
+      font-size: 12px;
+      padding: 5px;
+      font-family: arial, sans-serif; }
+  .zb-et-form .zb-et-form-body {
+    padding: 10px 30px 30px 30px; }
+    .zb-et-form .zb-et-form-body textarea {
+      height: 430px;
+      width: 430px;
+      font-size: 12px;
+      padding: 5px;
+      font-family: arial, sans-serif;
+      border: 1px solid #cfcfcf; }
+
+.zb-templar-modal-content {
+  width: 500px;
+  height: 620px; }
 
 /*# sourceMappingURL=composeToolBox.css.map */

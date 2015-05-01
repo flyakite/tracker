@@ -1,6 +1,7 @@
 var zbBaseURL = 'https://zenblip.appspot.com';
 
 //https://github.com/flyakite/deps.js
+//These javacript will be put and execute in the matched page (Gmail) context.
 var config = {
   paths: {
     'jsapi': zbBaseURL + '/_ah/channel/jsapi',
@@ -8,6 +9,7 @@ var config = {
     'jquery': chrome.extension.getURL('jquery-1.10.2.min.js'),
     'gmail': chrome.extension.getURL('gmail.js'),
     'utils': chrome.extension.getURL('utils.js'),
+    'react': chrome.extension.getURL('react-with-addons.js'),
     'channel': chrome.extension.getURL('channel.js'),
     'messenger': chrome.extension.getURL('messenger.js'),
     'tracker': chrome.extension.getURL('tracker.js'),
@@ -15,7 +17,8 @@ var config = {
     'simplemodal': chrome.extension.getURL('vendors/simplemodal/js/jquery.simplemodal.min.js'),
     'pickadate': chrome.extension.getURL('vendors/pickadate/js/picker.js'),
     'pickadate.date': chrome.extension.getURL('vendors/pickadate/js/picker.date.js'),
-    'composeToolBox': chrome.extension.getURL('composeToolBox/js/composeToolBox.js'),
+    'templar': chrome.extension.getURL('composeToolBox/js-build/templar.js'),
+    'composeToolBox': chrome.extension.getURL('composeToolBox/js-build/composeToolBox.js'),
     'main': chrome.extension.getURL('main.js')
   },
   shim: {
@@ -31,8 +34,11 @@ var config = {
     'pickadate.date': {
       'deps': ['jquery', 'pickadate']
     },
+    'templar': {
+      'deps': ['jquery', 'react']
+    },
     'composeToolBox': {
-      'deps': ['utils', 'jquery', 'databind', 'simplemodal', 'pickadate', 'pickadate.date']
+      'deps': ['utils', 'jquery', 'databind', 'simplemodal', 'pickadate', 'pickadate.date', 'react', 'templar'] // + react.js
     },
     'main':{
       // 'deps': ['jsapi', 'jquery', 'gmail', 'channel', 'messenger', 'tracker', 'simplemodal', 'databind']
@@ -76,7 +82,7 @@ var zenblip = (function(zb, $, React) {
   console.log(zb);
 
   var ExtensionID = 'oocgfjghhllncddlnhlocnikogonjdcp';
-  var zbBaseURL = 'https://zenblip.appspot.com';
+  zb.BaseURL = zbBaseURL;
   var zbMainURL = 'https://www.zenblip.com';
   var zbExternalURL = 'http://www.email-link.com';
   var zbChannelPath = '/channels/';
@@ -94,8 +100,7 @@ var zenblip = (function(zb, $, React) {
   var debugCounter = 0;
   var zenblipAccessToken = '';
   var zbRedirectPath = '/l',
-    zbSignalPath = '/s',
-    zbTmpToken = '$$$zbTmpToken$$$';
+    zbSignalPath = '/s';
 
   var setting = null;
 
@@ -253,7 +258,7 @@ var zenblip = (function(zb, $, React) {
           zb.requestTrackerInit({zenblipAccessToken:zenblipAccessToken});
         }
       }else{
-        raDashboard.onAuthenticationFailed({message:'Add ' + senderEmail + ' to zenblip'});
+        raDashboard.onAuthenticationFailed({message:'Add ' + sender.email + ' to zenblip'});
         //to be removed -----
         // zenblipAccessToken = '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25'
         // raDashboard.onAuthenticated({senderEmail:sender.email, accessToken:zenblipAccessToken});
@@ -288,6 +293,7 @@ var zenblip = (function(zb, $, React) {
       }
       if([zb.PRO_PLAN, zb.TEAM_PLAN].indexOf(setting.plan) != -1 && !setting.has_refresh_token){
         zb.goToGoogleOAuth(sender.email);
+        return
       }else{
         setting.enable_reminder = true;
       }
