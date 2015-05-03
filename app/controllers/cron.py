@@ -905,6 +905,7 @@ class Cron(BaseController):
         emails_sent = {
             0: [],
             1: [],
+            4: [],
             6: [],
             9: [],
             14: []
@@ -921,27 +922,41 @@ class Cron(BaseController):
                 except Exception as e:
                     logging.error(e)
                 try:
-                    logging.info("1 welcome_hint %s" % email)
+                    logging.info("0 welcome_hint %s" % email)
                     UserInfo.send_email(
                         email,
                         'zenblip HINT: (I got a notification that says "Someone" opened an email)',
                         'welcome_hint',
                         sync=sync)
+                    emails_sent[0].append(email)
+                except Exception as e:
+                    logging.error(e)
+            elif duration_joined.days == 1:
+                try:
+                    logging.info("1 welcome_user_settings %s" % email)
+                    UserInfo.send_email(email, 'zenblip HINT: Customize your user setting', 'welcome_user_settings', sync=sync)
+                    emails_sent[1].append(email)
+                except Exception as e:
+                    logging.error(e)
+            elif duration_joined.days == 2:
+                try:
+                    logging.info("1 welcome_email_hit_rates %s" % email)
+                    UserInfo.send_email(email, 'zenblip HINT: Email hit rates and increased efficiencies', 'welcome_email_hit_rates', sync=sync)
                     emails_sent[1].append(email)
                 except Exception as e:
                     logging.error(e)
             elif duration_joined.days == 4:
                 try:
-                    logging.info("6 welcome_any_problems %s" % email)
-                    UserInfo.send_email(email, 'Any problems?', 'welcome_any_problems', sync=sync)
-                    emails_sent[6].append(email)
+                    logging.info("4 welcome_tip %s" % email)
+                    UserInfo.send_email(email, 'zenblip TIP: Forwarded emails', 'welcome_tip', sync=sync)
+                    emails_sent[4].append(email)
                 except Exception as e:
                     logging.error(e)
             elif duration_joined.days == 6:
                 try:
-                    logging.info("9 welcome_tip %s" % email)
-                    UserInfo.send_email(email, 'zenblip TIP: Forwarded emails', 'welcome_tip', sync=sync)
-                    emails_sent[9].append(email)
+                    logging.info("6 welcome_any_problems %s" % email)
+                    UserInfo.send_email(email, 'Any problems?', 'welcome_any_problems', sync=sync)
+                    emails_sent[6].append(email)
                 except Exception as e:
                     logging.error(e)
             elif duration_joined.days == 12:

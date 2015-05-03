@@ -1,12 +1,14 @@
 Hi there!
 
 One more quick tip for you on zenblip. A lot of recruiters have been asking us this -
+
 Can zenblip tell me if my message was forwarded?
+
 It's a great question. While zenblip can't tell you definitively that a message was forwarded, zenblip can give you some very strong insights that a message was forwarded.
- - Look at the location. Was your message opened in multiple places in quick succession of one another? It was likely forwarded.
  - Look at the device. Was your email opened on a phone, then a desktop soon after? Another strong hint that your message was forwarded.
  - Look at the number and frequency of opens. Was a message you sent to only one or two people opened many times, in quick succession of one another? Also a hint your message may have been forwarded.
-Cheers,
+
+Hope that helps and cheers,
 
 The zenblip team
 

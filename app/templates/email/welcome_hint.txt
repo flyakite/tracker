@@ -3,13 +3,16 @@ Hi There!
 Hope zenblip is working out well for you (let us know if it isn't - just reply to this message). Here's a quick detail on zenblip that you may have been wondering about.
 
 Why does zenblip sometime say that "Someone" has opened my email? Why doesn't it know who?Why doesn't it know who?
+
 zenblip email tracking works by inserting a small piece of code into every tracked email. When you send an email to multiple people or an email with cc` recipients, zenblip knows that the message was opened, but is sometimes less than 100% confident it knows which specific person has opened it..as our servers do not control theirs.. :)
+
 Over time, as you track more emails with zenblip, the system will learn about who is opening your mail and clicking on your links and the amount of "Someone" notifications should decrease. With more people using zenblip and sending messages, zenblip leverages the usage data and improves its accuracy and ability to discern between recipients...a form of artificial intelligence.
+
 A couple of hints to make your emails more accurate:
 * Sending individual messages to recipients will increase zenblip's ability to uniquely identify individuals over time
-* Include images within your email (so recipients choose to display images if they aren't shown by default)
 * Include links within your emails
 * Include unique names or ID's in the subject title (for example, "Opportunity: Position #10A")
+* Include images within your email (so recipients choose to display images if they aren't shown by default)
 Hope that helps and clarifies things a little bit more.
 
 Cheers and have fun,
