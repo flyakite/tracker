@@ -203,13 +203,19 @@ class Apis(BaseController):
         setting = Setting.find_by_properties(email=email)
 
         if self.request.method == 'GET':
+            #from client side
             logging.info(self.request.GET.items())
+            user_info = UserInfo.find_by_properties(email=email)
             if not setting:
-                self.context['data'] = {'error_message': 'Setting Not Found',
+                if user_info:
+                    logging.info('CreateSetting')
+                    setting = Setting.create(email=email)
+                else:
+                    logging.error('SettingNotFound')
+                    self.context['data'] = {'error_message': 'SettingNotFound',
                                         'error': 1}
                 return
             
-            user_info = UserInfo.find_by_properties(email=email)
             
             s = setting.to_dict_output()
             has_refresh_token = True if user_info and user_info.refresh_token else False
