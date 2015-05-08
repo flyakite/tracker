@@ -256,7 +256,7 @@ var TemplarToolBar = React.createClass({displayName: "TemplarToolBar",
       React.createElement("div", {className: "zb-et-tool-bar"}, 
         React.createElement("ul", null, 
           React.createElement("li", null, 
-            React.createElement("a", {href: "#", className: "zb-btn", onClick: this.newTemplar}, " Create Template ")
+            React.createElement("a", {href: "#", className: "zb-btn zb-btn-blue", onClick: this.newTemplar}, " Create Template ")
           )
         )
       )
@@ -300,10 +300,10 @@ var TemplarForm = React.createClass({displayName: "TemplarForm",
         React.createElement("div", {className: "zb-et-tool-bar"}, 
           React.createElement("ul", null, 
             React.createElement("li", null, 
-              React.createElement("a", {href: "#", className: "zb-btn", onClick: this.saveTemplar}, " Save ")
+              React.createElement("a", {href: "#", className: "zb-btn zb-btn-blue", onClick: this.saveTemplar}, " Save ")
             ), 
             React.createElement("li", null, 
-              React.createElement("a", {href: "#", className: "zb-btn", onClick: this.cancelTemplar}, " Cancel ")
+              React.createElement("a", {href: "#", className: "zb-btn zb-btn-lowkey", onClick: this.cancelTemplar}, " Cancel ")
             )
           )
         )

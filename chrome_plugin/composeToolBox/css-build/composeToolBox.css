@@ -75,7 +75,21 @@ ul, li {
   font-size: 12px;
   text-align: center;
   white-space: nowrap;
-  text-decoration: none; }
+  text-decoration: none;
+  min-width: 100px;
+  text-align: middle; }
+
+.zb-btn-blue {
+  color: #f2f2f2 !important;
+  border: 1px solid #4a9EF2 !important;
+  background: url(http://i.imgur.com/K10IZBa.png) top left repeat #54AEFF !important; }
+
+.zb-btn-lowkey {
+  color: #666;
+  border: 1px solid #d3d3d3;
+  background-color: #f8f8f8;
+  background-image: -webkit-linear-gradient(top, #f8f8f8, #efefef);
+  background-image: -moz-linear-gradient(top, #f8f8f8, #efefef); }
 
 .zb-re {
   padding: 0; }

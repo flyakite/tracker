@@ -176,11 +176,11 @@ var zenblip = (function(zb, $, dbi, React) {
               <div class='zb-re-tool-bar'>\
                 <ul>\
                   <li>\
-                    <a href='#' id='zb-re-enable-"+mid+"' class='zb-btn' > Enable Reminder </a>\
+                    <a href='#' id='zb-re-enable-"+mid+"' class='zb-btn zb-btn-blue zb-re-enable-btn' > Enable Reminder </a>\
                     <!--a href='#' id='zb-re-enable-"+mid+"' class='zb-re-btn zb-re-enable-btn' > Enable Reminder </a-->\
                   </li>\
                   <li>\
-                    <a href='#' cid='zb-re-cancel-"+mid+"' class='zb-btn' > Disable Reminder </a>\
+                    <a href='#' cid='zb-re-cancel-"+mid+"' class='zb-btn zb-btn-lowkey zb-re-disable-btn' > Disable Reminder </a>\
                     <!--a href='#' cid='zb-re-cancel-"+mid+"' class='zb-re-btn zb-re-disable-btn' > Disable Reminder </a-->\
                   </li>\
                 </ul>\

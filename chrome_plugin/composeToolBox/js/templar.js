@@ -256,7 +256,7 @@ var TemplarToolBar = React.createClass({
       <div className="zb-et-tool-bar">
         <ul>
           <li>
-            <a href="#" className="zb-btn" onClick={this.newTemplar}> Create Template </a>
+            <a href="#" className="zb-btn zb-btn-blue" onClick={this.newTemplar}> Create Template </a>
           </li>
         </ul>
       </div>
@@ -300,10 +300,10 @@ var TemplarForm = React.createClass({
         <div className="zb-et-tool-bar">
           <ul>
             <li>
-              <a href="#" className="zb-btn" onClick={this.saveTemplar}> Save </a>
+              <a href="#" className="zb-btn zb-btn-blue" onClick={this.saveTemplar}> Save </a>
             </li>
             <li>
-              <a href="#" className="zb-btn" onClick={this.cancelTemplar}> Cancel </a>
+              <a href="#" className="zb-btn zb-btn-lowkey" onClick={this.cancelTemplar}> Cancel </a>
             </li>
           </ul>
         </div>
