@@ -14,6 +14,7 @@ from ferris import Controller, route_with
 from ferris.core import mail
 from base import BaseController
 from app.models.user_info import UserInfo
+from app.models.setting import Setting
 from app.models.device_client import DeviceClient
 from app.utils import is_user_legit, is_email_valid
 from libs.itsdangerous import JSONWebSignatureSerializer
@@ -113,6 +114,13 @@ class Auths(BaseController):
             if refresh_token:
                 user_info.refresh_token = refresh_token
             user_info.put()
+            
+        try:
+            setting = Setting.find_by_properties(email=user_info.email)
+            if not setting:
+                setting = Setting.create(user_info.email)
+        except:
+            pass
 
     @route_with('/auth/google')
     def auth_chrome(self):
