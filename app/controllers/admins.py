@@ -29,12 +29,13 @@ from base import BaseController
 
 class TempUser():
 
-    def __init__(self, email, is_connected=False, orgs=[], last_seen=None, created=datetime.utcnow(), legit=False):
+    def __init__(self, email, is_connected=False, orgs=[], last_seen=None, legit=False, google_id='', created=datetime.utcnow()):
         self.email = email
         self.is_connected = is_connected
         self.orgs = orgs
         self.legit = legit
         self.last_seen = last_seen
+        self.google_id = google_id
         self.created = created
 
 
@@ -47,6 +48,7 @@ class Admins(BaseController):
         org = self.request.get('org')
         legacy = self.request.get('legacy', False)
         active = self.request.get('active', False)
+        is_gmail = self.request.get('gmail', False)
         
         if active:
             active_start = datetime.utcnow() - timedelta(days=60)
@@ -95,15 +97,19 @@ class Admins(BaseController):
                     userinfos = UserInfo.query().order(-UserInfo.created).fetch(500)
             logging.info('userinfos: %s' % len(userinfos))
             emails = [u.email for u in userinfos]
-            ccs = ChannelClient.query(ChannelClient.owner.IN(emails)).fetch()
+            emails_lower = [u.email.lower() for u in userinfos]
+            ccs = ChannelClient.query(ChannelClient.owner.IN(emails_lower)).fetch()
             logging.info('channelclients: %s' % len(ccs))
             user_connected = {cc.owner: {'last_seen': cc.modified} for cc in ccs}
             for u in userinfos:
+                if is_gmail and not u.google_id:
+                    continue
                 user = TempUser(u.email,
-                                is_connected=True if user_connected.get(u.email) else False,
-                                last_seen=user_connected.get(u.email, {'last_seen': None})['last_seen'],
+                                is_connected=True if user_connected.get(u.email.lower()) else False,
+                                last_seen=user_connected.get(u.email.lower(), {'last_seen': None})['last_seen'],
                                 orgs=u.orgs,
                                 legit=u.role,
+                                google_id=u.google_id,
                                 created=u.created
                                 )
                 users.append(user)

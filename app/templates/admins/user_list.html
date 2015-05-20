@@ -21,7 +21,7 @@
                 <th>Email</th>
                 <th>Connected</th>
                 <th>Organizations</th>
-                <th>Legit</th>
+                <th>Gmail Authorized</th>
                 <th>Created(UTC)</th>
                 <th>Last Seen(UTC)</th>
             </tr>
@@ -42,7 +42,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if u.legit %}
+                    {% if u.google_id %}
                         True
                     {% endif %}
                 </td>
