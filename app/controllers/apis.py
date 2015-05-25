@@ -188,7 +188,7 @@ class Apis(BaseController):
             self.abort(404)
             return
         
-        if client == 'outlook':
+        if client.lower() == 'outlook':
             #dirty hack
             pass
         else:
