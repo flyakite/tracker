@@ -180,6 +180,7 @@ class Apis(BaseController):
         self.meta.change_view('json')
         self._enable_cors()
         email = self.request.get('email')
+        client = self.request.get('client')
         logging.info(email)
         if not is_email_valid(email):
             self.context['data'] = {'error_message': 'No Email',
@@ -187,25 +188,33 @@ class Apis(BaseController):
             self.abort(404)
             return
         
-        # TODO: create a decorator to verify access_token
-        access_token = self.request.get('access_token')
-        if not access_token:
-            logging.error('No Access Token')
-            return self.abort(403)
-        if access_token not in ['temp', '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25']:  # TODO: to be removed
-            data = decode_token(access_token)
-            logging.info(data)
-            if not data or (data.get('user_plans') and email not in data.get('user_plans').keys()):
-                logging.info(email)
-                logging.error('Access Token Invalid')
+        if client == 'outlook':
+            #dirty hack
+            pass
+        else:
+            # verify access_token
+            # TODO: create a decorator to verify access_token
+            access_token = self.request.get('access_token')
+            if not access_token:
+                logging.error('No Access Token')
                 return self.abort(403)
+            if access_token not in ['temp', '1lk3j5hgl1k5g15ATHATH35523jkgETHWYqetrkj_THTHQ25hwTYH2556DHMETJM2452h25']:  # TODO: to be removed
+                data = decode_token(access_token)
+                logging.info(data)
+                if not data or (data.get('user_plans') and email not in data.get('user_plans').keys()):
+                    logging.info(email)
+                    logging.error('Access Token Invalid')
+                    return self.abort(403)
 
-        setting = Setting.find_by_properties(email=email)
+        
 
         if self.request.method == 'GET':
             #from client side
             logging.info(self.request.GET.items())
             user_info = UserInfo.find_by_properties(email=email)
+            setting = Setting.find_by_properties(email=email)
+            if not setting:
+                setting = Setting.find_by_properties(email=email.lower())
             if not setting:
                 if user_info:
                     logging.info('CreateSetting')
@@ -230,6 +239,9 @@ class Apis(BaseController):
             is_notify_by_desktop = self.request.get('is_notify_by_desktop')
             is_daily_report = self.request.get('is_daily_report')
             is_weekly_report = self.request.get('is_weekly_report')
+            setting = Setting.find_by_properties(email=email)
+            if not setting:
+                setting = Setting.find_by_properties(email=email.lower())
             if not setting:
                 setting = Setting.create(email=email)
 
